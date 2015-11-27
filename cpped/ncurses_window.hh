@@ -20,6 +20,7 @@ public:
 	void unset_attr(attr_t a) { ::wattroff(win, a); }
 
 	void color_printf(NCURSES_COLOR_T bg, NCURSES_COLOR_T fg, const char* fmt, ...) __attribute__ ((format (printf, 4, 5)));
+	void color_print(NCURSES_COLOR_T bg, NCURSES_COLOR_T fg, const char* text);
 
 	int get_ch() { ::wgetch(win); }
 	int get_width() const { return getmaxx(win); }

@@ -27,12 +27,22 @@ void ncurses_window::color_printf(NCURSES_COLOR_T bg, NCURSES_COLOR_T fg, const 
 	std::va_list args;
 	va_start(args, fmt);
 
-	::init_pair(1, fg, bg);
-	::wattron(win, COLOR_PAIR(1));
+	int pair = fg +(bg<<3);
+	::init_pair(pair, fg, bg);
+	::wattron(win, COLOR_PAIR(pair));
 	::vwprintw(win, fmt, args);
-	::wattroff(win, COLOR_PAIR(1));
+	::wattroff(win, COLOR_PAIR(pair));
 
 	va_end(args);
+}
+
+void ncurses_window::color_print(short bg, short fg, const char* text)
+{
+	int pair = fg +(bg<<3);
+	::init_pair(pair, fg, bg);
+	::wattron(win, COLOR_PAIR(pair));
+	::wprintw(win, text);
+	::wattroff(win, COLOR_PAIR(pair));
 }
 
 }

@@ -21,11 +21,27 @@ public:
 
 private:
 
+	// action handlers
+	void cursor_up();
+	void cursor_down();
+	void cursor_left();
+	void cursor_right();
+
+	void scroll_down();
+	void scroll_up();
+
+	void move_cursor(int y, int x);
+
+	int left_bar_width() const;
 
 	std::vector<std::string> data;
 	int first_line = 0;
 	int first_column = 0;
 	int left_bar_digits = 1;
+
+	// cursor's screen pos
+	int cursor_x = 0;
+	int cursor_y = 0;
 
 	ncurses_window& window;
 };
