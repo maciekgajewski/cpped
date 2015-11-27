@@ -20,3 +20,5 @@
 * Code navigation history (alt + <-, alt + ->)
 * Code completion
 * Quick header/cpp switch
+* Clipboard history
+
