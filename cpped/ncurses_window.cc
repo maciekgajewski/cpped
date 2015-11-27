@@ -20,19 +20,4 @@ ncurses_window::~ncurses_window()
 		::delwin(win);
 }
 
-void ncurses_window::print(const char* text)
-{
-	::wprintw(win, text);
-}
-
-void ncurses_window::refresh()
-{
-	::wrefresh(win);
-}
-
-int ncurses_window::get_ch()
-{
-	::wgetch(win);
-}
-
 }

@@ -10,6 +10,7 @@ ncurses_env::ncurses_env()
 	::raw();
 	::noecho();
 	::keypad(::stdscr, TRUE);
+	::mousemask(ALL_MOUSE_EVENTS|REPORT_MOUSE_POSITION, nullptr);
 }
 
 ncurses_env::~ncurses_env()
