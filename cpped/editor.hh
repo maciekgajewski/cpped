@@ -29,10 +29,14 @@ private:
 
 	void scroll_down();
 	void scroll_up();
+	void scroll_left();
+	void scroll_right();
 
 	void move_cursor(int y, int x);
 
 	int left_bar_width() const;
+	int current_line_length() const;
+	int workspace_width() const;
 
 	std::vector<std::string> data;
 	int first_line = 0;
@@ -42,6 +46,7 @@ private:
 	// cursor's screen pos
 	int cursor_x = 0;
 	int cursor_y = 0;
+	int desired_cursor_x = 0;
 
 	ncurses_window& window;
 };

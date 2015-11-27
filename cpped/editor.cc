@@ -20,10 +20,6 @@ editor::editor(ncurses_window& win)
 
 void editor::on_key(int key)
 {
-//	std::ostringstream ss;
-//	ss << "key=" << key;
-//	window.clear();
-//	window.print(ss.str().c_str());
 
 	// hard-coded actions
 	switch(key)
@@ -40,6 +36,14 @@ void editor::on_key(int key)
 		case KEY_RIGHT:
 			cursor_right();
 			break;
+
+		default:
+		{
+			std::ostringstream ss;
+			ss << "key=" << key << ", name=" << ::keyname(key);
+			window.clear();
+			window.print(ss.str().c_str());
+		}
 	}
 }
 
@@ -94,7 +98,8 @@ void editor::render()
 		window.color_printf(COLOR_BLACK, COLOR_RED, fmt, line+first_line+1);
 
 		// render text
-		window.print(d.c_str());
+		if (d.length() > first_column)
+			window.print(d.c_str() + first_column);
 	}
 
 	// redner last line
@@ -138,12 +143,26 @@ void editor::cursor_down()
 
 void editor::cursor_left()
 {
-	// TODO
+	if (cursor_x == 0)
+	{
+		scroll_left();
+	}
+	else
+	{
+		move_cursor(cursor_y, cursor_x-1);
+	}
 }
 
 void editor::cursor_right()
 {
-	// TODO
+	int ll = current_line_length();
+	if (cursor_x + first_column < ll-1)
+	{
+		if(cursor_x == workspace_width()-1)
+			scroll_right();
+		else
+			move_cursor(cursor_y, cursor_x+1);
+	}
 }
 
 void editor::scroll_down()
@@ -164,16 +183,45 @@ void editor::scroll_up()
 	}
 }
 
+void editor::scroll_left()
+{
+	if (first_column > 0)
+	{
+		--first_column;
+		render();
+	}
+}
+
+void editor::scroll_right()
+{
+	++first_column;
+	render();
+}
+
 void editor::move_cursor(int y, int x)
 {
 	cursor_y = y;
 	cursor_x = x;
-	window.move(y, x + left_bar_width() + 1);
+	window.move(y, x + left_bar_width());
 }
 
 int editor::left_bar_width() const
 {
 	return left_bar_digits + LEFT_BAR_WDTH_MARGIN;
+}
+
+int editor::current_line_length() const
+{
+	size_t idx = cursor_y + first_line;
+	if (idx < data.size())
+		return data[idx].length();
+	else
+		return 0;
+}
+
+int editor::workspace_width() const
+{
+	return window.get_width() - left_bar_width();
 }
 
 
