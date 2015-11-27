@@ -5,13 +5,18 @@
 
 #include <iostream>
 
-int main()
+int main(int argc, char** argv)
 {
 	cpped::ncurses_env env;
 	auto ss = env.get_stdscr();
 
-	//cpped::ncurses_window win(50, 50, 0, 0);
 	cpped::editor editor(ss);
+	if (argc > 1)
+	{
+		editor.load_from_file(argv[1]);
+	}
+
+	editor.render();
 
 	while(true)
 	{
