@@ -60,8 +60,7 @@ void editor::render()
 	window.clear();
 
 	doc->render(window, first_line, first_column, get_workspace_height(), get_workspace_width());
-	// restore cursor
-	move_cursor(documet_to_workspace_y(cursor_doc_y), documet_to_workspace_x(cursor_doc_x));
+	refresh_cursor();;
 }
 
 void editor::set_document(document& d)
@@ -98,7 +97,7 @@ void editor::cursor_up()
 		}
 		else
 		{
-			move_cursor(cursor_doc_y, cursor_doc_x);
+			refresh_cursor();
 		}
 	}
 }
@@ -120,7 +119,7 @@ void editor::cursor_down()
 			cursor_doc_x = std::min(new_line_len, desired_cursor_x);
 		}
 
-		if (workspace_to_document_y(cursor_doc_y) == get_workspace_height())
+		if (documet_to_workspace_y(cursor_doc_y) == get_workspace_height())
 		{
 			// scroll one line down
 			first_line ++;
@@ -129,7 +128,7 @@ void editor::cursor_down()
 		else
 		{
 			// just move cursor
-			move_cursor(cursor_doc_y, cursor_doc_x);
+			refresh_cursor();
 		}
 	}
 }
@@ -150,7 +149,7 @@ void editor::cursor_left()
 		}
 		else
 		{
-			move_cursor(cursor_doc_y, cursor_doc_x);
+			refresh_cursor();
 		}
 	}
 }
@@ -174,7 +173,7 @@ void editor::cursor_right()
 		else
 		{
 			// just move cursor
-			move_cursor(cursor_doc_y, cursor_doc_x);
+			refresh_cursor();
 		}
 	}
 }
@@ -199,13 +198,10 @@ void editor::scroll_right()
 	// TODO
 }
 
-void editor::move_cursor(int doc_y, int doc_x)
+void editor::refresh_cursor()
 {
-	cursor_doc_y = doc_y;
-	cursor_doc_x = doc_x;
-
-	int wx = documet_to_workspace_x(doc_x) + doc->left_bar_width();
-	int wy = documet_to_workspace_y(doc_y);
+	int wx = documet_to_workspace_x(cursor_doc_x) + doc->left_bar_width();
+	int wy = documet_to_workspace_y(cursor_doc_y);
 	if (wx >= 0 && wy >= 0 && wx < get_workspace_width() && wy < get_workspace_height())
 	{
 		::curs_set(1);

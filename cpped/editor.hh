@@ -31,7 +31,7 @@ private:
 	void scroll_left();
 	void scroll_right();
 
-	void move_cursor(int doc_y, int doc_x);
+	void refresh_cursor();
 
 	// workspace/doc coordinates
 	int get_workspace_width() const;
