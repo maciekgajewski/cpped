@@ -1,20 +1,20 @@
 #include <ncurses.h>
 
 #include "editor.hh"
+#include "document.hh"
 #include "ncurses_window.hh"
 
 #include <string>
 #include <sstream>
-#include <fstream>
 #include <stdexcept>
 #include <cmath>
+#include <cassert>
 
 namespace cpped {
 
-static const int LEFT_BAR_WDTH_MARGIN = 3;
-
-editor::editor(ncurses_window& win)
+editor::editor(ncurses_window& win, document& d)
 	: window(win)
+	, doc(&d)
 {
 }
 
@@ -55,173 +55,198 @@ void editor::on_mouse(const MEVENT& event)
 	window.print(ss.str().c_str());
 }
 
-void editor::load_from_file(const std::__cxx11::string& path)
-{
-	std::fstream f(path, std::ios_base::in);
-	if (f.fail())
-	{
-		throw std::runtime_error("Error opening file");
-	}
-
-	data.clear();
-
-	std::string line;
-	while(!f.eof())
-	{
-		line.clear();
-		std::getline(f, line);
-		data.push_back(line);
-	}
-	first_line = 0;
-	first_column = 0;
-
-	left_bar_digits = int(std::ceil(std::log10(data.size()+1)));
-	move_cursor(0,0);
-}
-
 void editor::render()
 {
 	window.clear();
 
-	int lines = std::min(window.get_height(), int(data.size()) - first_line);
-
-	char fmt[32];
-	std::snprintf(fmt, 32, " %%%dd  ", left_bar_digits);
-
-	int line = 0;
-	for(; line < lines; ++line)
-	{
-		window.move(line, 0);
-		const std::string& d = data[first_line+line];
-
-		// render left bar with line number
-		window.color_printf(COLOR_BLACK, COLOR_RED, fmt, line+first_line+1);
-
-		// render text
-		if (d.length() > first_column)
-			window.print(d.c_str() + first_column);
-	}
-
-	// redner last line
-	if (line < window.get_height())
-	{
-		window.move(line, 0);
-		window.color_printf(COLOR_BLACK, COLOR_RED, fmt, line+first_line+1);
-		window.color_print(COLOR_BLACK, COLOR_BLUE, "¶");
-	}
-
+	doc->render(window, first_line, first_column, get_workspace_height(), get_workspace_width());
 	// restore cursor
-	move_cursor(cursor_y, cursor_x);
+	move_cursor(documet_to_workspace_y(cursor_doc_y), documet_to_workspace_x(cursor_doc_x));
+}
+
+void editor::set_document(document& d)
+{
+	doc = &d;
+	cursor_doc_x = 0;
+	cursor_doc_y = 0;
+	desired_cursor_x = 0;
+	first_line = 0;
+	first_column = 0;
+	render();
 }
 
 void editor::cursor_up()
 {
-	if (cursor_y == 0)
+	if (cursor_doc_y > 0)
 	{
-		scroll_up();
-	}
-	else
-	{
-		move_cursor(cursor_y - 1, cursor_x);
+		cursor_doc_y--;
+		int new_line_len = doc->line_length(cursor_doc_y);
+		if (cursor_doc_x > new_line_len)
+		{
+			cursor_doc_x = new_line_len;
+		}
+		else if (desired_cursor_x > cursor_doc_x)
+		{
+			cursor_doc_x = std::min(new_line_len, desired_cursor_x);
+		}
+
+		if (documet_to_workspace_y(cursor_doc_y) ==-1)
+		{
+			assert(first_line > 0);
+			first_line--;
+			render();
+		}
+		else
+		{
+			move_cursor(cursor_doc_y, cursor_doc_x);
+		}
 	}
 }
 
 void editor::cursor_down()
 {
-	if (cursor_y == window.get_height()-1)
+	assert(doc);
+
+	if (cursor_doc_y < doc->get_lines())
 	{
-		scroll_down();
-	}
-	else
-	{
-		if (cursor_y < data.size() - first_line)
+		cursor_doc_y++;
+		int new_line_len = doc->line_length(cursor_doc_y);
+		if (cursor_doc_x > new_line_len)
 		{
-			move_cursor(cursor_y + 1, cursor_x);
+			cursor_doc_x = new_line_len;
+		}
+		else if (desired_cursor_x > cursor_doc_x)
+		{
+			cursor_doc_x = std::min(new_line_len, desired_cursor_x);
+		}
+
+		if (workspace_to_document_y(cursor_doc_y) == get_workspace_height())
+		{
+			// scroll one line down
+			first_line ++;
+			render();
+		}
+		else
+		{
+			// just move cursor
+			move_cursor(cursor_doc_y, cursor_doc_x);
 		}
 	}
 }
 
 void editor::cursor_left()
 {
-	if (cursor_x == 0)
+	if (cursor_doc_x > 0)
 	{
-		scroll_left();
-	}
-	else
-	{
-		move_cursor(cursor_y, cursor_x-1);
+		cursor_doc_x--;
+		desired_cursor_x = cursor_doc_x;
+
+		if (documet_to_workspace_x(cursor_doc_x) == -1)
+		{
+			// scroll left
+			assert(first_column > 0);
+			first_column--;
+			render();
+		}
+		else
+		{
+			move_cursor(cursor_doc_y, cursor_doc_x);
+		}
 	}
 }
 
 void editor::cursor_right()
 {
-	int ll = current_line_length();
-	if (cursor_x + first_column < ll-1)
+	assert(doc); // TODO is this needed?
+
+	int ll = doc->line_length(cursor_doc_y);
+	if (cursor_doc_x < ll)
 	{
-		if(cursor_x == workspace_width()-1)
-			scroll_right();
+		cursor_doc_x++;
+		desired_cursor_x = cursor_doc_x;
+
+		if(documet_to_workspace_x(cursor_doc_x) == get_workspace_width())
+		{
+			// scroll right
+			first_column++;
+			render();
+		}
 		else
-			move_cursor(cursor_y, cursor_x+1);
+		{
+			// just move cursor
+			move_cursor(cursor_doc_y, cursor_doc_x);
+		}
 	}
 }
 
 void editor::scroll_down()
 {
-	if (first_line + window.get_height() < data.size() + 1)
-	{
-		++first_line;
-		render();
-	}
+	// TODO
 }
 
 void editor::scroll_up()
 {
-	if (first_line > 0)
-	{
-		--first_line;
-		render();
-	}
+	// TODO
 }
 
 void editor::scroll_left()
 {
-	if (first_column > 0)
-	{
-		--first_column;
-		render();
-	}
+	// TODO
 }
 
 void editor::scroll_right()
 {
-	++first_column;
-	render();
+	// TODO
 }
 
-void editor::move_cursor(int y, int x)
+void editor::move_cursor(int doc_y, int doc_x)
 {
-	cursor_y = y;
-	cursor_x = x;
-	window.move(y, x + left_bar_width());
-}
+	cursor_doc_y = doc_y;
+	cursor_doc_x = doc_x;
 
-int editor::left_bar_width() const
-{
-	return left_bar_digits + LEFT_BAR_WDTH_MARGIN;
-}
-
-int editor::current_line_length() const
-{
-	size_t idx = cursor_y + first_line;
-	if (idx < data.size())
-		return data[idx].length();
+	int wx = documet_to_workspace_x(doc_x) + doc->left_bar_width();
+	int wy = documet_to_workspace_y(doc_y);
+	if (wx >= 0 && wy >= 0 && wx < get_workspace_width() && wy < get_workspace_height())
+	{
+		::curs_set(1);
+		window.move(wy, wx);
+	}
 	else
-		return 0;
+	{
+		::curs_set(0); // hide cursor
+	}
+
 }
 
-int editor::workspace_width() const
+int editor::get_workspace_width() const
 {
-	return window.get_width() - left_bar_width();
+	assert(doc);
+	return window.get_width() - doc->left_bar_width();
+}
+
+int editor::get_workspace_height() const
+{
+	return window.get_height();
+}
+
+int editor::documet_to_workspace_x(int docx) const
+{
+	return docx - first_column;
+}
+
+int editor::documet_to_workspace_y(int docy) const
+{
+	return docy - first_line;
+}
+
+int editor::workspace_to_document_x(int wx) const
+{
+	return wx + first_column;
+}
+
+int editor::workspace_to_document_y(int wy) const
+{
+	return wy + first_line;
 }
 
 

@@ -4,6 +4,7 @@ add_executable(cpped
 	ncurses_window.cc ncurses_window.hh
 	editor.cc editor.hh
 	palette.hh
+	document.cc document.hh
 )
 
 target_link_libraries(cpped

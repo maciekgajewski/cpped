@@ -2,6 +2,7 @@
 
 #include "ncurses_env.hh"
 #include "editor.hh"
+#include "document.hh"
 
 #include <iostream>
 
@@ -10,12 +11,13 @@ int main(int argc, char** argv)
 	cpped::ncurses_env env;
 	auto ss = env.get_stdscr();
 
-	cpped::editor editor(ss);
+	cpped::document document;
 	if (argc > 1)
 	{
-		editor.load_from_file(argv[1]);
+		document.load_from_file(argv[1]);
 	}
 
+	cpped::editor editor(ss, document);
 	editor.render();
 
 	while(true)
