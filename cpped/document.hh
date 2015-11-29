@@ -20,6 +20,9 @@ public:
 	void render(ncurses_window& win, int first_line, int first_column, int height, int width);
 
 private:
+
+	void parse();
+
 	int left_bar_digits = 1;
 
 	std::vector<std::string> data;

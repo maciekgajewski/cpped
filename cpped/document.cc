@@ -58,7 +58,7 @@ void document::render(ncurses_window& window, int first_line, int first_column, 
 	}
 }
 
-void document::load_from_file(const std::__cxx11::string& path)
+void document::load_from_file(const std::string& path)
 {
 	std::fstream f(path, std::ios_base::in);
 	if (f.fail())
@@ -76,6 +76,14 @@ void document::load_from_file(const std::__cxx11::string& path)
 		data.push_back(line);
 	}
 	left_bar_digits = int(std::ceil(std::log10(data.size()+1)));
+
+	// TODO just put here for now
+	parse();
+}
+
+void document::parse()
+{
+	// TODO
 }
 
 
