@@ -106,7 +106,7 @@ void editor::cursor_down()
 {
 	assert(doc);
 
-	if (cursor_doc_y < doc->get_lines())
+	if (cursor_doc_y < doc->get_line_count())
 	{
 		cursor_doc_y++;
 		int new_line_len = doc->line_length(cursor_doc_y);

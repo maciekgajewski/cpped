@@ -16,21 +16,10 @@ int document::left_bar_width() const
 	return LEFT_BAR_WDTH_MARGIN + left_bar_digits;
 }
 
-int document::line_length(int line) const
-{
-	assert(line >= 0);
-
-	if (line < data.size())
-		return data[line].length();
-	else if (line == data.size())
-		return 0;
-	else
-		throw std::logic_error("Accessing line out of range");
-}
-
 void document::render(ncurses_window& window, int first_line, int first_column, int height, int width)
 {
-	int lines_to_render = std::min(height, get_lines() - first_line);
+	/*
+	int lines_to_render = std::min(height, get_line_count() - first_line);
 
 	char fmt[32];
 	std::snprintf(fmt, 32, " %%%dd  ", left_bar_digits);
@@ -56,34 +45,11 @@ void document::render(ncurses_window& window, int first_line, int first_column, 
 		window.color_printf(COLOR_BLACK, COLOR_RED, fmt, line+first_line+1);
 		window.color_print(COLOR_BLACK, COLOR_BLUE, "¶");
 	}
+	*/
 }
 
 void document::load_from_file(const std::string& path)
 {
-	std::fstream f(path, std::ios_base::in);
-	if (f.fail())
-	{
-		throw std::runtime_error("Error opening file");
-	}
-
-	data.clear();
-
-	std::string line;
-	while(!f.eof())
-	{
-		line.clear();
-		std::getline(f, line);
-		data.push_back(line);
-	}
-	left_bar_digits = int(std::ceil(std::log10(data.size()+1)));
-
-	// TODO just put here for now
-	parse();
-}
-
-void document::parse()
-{
-	// TODO
 }
 
 

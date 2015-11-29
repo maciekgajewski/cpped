@@ -122,7 +122,7 @@ int main(int argc, char** argv)
 	std::vector<const char*> cmndline;
 	CXTranslationUnit tu_raw;
 	auto parse_start_time = std::chrono::high_resolution_clock::now();
-	CXErrorCode ec = clang_parseTranslationUnit2(index, filename, cmndline.data(), cmndline.size(), nullptr, 0, CXTranslationUnit_CacheCompletionResults, &tu_raw);
+	CXErrorCode ec = clang_parseTranslationUnit2(index, filename, cmndline.data(), cmndline.size(), nullptr, 0, CXTranslationUnit_CacheCompletionResults|CXTranslationUnit_DetailedPreprocessingRecord, &tu_raw);
 	translation_unit tu(tu_raw);
 
 	auto parse_end_time = std::chrono::high_resolution_clock::now();
@@ -154,6 +154,35 @@ int main(int argc, char** argv)
 		clang_disposeString(s);
 	}
 
+	// print AST
+	CXCursor tu_cursor = clang_getTranslationUnitCursor(tu);
+	clang_visitChildren(tu_cursor, [](CXCursor cursor, CXCursor parent, CXClientData client_data) -> CXChildVisitResult
+	{
+		CXSourceLocation loc = clang_getCursorLocation(cursor);
 
+//		CXFile file;
+//		unsigned int line;
+//		unsigned int column;
+//		unsigned int offset;
+//		clang_getFileLocation(loc, &file, &line, &column, &offset);
+//		CXString file_name = clang_getFileName(file);
+
+//		std::cout << clang_getCString(file_name) << ":" << line << ":" << column << " off: " << offset << std::endl;
+//		clang_disposeString(file_name); // ?
+
+		if (clang_Location_isFromMainFile(loc))
+		{
+			auto kind = clang_getCursorKind(cursor);
+			CXString s = clang_getCursorKindSpelling(kind);
+
+			std::cout << "cursor kind=" << clang_getCString(s) << std::endl;
+			clang_disposeString(s);
+
+			return CXChildVisit_Continue;
+		}
+
+		return CXChildVisit_Continue;
+	},
+	nullptr);
 }
 

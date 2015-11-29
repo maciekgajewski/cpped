@@ -1,11 +1,7 @@
-#pragma once
-
 #include <vector>
 #include <string>
 
-namespace cpped {
-
-class ncurses_window;
+namespace cpped { namespace  document {
 
 class document_line
 {
@@ -23,23 +19,23 @@ class document
 {
 public:
 
+	void load_from_raw_data(std::vector<char> data);
 	void load_from_file(const std::string& path);
 
 	int get_line_count() const { return lines.size(); }
 	int left_bar_width() const;
-	int line_length(int) const { return 0; } // dummy
 
 	document_line& get_line(unsigned index) { return lines.at(index); }
 
-	void render(ncurses_window& win, int first_line, int first_column, int lines, int columns);
-
 private:
 
-	int left_bar_digits = 1;
+	void parse_raw_buffer();
 
 	std::vector<char> raw_data;
 	std::vector<document_line> lines;
 
 };
 
-}
+
+
+}}
