@@ -48,13 +48,6 @@ public:
 			{
 				f(*it);
 			}
-			// EOF line
-//			if (count < max_count)
-//			{
-//				static std::string eof_buf("¶");
-//				document_line eof(&eof_buf.front(), eof_buf.length());
-//				f(eof);
-//			}
 		}
 	}
 
