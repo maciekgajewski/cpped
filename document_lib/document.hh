@@ -9,6 +9,7 @@ public:
 	document_line(char* b, unsigned l) : begin(b), length(l) {}
 
 	unsigned get_length() const { return length; }
+	const char* get_data() const { return begin; }
 
 private:
 	char* begin;

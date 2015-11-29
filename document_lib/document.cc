@@ -3,6 +3,7 @@
 #include <boost/tokenizer.hpp>
 
 #include <fstream>
+#include <iostream>
 
 namespace cpped { namespace  document {
 
@@ -50,11 +51,13 @@ void document::parse_raw_buffer()
 	lines.clear();
 
 	// tokenize by lines
-	boost::char_separator<char> endline_sep("\n\r");
+	boost::char_separator<char> endline_sep("\n", "", boost::keep_empty_tokens);
 	boost::tokenizer<decltype(endline_sep), std::vector<char>::const_iterator, range> tokens(raw_data, endline_sep);
 
 	for(const range& token : tokens)
 	{
+		lines.emplace_back(const_cast<char*>(&*token.begin), token.end - token.begin);
+		assert(lines.back().get_data() >= raw_data.data() && lines.back().get_data() <= raw_data.data()+raw_data.size());
 	}
 }
 

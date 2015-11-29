@@ -4,3 +4,4 @@ add_library(document_lib
 
 target_include_directories(document_lib INTERFACE ..)
 
+add_subdirectory(tests)
