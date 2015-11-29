@@ -1,8 +1,9 @@
 #include <ncurses.h>
 
 #include "editor.hh"
-#include "document.hh"
 #include "ncurses_window.hh"
+
+#include "document_lib/document.hh"
 
 #include <string>
 #include <sstream>
@@ -12,7 +13,7 @@
 
 namespace cpped {
 
-editor::editor(ncurses_window& win, document& d)
+editor::editor(ncurses_window& win, document::document& d)
 	: window(win)
 	, doc(&d)
 {
@@ -59,11 +60,11 @@ void editor::render()
 {
 	window.clear();
 
-	doc->render(window, first_line, first_column, get_workspace_height(), get_workspace_width());
+	//doc->render(window, first_line, first_column, get_workspace_height(), get_workspace_width());
 	refresh_cursor();;
 }
 
-void editor::set_document(document& d)
+void editor::set_document(document::document& d)
 {
 	doc = &d;
 	cursor_doc_x = 0;

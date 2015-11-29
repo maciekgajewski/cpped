@@ -2,7 +2,7 @@
 
 #include "ncurses_env.hh"
 #include "editor.hh"
-#include "document.hh"
+#include "document_lib/document.hh"
 
 #include <iostream>
 
@@ -11,7 +11,7 @@ int main(int argc, char** argv)
 	cpped::ncurses_env env;
 	auto ss = env.get_stdscr();
 
-	cpped::document document;
+	cpped::document::document document;
 	if (argc > 1)
 	{
 		document.load_from_file(argv[1]);

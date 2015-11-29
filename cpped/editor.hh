@@ -6,17 +6,20 @@
 namespace cpped {
 
 class ncurses_window;
-class document;
+
+namespace document{
+	class document;
+}
 
 class editor
 {
 public:
-	editor(ncurses_window& win, document& d);
+	editor(ncurses_window& win, document::document& d);
 
 	void on_key(int key);
 	void on_mouse(const MEVENT& event);
 	void render();
-	void set_document(document& doc);
+	void set_document(document::document& doc);
 
 private:
 
@@ -48,7 +51,7 @@ private:
 	int cursor_doc_x = 0;
 	int cursor_doc_y = 0;
 	int desired_cursor_x = 0;
-	document* doc;
+	document::document* doc;
 
 	ncurses_window& window;
 };
