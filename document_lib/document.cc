@@ -25,10 +25,11 @@ void document::load_from_file(const std::string& path)
 
 	const unsigned bufsize = 4096;
 	char buf[bufsize];
-	while(!f.eof())
+	auto c = f.readsome(buf, bufsize);
+	while( c > 0)
 	{
-		auto c = f.readsome(buf, bufsize);
 		raw_data.insert(raw_data.end(), buf, buf+c);
+		c = f.readsome(buf, bufsize);
 	}
 
 	parse_raw_buffer();

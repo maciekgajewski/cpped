@@ -13,6 +13,7 @@ public:
 	ncurses_window(WINDOW* w);
 	~ncurses_window();
 	void print(const char* text) { ::wprintw(win, text); }
+	void put_char(char c) { ::waddnstr(win, &c, 1); }
 	void refresh() { ::wrefresh(win); }
 	void clear() { ::wclear(win); }
 	void move(int row, int col) { ::wmove(win, row, col); }
@@ -22,7 +23,7 @@ public:
 	void color_printf(NCURSES_COLOR_T bg, NCURSES_COLOR_T fg, const char* fmt, ...) __attribute__ ((format (printf, 4, 5)));
 	void color_print(NCURSES_COLOR_T bg, NCURSES_COLOR_T fg, const char* text);
 
-	int get_ch() { ::wgetch(win); }
+	int get_ch() { return ::wgetch(win); }
 	int get_width() const { return getmaxx(win); }
 	int get_height() const { return getmaxy(win); }
 

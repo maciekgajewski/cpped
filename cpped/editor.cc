@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <cmath>
 #include <cassert>
+#include <cstdio>
 
 namespace cpped {
 
@@ -60,8 +61,39 @@ void editor::render()
 {
 	window.clear();
 
-	//doc->render(window, first_line, first_column, get_workspace_height(), get_workspace_width());
-	refresh_cursor();;
+	int line_count_digits = 8;
+	if (doc->get_line_count() < 10)
+		line_count_digits = 1;
+	else if (doc->get_line_count() < 100)
+		line_count_digits = 2;
+	else if (doc->get_line_count() < 1000)
+		line_count_digits = 3;
+	else if (doc->get_line_count() < 10000)
+		line_count_digits = 4;
+
+	left_margin_width = line_count_digits + 2;
+	char fmt[32];
+	std::snprintf(fmt, 32, " %%%dd ", line_count_digits);
+
+	// TODO iterate over lines
+	int line_no = 0;
+	doc->for_lines(first_line, window.get_height(), [&](const document::document_line& line)
+	{
+		window.move(line_no, 0);
+		window.color_printf(COLOR_BLACK, COLOR_RED, fmt, first_line+line_no++);
+		if (line.get_length() > first_column)
+		{
+			const char* begin = line.get_data() + first_column;
+			const char* end = line.get_data() + std::min<unsigned>(line.get_length(), window.get_width() - first_column - left_margin_width);
+
+			for(const char* c = begin; c != end; ++c)
+			{
+				window.put_char(*c);
+			}
+		}
+	});
+
+	refresh_cursor();
 }
 
 void editor::set_document(document::document& d)
@@ -201,7 +233,7 @@ void editor::scroll_right()
 
 void editor::refresh_cursor()
 {
-	int wx = documet_to_workspace_x(cursor_doc_x) + doc->left_bar_width();
+	int wx = documet_to_workspace_x(cursor_doc_x) + left_margin_width;
 	int wy = documet_to_workspace_y(cursor_doc_y);
 	if (wx >= 0 && wy >= 0 && wx < get_workspace_width() && wy < get_workspace_height())
 	{
@@ -218,7 +250,7 @@ void editor::refresh_cursor()
 int editor::get_workspace_width() const
 {
 	assert(doc);
-	return window.get_width() - doc->left_bar_width();
+	return window.get_width() - left_margin_width;
 }
 
 int editor::get_workspace_height() const

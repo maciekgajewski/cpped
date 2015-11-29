@@ -46,14 +46,15 @@ private:
 
 	int first_line = 0;
 	int first_column = 0;
+	int left_margin_width = 0; // calculated when rendering
 
 	// cursor's screen pos
 	int cursor_doc_x = 0;
 	int cursor_doc_y = 0;
 	int desired_cursor_x = 0;
-	document::document* doc;
 
 	ncurses_window& window;
+	document::document* doc;
 };
 
 }

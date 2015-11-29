@@ -1,6 +1,5 @@
 #include <vector>
 #include <string>
-
 namespace cpped { namespace  document {
 
 class document_line
@@ -24,14 +23,40 @@ public:
 	void load_from_raw_data(std::vector<char> data);
 	void load_from_file(const std::string& path);
 
-	int get_line_count() const { return lines.size(); }
+	unsigned get_line_count() const { return lines.size(); }
 	int left_bar_width() const;
 
-	// TODO temp
-	int line_length(int) { return 0; }
-	int left_bar_width() { return 0; }
+	unsigned line_length(unsigned index)
+	{
+		if (index == lines.size())
+			return 0; // fake last line
+		else
+			return get_line(index).get_length();
+	}
 
 	document_line& get_line(unsigned index) { return lines.at(index); }
+
+	// iterates over no more than 'count' lines in range, starting from first_line
+	template<typename FUN>
+	void for_lines(unsigned first_line, unsigned max_count, FUN f)
+	{
+		if (first_line < lines.size())
+		{
+			unsigned count = std::min<unsigned>(lines.size()-first_line, max_count);
+			auto it = lines.begin() + first_line;
+			for(unsigned i = 0; i < count; ++i, ++it)
+			{
+				f(*it);
+			}
+			// EOF line
+//			if (count < max_count)
+//			{
+//				static std::string eof_buf("¶");
+//				document_line eof(&eof_buf.front(), eof_buf.length());
+//				f(eof);
+//			}
+		}
+	}
 
 private:
 

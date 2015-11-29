@@ -11,18 +11,22 @@ BOOST_AUTO_TEST_SUITE( document_tests )
 BOOST_AUTO_TEST_CASE(document_lines)
 {
 	std::string code =
-R"(line 1
-line 2
-line 3
-line 4
-line 5
-line 6)";
+R"(1
+22
+333
+4444
+55555
+666666)";
 
 
 	document doc;
 	doc.load_from_raw_data(code);
 
 	BOOST_CHECK_EQUAL(6, doc.get_line_count());
+	for(unsigned i = 0; i < doc.get_line_count(); ++i)
+	{
+		BOOST_CHECK_EQUAL(i+1, doc.get_line(i).get_length());
+	}
 }
 
 BOOST_AUTO_TEST_SUITE_END()
