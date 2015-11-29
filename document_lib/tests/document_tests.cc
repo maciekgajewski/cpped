@@ -20,13 +20,34 @@ R"(1
 
 
 	document doc;
-	doc.load_from_raw_data(code);
+	doc.load_from_raw_data(code, "fake.cc");
 
 	BOOST_CHECK_EQUAL(6, doc.get_line_count());
 	for(unsigned i = 0; i < doc.get_line_count(); ++i)
 	{
 		BOOST_CHECK_EQUAL(i+1, doc.get_line(i).get_length());
 	}
+}
+
+BOOST_AUTO_TEST_CASE(cpp_parsing)
+{
+	std::string code =
+R"(#include <string>
+
+// hello boss
+const char* s = "a\
+lamakaota";
+
+struct X {
+  int i;
+  std::string s;
+};)";
+
+
+	document doc;
+	doc.load_from_raw_data(code, "fake.cc");
+
+	doc.parse_language();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
