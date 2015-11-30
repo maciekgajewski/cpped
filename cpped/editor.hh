@@ -6,6 +6,7 @@
 namespace cpped {
 
 class ncurses_window;
+class style_manager;
 
 namespace document{
 	class document;
@@ -14,7 +15,7 @@ namespace document{
 class editor
 {
 public:
-	editor(ncurses_window& win, document::document& d);
+	editor(ncurses_window& win, document::document& d, style_manager& sm);
 
 	void on_key(int key);
 	void on_mouse(const MEVENT& event);
@@ -37,24 +38,25 @@ private:
 	void refresh_cursor();
 
 	// workspace/doc coordinates
-	int get_workspace_width() const;
+	unsigned get_workspace_width() const;
 	int get_workspace_height() const;
 	int documet_to_workspace_x(int docx) const;
 	int documet_to_workspace_y(int docy) const;
 	int workspace_to_document_x(int wx) const;
 	int workspace_to_document_y(int wy) const;
 
-	int first_line = 0;
-	int first_column = 0;
-	int left_margin_width = 0; // calculated when rendering
+	unsigned first_line = 0;
+	unsigned first_column = 0;
+	unsigned left_margin_width = 0; // calculated when rendering
 
 	// cursor's screen pos
-	int cursor_doc_x = 0;
-	int cursor_doc_y = 0;
-	int desired_cursor_x = 0;
+	unsigned cursor_doc_x = 0;
+	unsigned cursor_doc_y = 0;
+	unsigned desired_cursor_x = 0;
 
 	ncurses_window& window;
 	document::document* doc;
+	style_manager& styles;
 };
 
 }

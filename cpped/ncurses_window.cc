@@ -45,4 +45,11 @@ void ncurses_window::color_print(short bg, short fg, const char* text)
 	::wattroff(win, COLOR_PAIR(pair));
 }
 
+void ncurses_window::attr_print(attr_t attr, const char* text, unsigned length)
+{
+	::wattron(win, attr);
+	::waddnstr(win, text, length);
+	::wattron(win, attr);
+}
+
 }

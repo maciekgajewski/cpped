@@ -2,6 +2,8 @@
 
 #include "ncurses_env.hh"
 #include "editor.hh"
+#include "styles.hh"
+
 #include "document_lib/document.hh"
 
 #include <iostream>
@@ -17,7 +19,8 @@ int main(int argc, char** argv)
 		document.load_from_file(argv[1]);
 	}
 
-	cpped::editor editor(ss, document);
+	cpped::style_manager styles;
+	cpped::editor editor(ss, document, styles);
 	editor.render();
 
 	while(true)

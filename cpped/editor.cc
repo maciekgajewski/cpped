@@ -2,6 +2,7 @@
 
 #include "editor.hh"
 #include "ncurses_window.hh"
+#include "styles.hh"
 
 #include "document_lib/document.hh"
 
@@ -14,9 +15,10 @@
 
 namespace cpped {
 
-editor::editor(ncurses_window& win, document::document& d)
+editor::editor(ncurses_window& win, document::document& d, style_manager& sm)
 	: window(win)
 	, doc(&d)
+	, styles(sm)
 {
 }
 
@@ -75,22 +77,32 @@ void editor::render()
 	char fmt[32];
 	std::snprintf(fmt, 32, " %%%dd ", line_count_digits);
 
-	// TODO iterate over lines
+	// iterate over lines
 	int line_no = 0;
 	doc->for_lines(first_line, window.get_height(), [&](const document::document_line& line)
 	{
 		window.move(line_no, 0);
 		window.color_printf(COLOR_BLACK, COLOR_RED, fmt, first_line+line_no++);
-		if (line.get_length() > first_column)
-		{
-			const char* begin = line.get_data() + first_column;
-			const char* end = line.get_data() + std::min<unsigned>(line.get_length(), window.get_width() - first_column - left_margin_width);
+//			const char* begin = line.get_data() + first_column;
+//			const char* end = line.get_data() + std::min<unsigned>(line.get_length(), window.get_width() - first_column - left_margin_width);
 
-			for(const char* c = begin; c != end; ++c)
+//			for(const char* c = begin; c != end; ++c)
+//			{
+//				window.put_char(*c);
+//			}
+		// iterate over tokens in line
+		line.for_each_token([&](const document::line_token& token)
+		{
+			if (token.end > first_column)
 			{
-				window.put_char(*c);
+				unsigned begin = std::max(token.begin, first_column);
+				unsigned end = std::min(get_workspace_width(), token.end-first_column);
+
+				int attr = styles.get_attr_for_token(token.type);
+
+				window.attr_print(attr, line.get_data() + begin, end - begin);
 			}
-		}
+		});
 	});
 
 	refresh_cursor();
@@ -112,7 +124,7 @@ void editor::cursor_up()
 	if (cursor_doc_y > 0)
 	{
 		cursor_doc_y--;
-		int new_line_len = doc->line_length(cursor_doc_y);
+		unsigned new_line_len = doc->line_length(cursor_doc_y);
 		if (cursor_doc_x > new_line_len)
 		{
 			cursor_doc_x = new_line_len;
@@ -142,7 +154,7 @@ void editor::cursor_down()
 	if (cursor_doc_y < doc->get_line_count())
 	{
 		cursor_doc_y++;
-		int new_line_len = doc->line_length(cursor_doc_y);
+		unsigned new_line_len = doc->line_length(cursor_doc_y);
 		if (cursor_doc_x > new_line_len)
 		{
 			cursor_doc_x = new_line_len;
@@ -247,10 +259,13 @@ void editor::refresh_cursor()
 
 }
 
-int editor::get_workspace_width() const
+unsigned editor::get_workspace_width() const
 {
 	assert(doc);
-	return window.get_width() - left_margin_width;
+	if (window.get_width() < left_margin_width)
+		return 0;
+	else
+		return window.get_width() - left_margin_width;
 }
 
 int editor::get_workspace_height() const

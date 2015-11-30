@@ -45,7 +45,7 @@ public:
 
 	// Calls 'fun' for each token of the line. If section of the line is not covered by a token, empty token is used
 	template<typename FUN>
-	void for_each_token(FUN fun);
+	void for_each_token(FUN fun) const;
 
 private:
 
@@ -102,7 +102,7 @@ private:
 };
 
 template<typename FUN>
-void document_line::for_each_token(FUN fun)
+void document_line::for_each_token(FUN fun) const
 {
 	unsigned current = 0;
 	auto it = tokens.begin();
@@ -119,7 +119,7 @@ void document_line::for_each_token(FUN fun)
 		}
 		else
 		{
-			line_token& token = *it;
+			const line_token& token = *it;
 			it++;
 			assert(token.begin >= current);
 			assert(token.end <= length);
