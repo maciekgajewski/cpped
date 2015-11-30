@@ -39,8 +39,8 @@ const char* s = "a\
 lamakaota";
 
 struct X {
-  int i;
-  std::string s;
+  int i = 666;
+  std::string s = "string literal";
 };)";
 
 

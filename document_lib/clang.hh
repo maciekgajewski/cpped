@@ -63,6 +63,7 @@ private:
 	friend class translation_unit;
 	friend class source_range;
 	friend class token_list;
+	friend class source_range;
 };
 
 class source_range
@@ -71,10 +72,16 @@ public:
 	source_range() : clang_range(clang_getNullRange()) {}
 	source_range(const source_location& b, const source_location& e)
 		: clang_range(clang_getRange(b.clang_location, e.clang_location)) {}
+
+	source_location get_start() const { return clang_getRangeStart(clang_range); }
+	source_location get_end() const { return clang_getRangeEnd(clang_range); }
+
 private:
+	source_range(const CXSourceRange& rng) : clang_range(rng) {}
 	CXSourceRange clang_range;
 
 	friend class translation_unit;
+	friend class token_list;
 };
 
 class string
@@ -200,6 +207,11 @@ public:
 	source_location get_token_location(const token& t) const
 	{
 		return source_location(clang_getTokenLocation(owning_tu, *t.clang_token));
+	}
+
+	source_range get_token_extent(const token& t) const
+	{
+		return source_range(clang_getTokenExtent(owning_tu, *t.clang_token));
 	}
 
 	void annotate_tokens()

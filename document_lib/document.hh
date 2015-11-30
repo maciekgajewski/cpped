@@ -4,6 +4,27 @@
 #include <string>
 namespace cpped { namespace  document {
 
+//  additional info associated with token
+
+enum class token_type
+{
+	none,
+	keyword,
+	literal,
+	preprocessor,
+	type,
+	comment,
+
+	max_tokens
+};
+
+struct line_token
+{
+	unsigned begin;
+	unsigned end;
+	token_type type;
+};
+
 class document_line
 {
 public:
@@ -14,21 +35,29 @@ public:
 
 	std::string to_string() const { return std::string(begin, begin+length); }
 
+	void clear_tokens() { tokens.clear(); }
+	void push_back_token(const line_token& t);
+
+	// Calls 'fun' for each token of the line. If section of the line is not covered by a token, empty token is used
+	template<typename FUN>
+	void for_each_token(FUN fun);
+
 private:
+
 	char* begin;
 	unsigned length;
+	std::vector<line_token> tokens;
 };
 
 class document
 {
 public:
 
-	void load_from_raw_data(const std::string& data, const std::__cxx11::string& fake_path);
+	void load_from_raw_data(const std::string& data, const std::string& fake_path);
 	void load_from_raw_data(std::vector<char> data);
 	void load_from_file(const std::string& path);
 
 	unsigned get_line_count() const { return lines.size(); }
-	int left_bar_width() const;
 
 	unsigned line_length(unsigned index)
 	{
