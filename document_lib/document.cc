@@ -94,8 +94,9 @@ void document::parse_language()
 	clang::source_file file = tu.get_file(file_name);
 
 	// full file tokenizer. doing it line-by-line is not a good approach
-	clang::source_location file_begin = tu.get_location(file, 1, 1);
-	clang::source_location file_end = tu.get_location(file, lines.size() + 1, lines.back().get_length());
+	clang::source_location file_begin = tu.get_location_for_offset(file, 0);
+	clang::source_location file_end = tu.get_location_for_offset(file, raw_data.size());
+
 	clang::source_range range(file_begin, file_end);
 	clang::token_list tokens = tu.tokenize(range);
 	tokens.annotate_tokens();
@@ -103,6 +104,10 @@ void document::parse_language()
 	// clear all tokens in al lines
 	for(auto& line : lines)
 		line.clear_tokens();
+
+	// sanity check
+	if (!lines.empty() && tokens.size() == 0)
+		throw std::runtime_error("parsing failed");
 
 	for(const clang::token& token : tokens)
 	{

@@ -39,6 +39,8 @@ style_manager::style_manager()
 	attr_for_token[int(document::token_type::preprocessor)]	= COLOR_PAIR(palette.get_pair_for_colors(bg, COLOR_GREEN));
 	attr_for_token[int(document::token_type::type)]			= COLOR_PAIR(palette.get_pair_for_colors(bg, COLOR_RED));
 	attr_for_token[int(document::token_type::comment)]		= COLOR_PAIR(palette.get_pair_for_colors(bg, COLOR_BLUE));
+
+	line_numbers = COLOR_PAIR(palette.get_pair_for_colors(COLOR_BLACK, COLOR_RED));
 }
 
 }

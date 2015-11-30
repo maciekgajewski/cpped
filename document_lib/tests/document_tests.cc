@@ -140,5 +140,40 @@ BOOST_AUTO_TEST_CASE(token_in_the_middle)
 
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(cpp_parser_tests)
+
+BOOST_AUTO_TEST_CASE(simple_test)
+{
+	std::string code ="int x=7;";
+
+	document d;
+	d.load_from_raw_data(code, "code.cc");
+	d.parse_language();
+
+	int lines = 0;
+	int tokens = 0;
+	token_type expected_tokens[] = {
+		token_type::keyword,	// int
+		token_type::none,		// (space)
+		token_type::none,		// x
+		token_type::none,		// =
+		token_type::literal,	// 7
+		token_type::none,		// ;
+		};
+
+	d.for_lines(0, 1, [&](const document_line& line)
+	{
+		lines++;
+		line.for_each_token([&](const line_token& token)
+		{
+			BOOST_REQUIRE_LT(tokens, sizeof(expected_tokens)/sizeof(token_type));
+			BOOST_CHECK_EQUAL(expected_tokens[tokens], token.type);
+			tokens++;
+		});
+	});
+	BOOST_CHECK_EQUAL(lines, 1);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 }}}

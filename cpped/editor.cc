@@ -76,21 +76,19 @@ void editor::render()
 	left_margin_width = line_count_digits + 2;
 	char fmt[32];
 	std::snprintf(fmt, 32, " %%%dd ", line_count_digits);
+	char lineno[32];
 
 	// iterate over lines
 	int line_no = 0;
 	doc->for_lines(first_line, window.get_height(), [&](const document::document_line& line)
 	{
 		window.move(line_no, 0);
-		window.color_printf(COLOR_BLACK, COLOR_RED, fmt, first_line+line_no++);
-//			const char* begin = line.get_data() + first_column;
-//			const char* end = line.get_data() + std::min<unsigned>(line.get_length(), window.get_width() - first_column - left_margin_width);
 
-//			for(const char* c = begin; c != end; ++c)
-//			{
-//				window.put_char(*c);
-//			}
-		// iterate over tokens in line
+		// print line number
+		std::snprintf(lineno, 32, fmt, first_line+line_no++);
+		window.attr_print(styles.line_numbers, lineno, left_margin_width);
+
+		// print line
 		line.for_each_token([&](const document::line_token& token)
 		{
 			if (token.end > first_column)

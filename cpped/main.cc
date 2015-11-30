@@ -10,14 +10,16 @@
 
 int main(int argc, char** argv)
 {
-	cpped::ncurses_env env;
-	auto ss = env.get_stdscr();
-
 	cpped::document::document document;
 	if (argc > 1)
 	{
 		document.load_from_file(argv[1]);
 	}
+	document.parse_language();
+
+	cpped::ncurses_env env;
+	auto ss = env.get_stdscr();
+
 
 	cpped::style_manager styles;
 	cpped::editor editor(ss, document, styles);

@@ -20,10 +20,6 @@ public:
 	void set_attr(attr_t a) { ::wattron(win, a); }
 	void unset_attr(attr_t a) { ::wattroff(win, a); }
 
-	// TODO don't use these
-	void color_printf(NCURSES_COLOR_T bg, NCURSES_COLOR_T fg, const char* fmt, ...) __attribute__ ((format (printf, 4, 5)));
-	void color_print(NCURSES_COLOR_T bg, NCURSES_COLOR_T fg, const char* text);
-
 	// use this one
 	void attr_print(attr_t attr, const char* text, unsigned length);
 

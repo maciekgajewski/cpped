@@ -22,34 +22,11 @@ ncurses_window::~ncurses_window()
 		::delwin(win);
 }
 
-void ncurses_window::color_printf(NCURSES_COLOR_T bg, NCURSES_COLOR_T fg, const char* fmt, ...)
-{
-	std::va_list args;
-	va_start(args, fmt);
-
-	int pair = fg +(bg<<3);
-	::init_pair(pair, fg, bg);
-	::wattron(win, COLOR_PAIR(pair));
-	::vwprintw(win, fmt, args);
-	::wattroff(win, COLOR_PAIR(pair));
-
-	va_end(args);
-}
-
-void ncurses_window::color_print(short bg, short fg, const char* text)
-{
-	int pair = fg +(bg<<3);
-	::init_pair(pair, fg, bg);
-	::wattron(win, COLOR_PAIR(pair));
-	::wprintw(win, text);
-	::wattroff(win, COLOR_PAIR(pair));
-}
-
 void ncurses_window::attr_print(attr_t attr, const char* text, unsigned length)
 {
 	::wattron(win, attr);
 	::waddnstr(win, text, length);
-	::wattron(win, attr);
+	::wattroff(win, attr);
 }
 
 }

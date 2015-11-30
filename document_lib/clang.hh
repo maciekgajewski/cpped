@@ -51,10 +51,9 @@ public:
 	source_location() : clang_location(clang_getNullLocation()) {}
 
 	info get_location_info() const;
+	bool is_null() const { return clang_equalLocations(clang_location, clang_getNullLocation()); }
 
 private:
-	source_location(CXTranslationUnit tu, CXFile f, unsigned line, unsigned column)
-		: clang_location(clang_getLocation(tu, f, line, column)) {}
 
 	source_location(const CXSourceLocation& sl) : clang_location(sl) {}
 
@@ -246,7 +245,22 @@ public:
 	source_file get_file(const std::string& file_name) { return get_file(file_name.c_str()); }
 	source_location get_location(const source_file& file, unsigned line, unsigned column)
 	{
-		return source_location(clang_tu, file.clang_file, line, column);
+		source_location location(clang_getLocation(clang_tu, file.clang_file, line, column));
+		if (location.is_null())
+		{
+			throw std::runtime_error("no such location");
+		}
+		return location;
+	}
+
+	source_location get_location_for_offset(const source_file& file, unsigned offset)
+	{
+		source_location location(clang_getLocationForOffset(clang_tu, file.clang_file, offset));
+		if (location.is_null())
+		{
+			throw std::runtime_error("no such location");
+		}
+		return location;
 	}
 
 	token_list tokenize(const source_range& range)

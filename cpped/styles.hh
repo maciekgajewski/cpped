@@ -28,7 +28,10 @@ public:
 
 	color_palette palette;
 
+	int line_numbers;
+
 private:
+
 
 	std::array<int, int(document::token_type::max_tokens)> attr_for_token;
 };
