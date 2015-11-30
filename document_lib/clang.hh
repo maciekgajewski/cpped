@@ -23,29 +23,44 @@ private:
 	friend class translation_unit;
 };
 
-class file
+class source_file
 {
 public:
+	source_file() : clang_file(nullptr) {}
 private:
-	file(CXFile f) : clang_file(f) {}
+	source_file(CXFile f) : clang_file(f) {}
 	CXFile clang_file;
 
 	friend class translation_unit;
+	friend class source_location;
 };
 
 class source_location
 {
 public:
+	struct info
+	{
+		unsigned line;
+		unsigned column;
+		unsigned offset;
+		source_file file;
+	};
+
 	source_location() : clang_location(clang_getNullLocation()) {}
+
+	info get_location_info() const;
 
 private:
 	source_location(CXTranslationUnit tu, CXFile f, unsigned line, unsigned column)
 		: clang_location(clang_getLocation(tu, f, line, column)) {}
 
+	source_location(const CXSourceLocation& sl) : clang_location(sl) {}
+
 	CXSourceLocation clang_location;
 
 	friend class translation_unit;
 	friend class source_range;
+	friend class token_list;
 };
 
 class source_range
@@ -113,6 +128,12 @@ public:
 
 	iterator begin() const { return iterator(tokens); }
 	iterator end() const { return iterator(tokens + num_tokens); }
+
+	source_location get_token_location(const token& t) const
+	{
+		return source_location(clang_getTokenLocation(owning_tu, *t.clang_token));
+	}
+
 private:
 
 	token_list(CXTranslationUnit tu, CXToken* t, unsigned nt)
@@ -134,9 +155,9 @@ public:
 	translation_unit(const translation_unit&) = delete;
 	~translation_unit() { clang_disposeTranslationUnit(clang_tu); }
 
-	file get_file(const char* file_name) { return file(clang_getFile(clang_tu, file_name)); }
-	file get_file(const std::string& file_name) { return get_file(file_name.c_str()); }
-	source_location get_location(const file& file, unsigned line, unsigned column)
+	source_file get_file(const char* file_name) { return source_file(clang_getFile(clang_tu, file_name)); }
+	source_file get_file(const std::string& file_name) { return get_file(file_name.c_str()); }
+	source_location get_location(const source_file& file, unsigned line, unsigned column)
 	{
 		return source_location(clang_tu, file.clang_file, line, column);
 	}

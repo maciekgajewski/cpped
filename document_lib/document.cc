@@ -43,25 +43,29 @@ void document::parse_language()
 	clang::index index(0, 0);
 	clang::translation_unit tu(index, file_name.c_str(), raw_data.data(), raw_data.size());
 
-	// lets try tokenizing line by line
-	// TODO or should it be the entire file?
-	clang::file file = tu.get_file(file_name);
-	unsigned line_number = 1;
-	for(const document_line& line : lines)
+	clang::source_file file = tu.get_file(file_name);
+
+	// full file tokenizer. doing it line-by-line is not a good approach
+	clang::source_location file_begin = tu.get_location(file, 1, 1);
+	clang::source_location file_end = tu.get_location(file, lines.size() + 1, lines.back().get_length());
+	clang::source_range range(file_begin, file_end);
+	clang::token_list tokens = tu.tokenize(range);
+
+	std::cout << "entire file: tokens=" << tokens.size() << std::endl;
+	unsigned line_number = 0;
+	for(const clang::token& token : tokens)
 	{
-		clang::source_location line_begin = tu.get_location(file, line_number, 1);
-		clang::source_location line_end = tu.get_location(file, line_number, line.get_length());
-
-		clang::source_range range(line_begin, line_end);
-		clang::token_list tokens = tu.tokenize(range);
-
-		std::cout << "line: " << line_number << " '" << line.to_string() << "', tokens: " << tokens.size() << std::endl;
-		for(const clang::token& token : tokens)
+		clang::source_location location = tokens.get_token_location(token);
+		clang::source_location::info info = location.get_location_info();
+		if (info.line != line_number)
 		{
-			std::cout << "  - " << token.get_kind_name() << std::endl;
+			line_number = info.line;
+			std::cout << std::endl;
+			std::cout << "line: " << line_number << " '" << lines[line_number-1].to_string() << std::endl;
 		}
-		line_number++;
+		std::cout << token.get_kind_name() << ", ";
 	}
+	std::cout << std::endl;
 }
 
 struct range
