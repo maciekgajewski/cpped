@@ -5,10 +5,12 @@
 #include <cstdlib>
 #include <string>
 #include <iterator>
+#include <vector>
+#include <cassert>
 
 namespace cpped { namespace clang {
 
-// thinc C++ bindings for libclang
+// thin C++ bindings for libclang
 
 class index
 {
@@ -75,6 +77,39 @@ private:
 	friend class translation_unit;
 };
 
+class string
+{
+public:
+	~string() { clang_disposeString(clang_string); }
+
+	const char* c_str() const { return clang_getCString(clang_string); }
+
+private:
+	string(const CXString s) : clang_string(s) {}
+	CXString clang_string;
+
+	friend class cursor;
+};
+
+inline std::ostream& operator<<(std::ostream& s, const string& cs)
+{
+	return s << cs.c_str();
+}
+
+class cursor
+{
+public:
+
+	CXCursorKind get_kind() const { return clang_getCursorKind(clang_cursor); }
+	string get_kind_as_string() const { return clang_getCursorKindSpelling(clang_getCursorKind(clang_cursor)); }
+
+private:
+	cursor(const CXCursor& c) : clang_cursor(c) {}
+	CXCursor clang_cursor;
+
+	friend class token;
+};
+
 class token
 {
 public:
@@ -83,9 +118,20 @@ public:
 	CXTokenKind get_kind() const { return clang_getTokenKind(*clang_token); }
 	std::string get_kind_name() const;
 
+	bool has_associated_cursor() const { return associated_cursor != nullptr; }
+
+	cursor get_associated_cursor() const
+	{
+		if (associated_cursor)
+			return cursor(*associated_cursor);
+		else
+			throw std::logic_error("Token not annotated");
+	}
+
 private:
-	explicit token(CXToken* t) : clang_token(t) {}
+	explicit token(CXToken* t, const CXCursor* c)  : clang_token(t), associated_cursor(c) {}
 	CXToken* clang_token;
+	const CXCursor* associated_cursor = nullptr;
 
 	friend class token_list;
 
@@ -103,10 +149,10 @@ public:
 		const token* operator->()const { return &tok; }
 		bool operator==(const iterator& o) const { return tok.clang_token == o.tok.clang_token; }
 		bool operator!=(const iterator& o) const { return tok.clang_token != o.tok.clang_token; }
-		void operator++() { tok.clang_token++; }
+		void operator++() { tok.clang_token++; if(tok.associated_cursor) tok.associated_cursor++; }
 
 	private:
-		iterator(CXToken* t) : tok(t) {}
+		iterator(CXToken* t, const CXCursor* c) : tok(t, c) {}
 		token tok;
 
 		friend class token_list;
@@ -126,12 +172,40 @@ public:
 
 	size_t size() const { return num_tokens; }
 
-	iterator begin() const { return iterator(tokens); }
-	iterator end() const { return iterator(tokens + num_tokens); }
+	iterator begin() const
+	{
+		if (associated_cursors.empty())
+		{
+			return iterator(tokens, nullptr);
+		}
+		else
+		{
+			assert(associated_cursors.size() == num_tokens);
+			return iterator(tokens,	associated_cursors.data());
+		}
+	}
+	iterator end() const
+	{
+		if (associated_cursors.empty())
+		{
+			return iterator(tokens + num_tokens, nullptr);
+		}
+		else
+		{
+			assert(associated_cursors.size() == num_tokens);
+			return iterator(tokens + num_tokens, associated_cursors.data() + num_tokens);
+		}
+	}
 
 	source_location get_token_location(const token& t) const
 	{
 		return source_location(clang_getTokenLocation(owning_tu, *t.clang_token));
+	}
+
+	void annotate_tokens()
+	{
+		associated_cursors.resize(num_tokens);
+		clang_annotateTokens(owning_tu, tokens, num_tokens, associated_cursors.data());
 	}
 
 private:
@@ -142,6 +216,7 @@ private:
 	CXTranslationUnit owning_tu;
 	CXToken* tokens = nullptr;
 	unsigned num_tokens = 0;
+	std::vector<CXCursor> associated_cursors;
 
 	friend class translation_unit;
 };

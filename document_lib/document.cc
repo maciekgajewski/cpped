@@ -50,6 +50,7 @@ void document::parse_language()
 	clang::source_location file_end = tu.get_location(file, lines.size() + 1, lines.back().get_length());
 	clang::source_range range(file_begin, file_end);
 	clang::token_list tokens = tu.tokenize(range);
+	tokens.annotate_tokens();
 
 	std::cout << "entire file: tokens=" << tokens.size() << std::endl;
 	unsigned line_number = 0;
@@ -63,7 +64,15 @@ void document::parse_language()
 			std::cout << std::endl;
 			std::cout << "line: " << line_number << " '" << lines[line_number-1].to_string() << std::endl;
 		}
-		std::cout << token.get_kind_name() << ", ";
+		if (token.has_associated_cursor())
+		{
+			clang::string type = token.get_associated_cursor().get_kind_as_string();
+			std::cout << token.get_kind_name() << " (" << type << "), ";
+		}
+		else
+		{
+			std::cout << token.get_kind_name() << ", ";
+		}
 	}
 	std::cout << std::endl;
 }
