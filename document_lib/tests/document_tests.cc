@@ -47,8 +47,98 @@ struct X {
 	document doc;
 	doc.load_from_raw_data(code, "fake.cc");
 
-	doc.parse_language();
+	doc.parse_language(); // this test onlt has value if there is any debug printing. At least we'll see if it doesn't crash...
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(line_tests)
+BOOST_AUTO_TEST_CASE(no_tokens)
+{
+	std::string text = "abcdefg gijklm";
+	document_line line(const_cast<char*>(text.data()), text.length());
+
+	int token_count = 0;
+	line.for_each_token([&](const line_token& t)
+	{
+		token_count++;
+		BOOST_CHECK_EQUAL(t.type, token_type::none);
+		BOOST_CHECK_EQUAL(t.begin, 0u);
+		BOOST_CHECK_EQUAL(t.end, text.length());
+	});
+	BOOST_CHECK_EQUAL(token_count, 1);
+}
+
+BOOST_AUTO_TEST_CASE(back_to_back_tokens)
+{
+	std::string text = "11222333";
+	document_line line(const_cast<char*>(text.data()), text.length());
+
+	token_type expected_types[] = {token_type::keyword, token_type::comment, token_type::literal};
+
+	line.push_back_token(line_token{0, 2, expected_types[0]});
+	line.push_back_token(line_token{2, 5, expected_types[1]});
+	line.push_back_token(line_token{5, 8, expected_types[2]});
+
+	int token_count = 0;
+	unsigned current = 0;
+	line.for_each_token([&](const line_token& t)
+	{
+		BOOST_CHECK_EQUAL(t.type, expected_types[token_count]);
+		BOOST_CHECK_EQUAL(t.begin, current);
+		current = t.end;
+		token_count++;
+	});
+	BOOST_CHECK_EQUAL(token_count, 3);
+}
+
+BOOST_AUTO_TEST_CASE(token_gap)
+{
+	std::string text = "11222333";
+	document_line line(const_cast<char*>(text.data()), text.length());
+
+	token_type expected_types[] = {token_type::keyword, token_type::none, token_type::literal};
+
+	line.push_back_token(line_token{0, 2, expected_types[0]});
+	//line.push_back_token(line_token{2, 5, expected_types[1]});
+	line.push_back_token(line_token{5, 8, expected_types[2]});
+
+	int token_count = 0;
+	unsigned current = 0;
+	line.for_each_token([&](const line_token& t)
+	{
+		BOOST_CHECK_EQUAL(t.type, expected_types[token_count]);
+		BOOST_CHECK_EQUAL(t.begin, current);
+		current = t.end;
+		token_count++;
+	});
+	BOOST_CHECK_EQUAL(token_count, 3);
+}
+
+BOOST_AUTO_TEST_CASE(token_in_the_middle)
+{
+	std::string text = "11222333";
+	document_line line(const_cast<char*>(text.data()), text.length());
+
+	token_type expected_types[] = {token_type::none, token_type::literal, token_type::none};
+
+	//line.push_back_token(line_token{0, 2, expected_types[0]});
+	line.push_back_token(line_token{2, 5, expected_types[1]});
+	//line.push_back_token(line_token{5, 8, expected_types[2]});
+
+	int token_count = 0;
+	unsigned current = 0;
+	line.for_each_token([&](const line_token& t)
+	{
+		BOOST_CHECK_EQUAL(t.type, expected_types[token_count]);
+		BOOST_CHECK_EQUAL(t.begin, current);
+		current = t.end;
+		token_count++;
+	});
+	BOOST_CHECK_EQUAL(token_count, 3);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
 }}}

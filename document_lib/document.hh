@@ -2,6 +2,9 @@
 
 #include <vector>
 #include <string>
+#include <ostream>
+#include <cassert>
+
 namespace cpped { namespace  document {
 
 //  additional info associated with token
@@ -18,10 +21,12 @@ enum class token_type
 	max_tokens
 };
 
+std::ostream& operator << (std::ostream& s, token_type tt);
+
 struct line_token
 {
-	unsigned begin;
-	unsigned end;
+	unsigned begin; // index of the fist character of the token
+	unsigned end; // index _past_ the last character of the token (end-begin = length)
 	token_type type;
 };
 
@@ -96,6 +101,39 @@ private:
 
 };
 
+template<typename FUN>
+void document_line::for_each_token(FUN fun)
+{
+	unsigned current = 0;
+	auto it = tokens.begin();
+	line_token none_token { 0, 0, token_type::none };
+
+	while(current < length)
+	{
+		if (it == tokens.end())
+		{
+			none_token.begin = current;
+			none_token.end = length;
+			fun(none_token);
+			current = length;
+		}
+		else
+		{
+			line_token& token = *it;
+			it++;
+			assert(token.begin >= current);
+			assert(token.end <= length);
+			if (token.begin > current)
+			{
+				none_token.begin = current;
+				none_token.end = token.begin;
+				fun(none_token);
+			}
+			fun(token);
+			current = token.end;
+		}
+	}
+}
 
 
 }}

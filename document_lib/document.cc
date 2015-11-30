@@ -8,6 +8,21 @@
 
 namespace cpped { namespace  document {
 
+std::ostream& operator << (std::ostream& s, token_type tt)
+{
+	switch(tt)
+	{
+		case token_type::none : return s << "none";
+		case token_type::keyword : return s << "keyword";
+		case token_type::literal : return s << "literal";
+		case token_type::preprocessor : return s << "preprocessor";
+		case token_type::type : return s << "type";
+		case token_type::comment : return s << "comment";
+		case token_type::max_tokens : return s << "max_tokens";
+	}
+	return s << "?";
+}
+
 void document::load_from_raw_data(const std::string& data, const std::string& fake_path)
 {
 	file_name = fake_path;
@@ -177,8 +192,8 @@ void document::parse_raw_buffer()
 
 void document_line::push_back_token(const line_token& t)
 {
-	assert(t.end < length);
-	assert(t.begin > (tokens.empty() ? 0u : tokens.back().end));
+	assert(t.end <= length);
+	assert(t.begin >= (tokens.empty() ? 0u : tokens.back().end));
 	tokens.push_back(t);
 }
 
