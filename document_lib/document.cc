@@ -23,6 +23,12 @@ std::ostream& operator << (std::ostream& s, token_type tt)
 	return s << "?";
 }
 
+std::ostream& operator << (std::ostream& s, const line_token& t)
+{
+	return s << "token{b="<< t.begin << ", e=" << t.end << ", t=" << t.type << "}";
+}
+
+
 void document::load_from_raw_data(const std::string& data, const std::string& fake_path)
 {
 	file_name = fake_path;
@@ -200,7 +206,7 @@ void document::shift_lines(document_line* after, unsigned shift)
 
 void document::insert_line(document_line* after, document_line&& new_line)
 {
-	auto it = lines.begin() + (after-lines.data());
+	auto it = lines.begin() + (after-lines.data()) + 1;
 	lines.insert(it, std::move(new_line));
 }
 
@@ -281,7 +287,7 @@ void document_line::insert(unsigned position, char c)
 			tokens.erase(first_to_move, tokens.end());
 		}
 
-		parent.shift_lines(this, new_line.length);
+		parent.shift_lines(this, 1);
 		parent.insert_line(this, std::move(new_line)); // last statement, as this may delete this
 	}
 	else

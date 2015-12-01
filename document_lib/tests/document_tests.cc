@@ -212,9 +212,107 @@ BOOST_AUTO_TEST_CASE(insert_newline_no_tokens)
 	BOOST_CHECK_EQUAL(doc.get_line(1).get_length(), 2);
 	BOOST_CHECK_EQUAL(doc.get_line(2).get_length(), 2);
 	BOOST_CHECK_EQUAL(doc.get_line(3).get_length(), 3);
+
+	BOOST_CHECK_EQUAL(doc.get_line(0).to_string(), "111");
+	BOOST_CHECK_EQUAL(doc.get_line(1).to_string(), "22");
+	BOOST_CHECK_EQUAL(doc.get_line(2).to_string(), "xx");
+	BOOST_CHECK_EQUAL(doc.get_line(3).to_string(), "333");
 }
 
+BOOST_AUTO_TEST_CASE(insert_newline_between_tokens)
+{
+	std::string text = "1122\n33xx44\n5566";
+	document doc;
+	doc.load_from_raw_data(text, "");
 
+	BOOST_REQUIRE_EQUAL(3, doc.get_line_count());
+
+	doc.get_line(0).push_back_token(line_token{0, 2, token_type::keyword}); // 11
+	doc.get_line(0).push_back_token(line_token{2, 4, token_type::literal}); // 22
+
+	doc.get_line(1).push_back_token(line_token{0, 2, token_type::preprocessor}); // 33
+	doc.get_line(1).push_back_token(line_token{4, 6, token_type::type}); // 44
+
+	doc.get_line(2).push_back_token(line_token{0, 2, token_type::keyword}); // 55
+	doc.get_line(2).push_back_token(line_token{2, 4, token_type::literal}); // 66
+
+	auto& line1 = doc.get_line(1);
+	BOOST_CHECK_EQUAL(line1.get_length(), 6);
+
+	line1.insert(3, '\n');
+
+	BOOST_REQUIRE_EQUAL(4, doc.get_line_count());
+
+	BOOST_CHECK_EQUAL(doc.get_line(0).get_length(), 4);
+	BOOST_CHECK_EQUAL(doc.get_line(1).get_length(), 3);
+	BOOST_CHECK_EQUAL(doc.get_line(2).get_length(), 3);
+	BOOST_CHECK_EQUAL(doc.get_line(3).get_length(), 4);
+
+	auto& l0_tokens= doc.get_line(0).get_tokens();
+	BOOST_REQUIRE_EQUAL(l0_tokens.size(), 2);
+	BOOST_CHECK_EQUAL(l0_tokens[0], (line_token{0, 2, token_type::keyword}));
+	BOOST_CHECK_EQUAL(l0_tokens[1], (line_token{2, 4, token_type::literal}));
+
+	auto& l1_tokens = doc.get_line(1).get_tokens();
+	BOOST_REQUIRE_EQUAL(l1_tokens.size(), 1);
+	BOOST_CHECK_EQUAL(l1_tokens[0], (line_token{0, 2, token_type::preprocessor})); // 33
+
+	auto& l2_tokens = doc.get_line(2).get_tokens();
+	BOOST_REQUIRE_EQUAL(l2_tokens.size(), 1);
+	BOOST_CHECK_EQUAL(l2_tokens[0], (line_token{1, 3, token_type::type})); // 44
+
+	auto& l3_tokens = doc.get_line(3).get_tokens();
+	BOOST_REQUIRE_EQUAL(l3_tokens.size(), 2);
+	BOOST_CHECK_EQUAL(l3_tokens[0], (line_token{0, 2, token_type::keyword}));
+	BOOST_CHECK_EQUAL(l3_tokens[1], (line_token{2, 4, token_type::literal}));
+}
+
+BOOST_AUTO_TEST_CASE(insert_newline_inside_token)
+{
+	std::string text = "1122\n333\n5566";
+	document doc;
+	doc.load_from_raw_data(text, "");
+
+	BOOST_REQUIRE_EQUAL(3, doc.get_line_count());
+
+	doc.get_line(0).push_back_token(line_token{0, 2, token_type::keyword}); // 11
+	doc.get_line(0).push_back_token(line_token{2, 4, token_type::literal}); // 22
+
+	doc.get_line(1).push_back_token(line_token{0, 3, token_type::preprocessor}); // 333
+
+	doc.get_line(2).push_back_token(line_token{0, 2, token_type::keyword}); // 55
+	doc.get_line(2).push_back_token(line_token{2, 4, token_type::literal}); // 66
+
+	auto& line1 = doc.get_line(1);
+	BOOST_CHECK_EQUAL(line1.get_length(), 3);
+
+	line1.insert(2, '\n');
+
+	BOOST_REQUIRE_EQUAL(4, doc.get_line_count());
+
+	BOOST_CHECK_EQUAL(doc.get_line(0).get_length(), 4);
+	BOOST_CHECK_EQUAL(doc.get_line(1).get_length(), 2);
+	BOOST_CHECK_EQUAL(doc.get_line(2).get_length(), 1);
+	BOOST_CHECK_EQUAL(doc.get_line(3).get_length(), 4);
+
+	auto& l0_tokens= doc.get_line(0).get_tokens();
+	BOOST_REQUIRE_EQUAL(l0_tokens.size(), 2);
+	BOOST_CHECK_EQUAL(l0_tokens[0], (line_token{0, 2, token_type::keyword}));
+	BOOST_CHECK_EQUAL(l0_tokens[1], (line_token{2, 4, token_type::literal}));
+
+	auto& l1_tokens = doc.get_line(1).get_tokens();
+	BOOST_REQUIRE_EQUAL(l1_tokens.size(), 1);
+	BOOST_CHECK_EQUAL(l1_tokens[0], (line_token{0, 2, token_type::preprocessor})); // 33
+
+	auto& l2_tokens = doc.get_line(2).get_tokens();
+	BOOST_REQUIRE_EQUAL(l2_tokens.size(), 1);
+	BOOST_CHECK_EQUAL(l2_tokens[0], (line_token{0, 1, token_type::preprocessor})); // 3
+
+	auto& l3_tokens = doc.get_line(3).get_tokens();
+	BOOST_REQUIRE_EQUAL(l3_tokens.size(), 2);
+	BOOST_CHECK_EQUAL(l3_tokens[0], (line_token{0, 2, token_type::keyword}));
+	BOOST_CHECK_EQUAL(l3_tokens[1], (line_token{2, 4, token_type::literal}));
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 
