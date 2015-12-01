@@ -44,7 +44,6 @@ private:
 	// workspace/doc coordinates
 	unsigned get_workspace_width() const;
 	int get_workspace_height() const;
-	//int documet_to_workspace_x(unsigned docx) const;
 	int column_to_workspace_x(unsigned column) const;
 	int documet_to_workspace_y(unsigned docy) const;
 	unsigned workspace_to_document_x(unsigned wx) const;
@@ -53,6 +52,9 @@ private:
 
 	// converts document x (character in line) into column, taking all tabs into account
 	unsigned document_x_to_column(unsigned docy, unsigned docx) const;
+
+	// manipulation
+	void insert_at_cursor(char c);
 
 	unsigned first_line = 0;
 	unsigned first_column = 0;

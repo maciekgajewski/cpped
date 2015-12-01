@@ -43,10 +43,17 @@ void editor::on_key(int key)
 
 		default:
 		{
-			std::ostringstream ss;
-			ss << "key=" << key << ", name=" << ::keyname(key);
-			window.clear();
-			window.print(ss.str().c_str());
+			if ((key >=32 && key < 256) || key == '\n' || key == '\t')
+			{
+				insert_at_cursor(char(key));
+			}
+			else
+			{
+				std::ostringstream ss;
+				ss << "key=" << key << ", name=" << ::keyname(key);
+				window.clear();
+				window.print(ss.str().c_str());
+			}
 		}
 	}
 }
@@ -373,6 +380,24 @@ unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 			x++;
 	}
 	return x;
+}
+
+void editor::insert_at_cursor(char c)
+{
+	document::document_line& line = doc->get_line(cursor_doc_y);
+	line.insert(cursor_doc_x, c);
+	if (c == '\n')
+	{
+		cursor_doc_x = 0;
+		desired_cursor_column = 0;
+		cursor_doc_y++;
+	}
+	else
+	{
+		cursor_doc_x++;
+		desired_cursor_column = document_x_to_column(cursor_doc_y, cursor_doc_x);
+	}
+	render();
 }
 
 
