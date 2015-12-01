@@ -48,7 +48,7 @@ public:
 	void for_each_token(FUN fun) const;
 
 	// inserting text
-	//void insert(unsigned position,
+	void insert(unsigned position, char c);
 
 private:
 

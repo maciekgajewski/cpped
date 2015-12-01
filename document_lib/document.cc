@@ -202,5 +202,10 @@ void document_line::push_back_token(const line_token& t)
 	tokens.push_back(t);
 }
 
+void document_line::insert(unsigned position, char c)
+{
+	// TODO
+}
+
 
 }}

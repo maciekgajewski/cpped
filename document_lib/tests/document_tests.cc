@@ -136,6 +136,57 @@ BOOST_AUTO_TEST_CASE(token_in_the_middle)
 	BOOST_CHECK_EQUAL(token_count, 3);
 }
 
+BOOST_AUTO_TEST_CASE(insert_character_no_token)
+{
+	std::string text = "111\n222\n333";
+	document doc;
+	doc.load_from_raw_data(text, "filename");
+
+	BOOST_REQUIRE_EQUAL(3, doc.get_line_count());
+
+	std::string l0 = doc.get_line(0).to_string();
+	std::string l1 = doc.get_line(1).to_string();
+	std::string l2 = doc.get_line(2).to_string();
+
+	auto& line1 = doc.get_line(1);
+	line1.insert(1, 'x');
+
+	// no changes to previous and subsequent line
+	BOOST_CHECK_EQUAL(doc.get_line(0).to_string(), l0);
+	BOOST_CHECK_EQUAL(doc.get_line(2).to_string(), l2);
+
+	// line is 1 changed
+	BOOST_CHECK_EQUAL(doc.get_line(1).to_string(), "2x22");
+}
+
+BOOST_AUTO_TEST_CASE(insert_character_into_token)
+{
+	std::string text = "111\n22xx\n333";
+	document doc;
+	doc.load_from_raw_data(text, "filename");
+
+	BOOST_REQUIRE_EQUAL(3, doc.get_line_count());
+
+	auto& line1 = doc.get_line(1);
+
+	line1.push_back_token({0, 2, token_type::comment});
+	line1.push_back_token({2, 4, token_type::literal});
+
+	line1.insert(1, 'x');
+
+	std::vector<line_token> tokens;
+	line1.for_each_token([&](const line_token& t) { tokens.push_back(t); });
+
+	BOOST_REQUIRE_EQUAL(2, tokens.size());
+
+	// expect token 0 to be stretched, token 1 to be shifted
+	BOOST_CHECK_EQUAL(tokens[0].begin, 0);
+	BOOST_CHECK_EQUAL(tokens[0].end, 3);
+
+	BOOST_CHECK_EQUAL(tokens[0].begin, 3);
+	BOOST_CHECK_EQUAL(tokens[0].end, 5);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 }}}
