@@ -37,6 +37,10 @@ private:
 
 	void refresh_cursor();
 
+	// rendering
+	unsigned render_text(attr_t attr, unsigned phys_column, const char* begin, const char* end); // returns last physical column
+	void put_visual_tab();
+
 	// workspace/doc coordinates
 	unsigned get_workspace_width() const;
 	int get_workspace_height() const;
@@ -53,6 +57,10 @@ private:
 	unsigned cursor_doc_x = 0;
 	unsigned cursor_doc_y = 0;
 	unsigned desired_cursor_x = 0;
+
+	// settings
+	unsigned tab_width = 4;
+	bool visualise_tabs = true;
 
 	ncurses_window& window;
 	document::document* doc;

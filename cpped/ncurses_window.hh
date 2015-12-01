@@ -27,6 +27,9 @@ public:
 	int get_width() const { return getmaxx(win); }
 	int get_height() const { return getmaxy(win); }
 
+	void set_attr_on(attr_t a) { ::wattron(win, a); }
+	void set_attr_off(attr_t a) { ::wattroff(win, a); }
+
 private:
 
 	WINDOW* win;

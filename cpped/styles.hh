@@ -29,6 +29,7 @@ public:
 	color_palette palette;
 
 	int line_numbers;
+	int visual_tab;
 
 private:
 

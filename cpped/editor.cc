@@ -89,17 +89,15 @@ void editor::render()
 		window.attr_print(styles.line_numbers, lineno, left_margin_width);
 
 		// print line
+		unsigned column = 0;
 		line.for_each_token([&](const document::line_token& token)
 		{
-			if (token.end > first_column)
-			{
-				unsigned begin = std::max(token.begin, first_column);
-				unsigned end = std::min(get_workspace_width(), token.end-first_column);
+			unsigned begin = std::max(token.begin, first_column);
+			unsigned end = std::min(get_workspace_width(), token.end-first_column);
 
-				int attr = styles.get_attr_for_token(token.type);
+			int attr = styles.get_attr_for_token(token.type);
 
-				window.attr_print(attr, line.get_data() + begin, end - begin);
-			}
+			column = render_text(attr, column, line.get_data() + begin, line.get_data() + end);
 		});
 	});
 
@@ -255,6 +253,56 @@ void editor::refresh_cursor()
 		::curs_set(0); // hide cursor
 	}
 
+}
+
+unsigned editor::render_text(attr_t attr, unsigned phys_column, const char* begin, const char* end)
+{
+	window.set_attr_on(attr);
+	unsigned last_column = get_workspace_width() + first_column;
+
+	while(begin != end && phys_column != last_column)
+	{
+		if(*begin == '\t')
+		{
+			// render tab
+			unsigned w = phys_column+tab_width - (phys_column+tab_width%4);
+			for(unsigned c = 0; c < w && phys_column != last_column; c++, phys_column++)
+			{
+				if (phys_column >= first_column)
+				{
+					if (w == tab_width && c == 0) // first char of full tab
+						put_visual_tab();
+					else
+						window.put_char(' ');
+				}
+			}
+		}
+		else
+		{
+			if (phys_column >= first_column)
+				window.put_char(*begin);
+			phys_column++;
+		}
+		begin++;
+	}
+
+	window.set_attr_off(attr);
+
+	return phys_column;
+}
+
+void editor::put_visual_tab()
+{
+	if (visualise_tabs)
+	{
+		window.set_attr_on(styles.visual_tab);
+		window.put_char('|'); // TODO maybe use some cool unicode char?
+		window.set_attr_off(styles.visual_tab);
+	}
+	else
+	{
+		window.put_char(' ');
+	}
 }
 
 unsigned editor::get_workspace_width() const
