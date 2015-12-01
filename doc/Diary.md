@@ -1,6 +1,6 @@
 # Project diary
 
-## 28-11-205
+## 28-11-2015
 
 Everyone seems to be obesessed with 'frameworks'. Every IDE or rick editor I know is trying to be a 'framework' for 'plugins' providing additional 'features'.
 As a result, we get this:
@@ -17,4 +17,13 @@ So, sins to avoid:
 
 I was working on first ncurses interface, and I had to resist the urge to make it flexible, to reduce exposure to ncurses. I must force myself to let go, to go full-ncurses, full clang.
 
+## 30-11-2015
+
+I struck gold thi weekend: libclang. Simple, stable API to parse C++ and provide facilities for syntax highlighting and code completion. Much easier than playing with the mess of clang internas.
+Unfortunately, it's C. I've found a nice C++ wrapper in clang-tags project, but it was not suitable for my needs. I'm writing my own. C++ wrapper ofr C APi for C++ code. ZeroMQ again.
+
+## 01-12-2105
+
+The editor supports only ASCII. There is no trivial way to provide support for unicode. I can't convert the data to wchar_t* on loading, as I need undisturbed char* buffer for parsingg with libclang.
+I came up with an idea of container wrapping char utf-8 data, ut it would be a non-random-access container. Should be fine, as I manipualte one line at the time. I'll implement it one day.
 
