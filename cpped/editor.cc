@@ -109,7 +109,7 @@ void editor::set_document(document::document& d)
 	doc = &d;
 	cursor_doc_x = 0;
 	cursor_doc_y = 0;
-	desired_cursor_x = 0;
+	desired_cursor_column = 0;
 	first_line = 0;
 	first_column = 0;
 	render();
@@ -125,10 +125,8 @@ void editor::cursor_up()
 		{
 			cursor_doc_x = new_line_len;
 		}
-		else if (desired_cursor_x > cursor_doc_x)
-		{
-			cursor_doc_x = std::min(new_line_len, desired_cursor_x);
-		}
+
+		adjust_cursor_column_to_desired(new_line_len);
 
 		if (documet_to_workspace_y(cursor_doc_y) ==-1)
 		{
@@ -140,6 +138,21 @@ void editor::cursor_up()
 		{
 			refresh_cursor();
 		}
+	}
+}
+
+void editor::adjust_cursor_column_to_desired(unsigned new_line_len)
+{
+	unsigned current_column = document_x_to_column(cursor_doc_y, cursor_doc_x);
+	while(current_column < desired_cursor_column && cursor_doc_x < new_line_len)
+	{
+		cursor_doc_x++;
+		current_column = document_x_to_column(cursor_doc_y, cursor_doc_x);
+	}
+	while(current_column > desired_cursor_column+tab_width && cursor_doc_x > 0)
+	{
+		cursor_doc_x--;
+		current_column = document_x_to_column(cursor_doc_y, cursor_doc_x);
 	}
 }
 
@@ -155,10 +168,8 @@ void editor::cursor_down()
 		{
 			cursor_doc_x = new_line_len;
 		}
-		else if (desired_cursor_x > cursor_doc_x)
-		{
-			cursor_doc_x = std::min(new_line_len, desired_cursor_x);
-		}
+
+		adjust_cursor_column_to_desired(new_line_len);
 
 		if (documet_to_workspace_y(cursor_doc_y) == get_workspace_height())
 		{
@@ -179,13 +190,14 @@ void editor::cursor_left()
 	if (cursor_doc_x > 0)
 	{
 		cursor_doc_x--;
-		desired_cursor_x = cursor_doc_x;
+		desired_cursor_column = document_x_to_column(cursor_doc_y, cursor_doc_x);
+		int workspace_x = column_to_workspace_x(desired_cursor_column);
 
-		if (documet_to_workspace_x(cursor_doc_x) == -1)
+		if (workspace_x < 0)
 		{
 			// scroll left
+			first_column += workspace_x;
 			assert(first_column > 0);
-			first_column--;
 			render();
 		}
 		else
@@ -197,18 +209,17 @@ void editor::cursor_left()
 
 void editor::cursor_right()
 {
-	assert(doc); // TODO is this needed?
-
 	int ll = doc->line_length(cursor_doc_y);
 	if (cursor_doc_x < ll)
 	{
 		cursor_doc_x++;
-		desired_cursor_x = cursor_doc_x;
+		desired_cursor_column = document_x_to_column(cursor_doc_y, cursor_doc_x);
+		int workspace_x = column_to_workspace_x(desired_cursor_column);
 
-		if(documet_to_workspace_x(cursor_doc_x) == get_workspace_width())
+		if(workspace_x >= get_workspace_width())
 		{
 			// scroll right
-			first_column++;
+			first_column += (get_workspace_width() - workspace_x);
 			render();
 		}
 		else
@@ -241,7 +252,8 @@ void editor::scroll_right()
 
 void editor::refresh_cursor()
 {
-	int wx = documet_to_workspace_x(cursor_doc_x) + left_margin_width;
+	int column = document_x_to_column(cursor_doc_y, cursor_doc_x);
+	int wx = column_to_workspace_x(column) + left_margin_width;
 	int wy = documet_to_workspace_y(cursor_doc_y);
 	if (wx >= 0 && wy >= 0 && wx < get_workspace_width() && wy < get_workspace_height())
 	{
@@ -319,24 +331,48 @@ int editor::get_workspace_height() const
 	return window.get_height();
 }
 
-int editor::documet_to_workspace_x(int docx) const
+//int editor::documet_to_workspace_x(unsigned docx) const
+//{
+//	return docx - first_column;
+//}
+
+int editor::column_to_workspace_x(unsigned column) const
 {
-	return docx - first_column;
+	return column - first_column;
 }
 
-int editor::documet_to_workspace_y(int docy) const
+int editor::documet_to_workspace_y(unsigned docy) const
 {
 	return docy - first_line;
 }
 
-int editor::workspace_to_document_x(int wx) const
+unsigned editor::workspace_to_document_x(unsigned wx) const
 {
 	return wx + first_column;
 }
 
-int editor::workspace_to_document_y(int wy) const
+unsigned editor::workspace_to_document_y(unsigned wy) const
 {
 	return wy + first_line;
+}
+
+unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
+{
+	const document::document_line& line =  doc->get_line(docy);
+
+	if (docx > line.get_length())
+		throw std::runtime_error("line character out of bounds");
+
+	unsigned x = 0;
+	const char* text = line.get_data();
+	for(; docx > 0; docx--, text++)
+	{
+		if (*text == '\t')
+			x = (x+tab_width) - (x+tab_width)%tab_width;
+		else
+			x++;
+	}
+	return x;
 }
 
 

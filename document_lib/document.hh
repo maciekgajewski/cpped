@@ -73,6 +73,7 @@ public:
 	}
 
 	document_line& get_line(unsigned index) { return lines.at(index); }
+	const document_line& get_line(unsigned index) const { return lines.at(index); }
 
 	// iterates over no more than 'count' lines in range, starting from first_line
 	template<typename FUN>

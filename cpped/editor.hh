@@ -44,10 +44,15 @@ private:
 	// workspace/doc coordinates
 	unsigned get_workspace_width() const;
 	int get_workspace_height() const;
-	int documet_to_workspace_x(int docx) const;
-	int documet_to_workspace_y(int docy) const;
-	int workspace_to_document_x(int wx) const;
-	int workspace_to_document_y(int wy) const;
+	//int documet_to_workspace_x(unsigned docx) const;
+	int column_to_workspace_x(unsigned column) const;
+	int documet_to_workspace_y(unsigned docy) const;
+	unsigned workspace_to_document_x(unsigned wx) const;
+	unsigned workspace_to_document_y(unsigned wy) const;
+	void adjust_cursor_column_to_desired(unsigned new_line_len);
+
+	// converts document x (character in line) into column, taking all tabs into account
+	unsigned document_x_to_column(unsigned docy, unsigned docx) const;
 
 	unsigned first_line = 0;
 	unsigned first_column = 0;
@@ -56,7 +61,7 @@ private:
 	// cursor's screen pos
 	unsigned cursor_doc_x = 0;
 	unsigned cursor_doc_y = 0;
-	unsigned desired_cursor_x = 0;
+	unsigned desired_cursor_column = 0;
 
 	// settings
 	unsigned tab_width = 4;
