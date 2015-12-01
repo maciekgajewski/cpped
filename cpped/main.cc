@@ -8,6 +8,7 @@
 
 #include <iostream>
 
+// zażółć gęślą jaźń
 int main(int argc, char** argv)
 {
 	cpped::document::document document;
@@ -17,6 +18,7 @@ int main(int argc, char** argv)
 	}
 	document.parse_language();
 
+	::setlocale(LC_ALL, "en_EN.utf-8");
 	cpped::ncurses_env env;
 	auto ss = env.get_stdscr();
 

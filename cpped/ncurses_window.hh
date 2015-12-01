@@ -13,6 +13,8 @@ public:
 	ncurses_window(WINDOW* w);
 	~ncurses_window();
 	void print(const char* text) { ::wprintw(win, text); }
+	void print(const char* text, unsigned length) {::waddnstr(win, text, length);}
+	void attr_print(attr_t attr, const char* text, unsigned length);
 	void put_char(chtype c) { ::waddch(win, c); }
 	void refresh() { ::wrefresh(win); }
 	void clear() { ::wclear(win); }
@@ -21,7 +23,6 @@ public:
 	void unset_attr(attr_t a) { ::wattroff(win, a); }
 
 	// use this one
-	void attr_print(attr_t attr, const char* text, unsigned length);
 
 	int get_ch() { return ::wgetch(win); }
 	int get_width() const { return getmaxx(win); }

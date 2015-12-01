@@ -47,6 +47,9 @@ public:
 	template<typename FUN>
 	void for_each_token(FUN fun) const;
 
+	// inserting text
+	//void insert(unsigned position,
+
 private:
 
 	char* begin;
