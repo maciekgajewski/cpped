@@ -9,6 +9,6 @@ add_executable(cpped
 target_link_libraries(cpped
 	document_lib
 
-	ncurses
+	ncursesw
 
 )

@@ -1,6 +1,6 @@
 #include "styles.hh"
 
-#include <ncurses.h>
+#include <ncursesw/ncurses.h>
 
 namespace cpped
 {
@@ -36,8 +36,8 @@ style_manager::style_manager()
 	attr_for_token[int(document::token_type::none)]			= COLOR_PAIR(palette.get_pair_for_colors(bg, COLOR_WHITE));
 	attr_for_token[int(document::token_type::keyword)]		= COLOR_PAIR(palette.get_pair_for_colors(bg, COLOR_YELLOW));
 	attr_for_token[int(document::token_type::literal)]		= COLOR_PAIR(palette.get_pair_for_colors(bg, COLOR_CYAN));
-	attr_for_token[int(document::token_type::preprocessor)]	= COLOR_PAIR(palette.get_pair_for_colors(bg, COLOR_GREEN));
-	attr_for_token[int(document::token_type::type)]			= COLOR_PAIR(palette.get_pair_for_colors(bg, COLOR_RED));
+	attr_for_token[int(document::token_type::preprocessor)]	= COLOR_PAIR(palette.get_pair_for_colors(bg, COLOR_MAGENTA));
+	attr_for_token[int(document::token_type::type)]			= COLOR_PAIR(palette.get_pair_for_colors(bg, COLOR_GREEN));
 	attr_for_token[int(document::token_type::comment)]		= COLOR_PAIR(palette.get_pair_for_colors(bg, COLOR_BLUE));
 
 	line_numbers = COLOR_PAIR(palette.get_pair_for_colors(COLOR_BLACK, COLOR_RED));

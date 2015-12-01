@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ncurses.h>
+#include <ncursesw/ncurses.h>
 
 namespace cpped {
 
@@ -13,7 +13,7 @@ public:
 	ncurses_window(WINDOW* w);
 	~ncurses_window();
 	void print(const char* text) { ::wprintw(win, text); }
-	void put_char(char c) { ::waddnstr(win, &c, 1); }
+	void put_char(chtype c) { ::waddch(win, c); }
 	void refresh() { ::wrefresh(win); }
 	void clear() { ::wclear(win); }
 	void move(int row, int col) { ::wmove(win, row, col); }
