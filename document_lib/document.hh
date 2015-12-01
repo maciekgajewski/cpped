@@ -91,6 +91,8 @@ public:
 
 	void parse_language();
 
+	const std::vector<char>& get_raw_data() const { return raw_data; }
+
 private:
 
 	void parse_raw_buffer();

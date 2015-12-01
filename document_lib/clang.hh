@@ -109,6 +109,23 @@ public:
 	CXCursorKind get_kind() const { return clang_getCursorKind(clang_cursor); }
 	string get_kind_as_string() const { return clang_getCursorKindSpelling(clang_getCursorKind(clang_cursor)); }
 
+	// function_t: CXChildVisitResult(const cursor& visited_cursor, const cursor& parent)
+	template<typename function_t>
+	void visit_children(function_t fun) const
+	{
+		CXCursorVisitor visitor = [](CXCursor visited_cursor, CXCursor parent, CXClientData cd) -> CXChildVisitResult
+		{
+			function_t& fref = *reinterpret_cast<function_t*>(cd);
+
+			return fref(cursor(visited_cursor), cursor(parent));
+		};
+
+		clang_visitChildren(clang_cursor, visitor, reinterpret_cast<CXClientData>(&fun));
+	}
+
+	cursor get_lexical_parent() const { return clang_getCursorLexicalParent(clang_cursor); }
+	cursor get_semantic_parent() const { return clang_getCursorSemanticParent(clang_cursor); }
+
 private:
 	cursor(const CXCursor& c) : clang_cursor(c) {}
 	CXCursor clang_cursor;
