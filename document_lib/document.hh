@@ -30,10 +30,23 @@ struct line_token
 	token_type type;
 };
 
+class document;
+
 class document_line
 {
 public:
-	document_line(char* b, unsigned l) : begin(b), length(l) {}
+
+	document_line(document_line&&) = default;
+	document_line(document& doc, char* b, unsigned l) : parent(doc), begin(b), length(l) {}
+
+	document_line& operator = (document_line&& o)
+	{
+		assert(&parent == &o.parent);
+		begin = o.begin;
+		length = o.length;
+		tokens = std::move(o.tokens);
+		return *this;
+	}
 
 	unsigned get_length() const { return length; }
 	const char* get_data() const { return begin; }
@@ -50,11 +63,26 @@ public:
 	// inserting text
 	void insert(unsigned position, char c);
 
+	// shofts wrt the parent data buffer
+	void shift(unsigned s) { begin += s; }
+
+	const std::vector<line_token>& get_tokens() const { return tokens;} // for testing
+
+	// call if the underlying buffer changes
+	void refresh_position(const char* old_data, char* new_data)
+	{
+		auto offset = begin - old_data;
+		begin = new_data + offset;
+	}
+
 private:
+
+	document& parent;
 
 	char* begin;
 	unsigned length;
 	std::vector<line_token> tokens;
+
 };
 
 class document
@@ -96,6 +124,11 @@ public:
 	void parse_language();
 
 	const std::vector<char>& get_raw_data() const { return raw_data; }
+
+	void insert(const char* position, char c);
+
+	void shift_lines(document_line* after, unsigned shift);
+	void insert_line(document_line* after, document_line&& new_line);
 
 private:
 

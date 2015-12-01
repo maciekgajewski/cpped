@@ -168,6 +168,42 @@ void document::parse_language()
 #endif
 }
 
+void document::insert(const char* position, char c)
+{
+	const char* old_data = nullptr;
+	if (raw_data.size() + 1 > raw_data.capacity())
+	{
+		// this will reallocate. Preserve original data ptr
+		old_data = raw_data.data();
+	}
+	raw_data.insert(raw_data.begin() + (position-raw_data.data()), c);
+
+	if (old_data)
+	{
+		// old_data is invalid now, do not dereference!
+		for(document_line& line : lines)
+		{
+			line.refresh_position(old_data, raw_data.data());
+		}
+	}
+}
+
+void document::shift_lines(document_line* after, unsigned shift)
+{
+	auto it = lines.begin() + (after-lines.data());
+	for(it++; it != lines.end(); it++)
+	{
+		it->shift(shift);
+	}
+
+}
+
+void document::insert_line(document_line* after, document_line&& new_line)
+{
+	auto it = lines.begin() + (after-lines.data());
+	lines.insert(it, std::move(new_line));
+}
+
 struct range
 {
 	std::vector<char>::const_iterator begin;
@@ -190,7 +226,7 @@ void document::parse_raw_buffer()
 
 	for(const range& token : tokens)
 	{
-		lines.emplace_back(const_cast<char*>(&*token.begin), token.end - token.begin);
+		lines.emplace_back(*this, const_cast<char*>(&*token.begin), token.end - token.begin);
 		assert(lines.back().get_data() >= raw_data.data() && lines.back().get_data() <= raw_data.data()+raw_data.size());
 	}
 }
@@ -204,7 +240,66 @@ void document_line::push_back_token(const line_token& t)
 
 void document_line::insert(unsigned position, char c)
 {
-	// TODO
+	assert(position <= get_length());
+
+	// modify the underlying data buffer
+	parent.insert(begin+position, c);
+
+	if (c == '\n')
+	{
+		document_line new_line(parent, begin+position+1, length - position);
+
+		length = position;
+		// move tokens to the next line
+		auto first_to_move = std::find_if(tokens.begin(), tokens.end(),
+			[&](const line_token& t)
+			{
+				return t.end > position;
+			});
+
+		if (first_to_move != tokens.end())
+		{
+			unsigned tokens_to_move = tokens.size() - (tokens.begin()-first_to_move);
+			if (first_to_move->begin < position)
+			{
+				tokens_to_move++;
+			}
+			new_line.tokens.reserve(tokens_to_move);
+			if (first_to_move->begin < position)
+			{
+				new_line.tokens.push_back(line_token{0, first_to_move->end-position, first_to_move->type});
+				first_to_move->end = position;
+				first_to_move ++;
+			}
+
+			std::transform(first_to_move, tokens.end(), std::back_inserter(new_line.tokens),
+				[&](const line_token& token)
+				{
+					return line_token{token.begin-position, token.end-position, token.type};
+				});
+
+			tokens.erase(first_to_move, tokens.end());
+		}
+
+		parent.shift_lines(this, new_line.length);
+		parent.insert_line(this, std::move(new_line)); // last statement, as this may delete this
+	}
+	else
+	{
+		// modify tokens
+		for(line_token& token : tokens)
+		{
+			if (token.end > position)
+			{
+				token.end++;
+				if (token.begin > position)
+					token.begin++;
+			}
+		}
+		length++;
+		parent.shift_lines(this, 1);
+	}
+
 }
 
 
