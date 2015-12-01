@@ -18,11 +18,11 @@ public:
 	void put_char(chtype c) { ::waddch(win, c); }
 	void refresh() { ::wrefresh(win); }
 	void clear() { ::wclear(win); }
+	void clear_to_eol() { ::wclrtoeol(win); }
 	void move(int row, int col) { ::wmove(win, row, col); }
 	void set_attr(attr_t a) { ::wattron(win, a); }
 	void unset_attr(attr_t a) { ::wattroff(win, a); }
 
-	// use this one
 
 	int get_ch() { return ::wgetch(win); }
 	int get_width() const { return getmaxx(win); }

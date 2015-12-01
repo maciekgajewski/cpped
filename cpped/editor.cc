@@ -108,6 +108,7 @@ void editor::render()
 		});
 	});
 
+	update_status_line();
 	refresh_cursor();
 }
 
@@ -143,6 +144,7 @@ void editor::cursor_up()
 		}
 		else
 		{
+			update_status_line();
 			refresh_cursor();
 		}
 	}
@@ -187,6 +189,7 @@ void editor::cursor_down()
 		else
 		{
 			// just move cursor
+			update_status_line();
 			refresh_cursor();
 		}
 	}
@@ -209,6 +212,7 @@ void editor::cursor_left()
 		}
 		else
 		{
+			update_status_line();
 			refresh_cursor();
 		}
 	}
@@ -232,6 +236,7 @@ void editor::cursor_right()
 		else
 		{
 			// just move cursor
+			update_status_line();
 			refresh_cursor();
 		}
 	}
@@ -261,7 +266,7 @@ void editor::refresh_cursor()
 {
 	int column = document_x_to_column(cursor_doc_y, cursor_doc_x);
 	int wx = column_to_workspace_x(column) + left_margin_width;
-	int wy = documet_to_workspace_y(cursor_doc_y);
+	int wy = documet_to_workspace_y(cursor_doc_y) + top_margin;
 	if (wx >= 0 && wy >= 0 && wx < get_workspace_width() && wy < get_workspace_height())
 	{
 		::curs_set(1);
@@ -324,6 +329,31 @@ void editor::put_visual_tab()
 	}
 }
 
+void editor::update_status_line()
+{
+	window.move(window.get_height()-1, 0);
+	unsigned column = document_x_to_column(cursor_doc_y, cursor_doc_x);
+	char char_at_cursor = *(doc->get_line(cursor_doc_y).get_data() + cursor_doc_x);
+
+	char buf[32];
+	std::snprintf(buf, 32, "%d : %d-%d ", cursor_doc_y+1, cursor_doc_x+1, column+1);
+	window.print(buf);
+
+	if (char_at_cursor == '\t')
+		window.print("<tab>");
+	else if (char_at_cursor == ' ')
+		window.print("<space>");
+	else if (char_at_cursor == '\n')
+		window.print("<eol>");
+	else
+	{
+		std::snprintf(buf, 32, "'%c'", char_at_cursor);
+		window.print(buf);
+		window.clear_to_eol();
+	}
+
+}
+
 unsigned editor::get_workspace_width() const
 {
 	assert(doc);
@@ -335,13 +365,8 @@ unsigned editor::get_workspace_width() const
 
 int editor::get_workspace_height() const
 {
-	return window.get_height();
+	return window.get_height() - top_margin - bottom_margin;
 }
-
-//int editor::documet_to_workspace_x(unsigned docx) const
-//{
-//	return docx - first_column;
-//}
 
 int editor::column_to_workspace_x(unsigned column) const
 {

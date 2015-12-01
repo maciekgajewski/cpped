@@ -40,6 +40,7 @@ private:
 	// rendering
 	unsigned render_text(attr_t attr, unsigned phys_column, const char* begin, const char* end); // returns last physical column
 	void put_visual_tab();
+	void update_status_line();
 
 	// workspace/doc coordinates
 	unsigned get_workspace_width() const;
@@ -59,6 +60,8 @@ private:
 	unsigned first_line = 0;
 	unsigned first_column = 0;
 	unsigned left_margin_width = 0; // calculated when rendering
+	unsigned top_margin = 0;
+	unsigned bottom_margin = 1;
 
 	// cursor's screen pos
 	unsigned cursor_doc_x = 0;
