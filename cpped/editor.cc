@@ -289,7 +289,7 @@ unsigned editor::render_text(attr_t attr, unsigned phys_column, const char* begi
 		if(*begin == '\t')
 		{
 			// render tab
-			unsigned w = phys_column+tab_width - (phys_column+tab_width%4);
+			unsigned w = tab_width - phys_column%tab_width;
 			for(unsigned c = 0; c < w && phys_column != last_column; c++, phys_column++)
 			{
 				if (phys_column >= first_column)
@@ -319,9 +319,9 @@ void editor::put_visual_tab()
 {
 	if (visualise_tabs)
 	{
-		window.set_attr_on(styles.visual_tab);
+		window.set_attr(A_DIM);
 		window.put_char('|'); // TODO maybe use some cool unicode char?
-		window.set_attr_off(styles.visual_tab);
+		window.unset_attr(A_DIM);
 	}
 	else
 	{

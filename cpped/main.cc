@@ -9,6 +9,12 @@
 #include <iostream>
 
 // zażółć gęślą jaźń
+//		t
+//x		t
+//xx	t
+//xxx	t
+//xxxx	t
+//xxxxx	t
 int main(int argc, char** argv)
 {
 	cpped::document::document document;
