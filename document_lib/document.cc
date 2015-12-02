@@ -95,7 +95,8 @@ static token_type determin_token_type(const clang::token& token)
 void document::parse_language()
 {
 	clang::index index(0, 0);
-	clang::translation_unit tu(index, file_name.c_str(), raw_data.data(), raw_data.size());
+	clang::translation_unit tu;
+	tu.parse(index, file_name.c_str(), raw_data.data(), raw_data.size());
 
 	clang::source_file file = tu.get_file(file_name);
 
@@ -127,51 +128,23 @@ void document::parse_language()
 		assert(last_line_idx < lines.size());
 		assert(line_idx <= last_line_idx);
 
-		do
+		line_token lt;
+		lt.type = determin_token_type(token);
+		lt.begin = range_begin.column - 1;
+		document_line* line = &lines.at(line_idx);
+		while (line_idx < last_line_idx)
 		{
-			document_line& line = lines.at(line_idx);
-			line_token lt;
-			lt.begin = range_begin.column - 1;
-			lt.type = determin_token_type(token);
-			if (line_idx == last_line_idx)
-			{
-				lt.end = range_end.column-1;
-				line.push_back_token(lt);
-			}
-			else
-			{
-				lt.end = line.get_length();
-				line_idx++;
-				lt.begin = 0;
-			}
-		} while (line_idx < last_line_idx);
+			lt.end = line->get_length();
+			line->push_back_token(lt);
+			lt.begin = 0;
+
+			line_idx++;
+			line = &lines.at(line_idx);
+		}
+		lt.end = range_end.column-1;
+		line->push_back_token(lt);
 	}
 
-#if 0 // debug dump
-	std::cout << "entire file: tokens=" << tokens.size() << std::endl;
-	unsigned line_number = 0;
-	for(const clang::token& token : tokens)
-	{
-		clang::source_location location = tokens.get_token_location(token);
-		clang::source_location::info info = location.get_location_info();
-		if (info.line != line_number)
-		{
-			line_number = info.line;
-			std::cout << std::endl;
-			std::cout << "line: " << line_number << " '" << lines[line_number-1].to_string() << std::endl;
-		}
-		if (token.has_associated_cursor())
-		{
-			clang::string type = token.get_associated_cursor().get_kind_as_string();
-			std::cout << token.get_kind_name() << " (" << type << "), ";
-		}
-		else
-		{
-			std::cout << token.get_kind_name() << ", ";
-		}
-	}
-	std::cout << std::endl;
-#endif
 }
 
 void document::insert(const char* position, char c)

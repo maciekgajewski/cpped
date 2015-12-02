@@ -254,9 +254,11 @@ class translation_unit
 public:
 
 	// construct by parsing file
-	translation_unit(index& idx, const char* filename, const char* unsaved_data, std::size_t unsaved_data_size);
+	translation_unit() = default;
 	translation_unit(const translation_unit&) = delete;
-	~translation_unit() { clang_disposeTranslationUnit(clang_tu); }
+	~translation_unit() { dispose(); }
+
+	void parse(index& idx, const char* filename, const char* unsaved_data, std::size_t unsaved_data_size);
 
 	source_file get_file(const char* file_name) { return source_file(clang_getFile(clang_tu, file_name)); }
 	source_file get_file(const std::string& file_name) { return get_file(file_name.c_str()); }
@@ -290,7 +292,9 @@ public:
 
 private:
 
-	CXTranslationUnit clang_tu;
+	void dispose();
+
+	CXTranslationUnit clang_tu = nullptr;
 };
 
 }}

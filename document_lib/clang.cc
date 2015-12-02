@@ -5,8 +5,10 @@
 
 namespace cpped { namespace clang {
 
-translation_unit::translation_unit(index& idx, const char* filename, const char* unsaved_data, std::size_t unsaved_data_size)
+void translation_unit::parse(index& idx, const char* filename, const char* unsaved_data, std::size_t unsaved_data_size)
 {
+	dispose();
+
 	CXUnsavedFile* uf_ptr = nullptr;
 	CXUnsavedFile unsaved_file;
 	if (unsaved_data)
@@ -32,6 +34,16 @@ translation_unit::translation_unit(index& idx, const char* filename, const char*
 		throw std::runtime_error("Error parsing");
 	}
 }
+
+void translation_unit::dispose()
+{
+	if (clang_tu)
+	{
+		clang_disposeTranslationUnit(clang_tu);
+		clang_tu = nullptr;
+	}
+}
+
 
 std::string token::get_kind_name() const
 {

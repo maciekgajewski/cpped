@@ -41,6 +41,33 @@ BOOST_AUTO_TEST_CASE(simple_test)
 	BOOST_CHECK_EQUAL(lines, 1);
 }
 
+BOOST_AUTO_TEST_CASE(multiline_comment)
+{
+	std::string code =
+R"(/*345
+123456789
+*/)";
+
+	document d;
+	d.load_from_raw_data(code, "code.cc");
+	d.parse_language();
+
+	BOOST_REQUIRE_EQUAL(d.get_line_count(), 3);
+
+	auto& l0_tokens = d.get_line(0).get_tokens();
+	BOOST_REQUIRE_EQUAL(l0_tokens.size() , 1);
+	BOOST_CHECK_EQUAL(l0_tokens[0] , (line_token{0, 5, token_type::comment}));
+
+	auto& l1_tokens = d.get_line(1).get_tokens();
+	BOOST_REQUIRE_EQUAL(l1_tokens.size() , 1);
+	BOOST_CHECK_EQUAL(l1_tokens[0] , (line_token{0, 9, token_type::comment}));
+
+	auto& l2_tokens = d.get_line(2).get_tokens();
+	BOOST_REQUIRE_EQUAL(l2_tokens.size() , 1);
+	BOOST_CHECK_EQUAL(l2_tokens[0] , (line_token{0, 2, token_type::comment}));
+}
+
+
 /*
 BOOST_AUTO_TEST_CASE(feral_literal_test)
 {
