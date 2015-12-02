@@ -1,9 +1,13 @@
 #pragma once
 
+#include "iparser.hh"
+
 #include <vector>
 #include <string>
 #include <ostream>
 #include <cassert>
+#include <memory>
+#include <chrono>
 
 namespace cpped { namespace  document {
 
@@ -92,9 +96,10 @@ class document
 {
 public:
 
-	void load_from_raw_data(const std::string& data, const std::string& fake_path);
-	void load_from_raw_data(std::vector<char> data);
-	void load_from_file(const std::string& path);
+	~document();
+
+	void load_from_raw_data(const std::string& data, const std::string& fake_path, std::unique_ptr<iparser>&& parser = nullptr);
+	void load_from_file(const std::string& path, std::unique_ptr<iparser>&& parser = nullptr);
 
 	unsigned get_line_count() const { return lines.size(); }
 
@@ -127,6 +132,7 @@ public:
 	void parse_language();
 
 	const std::vector<char>& get_raw_data() const { return raw_data; }
+	const std::string& get_file_name() const { return file_name; }
 
 	void insert(const char* position, char c);
 
@@ -141,6 +147,8 @@ private:
 	std::vector<document_line> lines;
 	std::string file_name;
 
+	std::unique_ptr<iparser> parser;
+	std::chrono::high_resolution_clock::duration last_parse_time;
 };
 
 template<typename FUN>

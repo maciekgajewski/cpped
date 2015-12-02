@@ -1,5 +1,6 @@
 #include "document_lib/document.hh"
 #include "document_lib/clang.hh"
+#include "document_lib/cpp_parser.hh"
 
 #include <boost/test/unit_test.hpp>
 
@@ -14,7 +15,7 @@ BOOST_AUTO_TEST_CASE(simple_test)
 	std::string code ="int x=7;";
 
 	document d;
-	d.load_from_raw_data(code, "code.cc");
+	d.load_from_raw_data(code, "code.cc", std::make_unique<cpp_parser>());
 	d.parse_language();
 
 	int lines = 0;
@@ -49,7 +50,7 @@ R"(/*345
 */)";
 
 	document d;
-	d.load_from_raw_data(code, "code.cc");
+	d.load_from_raw_data(code, "code.cc", std::make_unique<cpp_parser>());
 	d.parse_language();
 
 	BOOST_REQUIRE_EQUAL(d.get_line_count(), 3);

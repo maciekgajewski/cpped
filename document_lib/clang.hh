@@ -259,6 +259,7 @@ public:
 	~translation_unit() { dispose(); }
 
 	void parse(index& idx, const char* filename, const char* unsaved_data, std::size_t unsaved_data_size);
+	void reparse(const char* filename, const char* unsaved_data, std::size_t unsaved_data_size);
 
 	source_file get_file(const char* file_name) { return source_file(clang_getFile(clang_tu, file_name)); }
 	source_file get_file(const std::string& file_name) { return get_file(file_name.c_str()); }
@@ -289,6 +290,8 @@ public:
 		clang_tokenize(clang_tu, range.clang_range, &tokens, &num_tokens);
 		return token_list(clang_tu, tokens, num_tokens);
 	}
+
+	bool is_null() const { return clang_tu == nullptr; }
 
 private:
 

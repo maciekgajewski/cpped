@@ -5,6 +5,7 @@
 #include "styles.hh"
 
 #include "document_lib/document.hh"
+#include "document_lib/cpp_parser.hh"
 
 #include <iostream>
 
@@ -20,7 +21,7 @@ int main(int argc, char** argv)
 	cpped::document::document document;
 	if (argc > 1)
 	{
-		document.load_from_file(argv[1]);
+		document.load_from_file(argv[1], std::make_unique<cpped::document::cpp_parser>());
 	}
 	document.parse_language();
 

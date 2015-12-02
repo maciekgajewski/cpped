@@ -26,13 +26,32 @@ void translation_unit::parse(index& idx, const char* filename, const char* unsav
 			filename,
 			cmndline.data(), cmndline.size(),
 			uf_ptr, uf_ptr ? 1 : 0,
-			CXTranslationUnit_CacheCompletionResults|CXTranslationUnit_DetailedPreprocessingRecord,
+			//CXTranslationUnit_CacheCompletionResults|CXTranslationUnit_DetailedPreprocessingRecord|CXTranslationUnit_PrecompiledPreamble,
+			clang_defaultEditingTranslationUnitOptions(),
 			&clang_tu);
 
 	if (ec != CXError_Success)
 	{
 		throw std::runtime_error("Error parsing");
 	}
+}
+
+void translation_unit::reparse(const char* filename, const char* unsaved_data, std::size_t unsaved_data_size)
+{
+	CXUnsavedFile* uf_ptr = nullptr;
+	CXUnsavedFile unsaved_file;
+	if (unsaved_data)
+	{
+		unsaved_file.Contents = unsaved_data;
+		unsaved_file.Length = unsaved_data_size;
+		unsaved_file.Filename = filename;
+		uf_ptr = &unsaved_file;
+	}
+
+	int error = clang_reparseTranslationUnit(clang_tu, uf_ptr ? 1 : 0, uf_ptr, clang_defaultReparseOptions(clang_tu));
+
+	if (error)
+		throw std::runtime_error("Error reparsing translation unit");
 }
 
 void translation_unit::dispose()
