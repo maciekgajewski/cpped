@@ -332,10 +332,13 @@ void editor::put_visual_tab()
 void editor::update_status_line()
 {
 	window.move(window.get_height()-1, 0);
+	window.clear_to_eol();
 	unsigned column = document_x_to_column(cursor_doc_y, cursor_doc_x);
 	char char_at_cursor = *(doc->get_line(cursor_doc_y).get_data() + cursor_doc_x);
 
 	char buf[32];
+
+	// cursor pos. character under cursor
 	std::snprintf(buf, 32, "%d : %d-%d ", cursor_doc_y+1, cursor_doc_x+1, column+1);
 	window.print(buf);
 
@@ -349,8 +352,13 @@ void editor::update_status_line()
 	{
 		std::snprintf(buf, 32, "'%c'", char_at_cursor);
 		window.print(buf);
-		window.clear_to_eol();
 	}
+
+	// last parse time
+	using namespace std::literals::chrono_literals;
+	window.move(window.get_height()-1, 20);
+	std::snprintf(buf, 32, "%.2fms", 0.001 * doc->get_last_parse_time()/1us);
+	window.print(buf);
 
 }
 
@@ -422,6 +430,7 @@ void editor::insert_at_cursor(char c)
 		cursor_doc_x++;
 		desired_cursor_column = document_x_to_column(cursor_doc_y, cursor_doc_x);
 	}
+	doc->parse_language();
 	render();
 }
 

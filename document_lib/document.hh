@@ -139,6 +139,8 @@ public:
 	void shift_lines(document_line* after, unsigned shift);
 	void insert_line(document_line* after, document_line&& new_line);
 
+	std::chrono::high_resolution_clock::duration get_last_parse_time() const { return last_parse_time; }
+
 private:
 
 	void parse_raw_buffer();
