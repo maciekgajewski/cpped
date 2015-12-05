@@ -18,7 +18,12 @@ int main(int argc, char** argv)
 
 	clang::translation_unit tu;
 
-	tu.parse(idx, argv[1], doc.get_raw_data().data(), doc.get_raw_data().size());
+	std::vector<const char*> cmdline;
+	cmdline.reserve(argc-2);
+	for(int i = 2; i < argc; i++)
+		cmdline.push_back(argv[i]);
+
+	tu.parse(idx, argv[1], doc.get_raw_data().data(), doc.get_raw_data().size(), cmdline);
 
 	clang::source_file file = tu.get_file(argv[1]);
 	clang::source_location file_begin = tu.get_location_for_offset(file, 0);

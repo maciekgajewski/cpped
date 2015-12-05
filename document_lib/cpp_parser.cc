@@ -52,7 +52,7 @@ void cpp_parser::parse(document& doc)
 	if (tu.is_null())
 	{
 		// first parsing
-		tu.parse(index, file_name.c_str(), raw_data.data(), raw_data.size());
+		tu.parse(index, file_name.c_str(), raw_data.data(), raw_data.size(), {/*cmdline*/});
 	}
 	else
 	{

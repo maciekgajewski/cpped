@@ -5,7 +5,7 @@
 
 namespace cpped { namespace clang {
 
-void translation_unit::parse(index& idx, const char* filename, const char* unsaved_data, std::size_t unsaved_data_size)
+void translation_unit::parse(index& idx, const char* filename, const char* unsaved_data, std::size_t unsaved_data_size, const std::vector<const char*> cmdline)
 {
 	dispose();
 
@@ -19,12 +19,10 @@ void translation_unit::parse(index& idx, const char* filename, const char* unsav
 		uf_ptr = &unsaved_file;
 	}
 
-	std::vector<const char*> cmndline;
-
 	CXErrorCode ec = clang_parseTranslationUnit2(
 			idx.clang_idx,
 			filename,
-			cmndline.data(), cmndline.size(),
+			cmdline.data(), cmdline.size(),
 			uf_ptr, uf_ptr ? 1 : 0,
 			//CXTranslationUnit_CacheCompletionResults|CXTranslationUnit_DetailedPreprocessingRecord|CXTranslationUnit_PrecompiledPreamble,
 			clang_defaultEditingTranslationUnitOptions(),

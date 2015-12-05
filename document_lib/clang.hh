@@ -341,7 +341,7 @@ public:
 	translation_unit(const translation_unit&) = delete;
 	~translation_unit() { dispose(); }
 
-	void parse(index& idx, const char* filename, const char* unsaved_data, std::size_t unsaved_data_size);
+	void parse(index& idx, const char* filename, const char* unsaved_data, std::size_t unsaved_data_sizei, const std::vector<const char*> cmdline);
 	void reparse(const char* filename, const char* unsaved_data, std::size_t unsaved_data_size);
 
 	source_file get_file(const char* file_name) { return source_file(clang_getFile(clang_tu, file_name)); }
