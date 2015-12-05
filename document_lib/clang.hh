@@ -249,6 +249,29 @@ private:
 	friend class translation_unit;
 };
 
+class code_completion_results
+{
+public:
+
+	~code_completion_results() { dispose(); }
+
+	bool is_null() const { return result == nullptr; }
+private:
+
+	code_completion_results(CXCodeCompleteResults* cr)  { dispose(); result = cr; }
+
+	void dispose()
+	{
+		if (result)
+			clang_disposeCodeCompleteResults(result);
+		result = nullptr;
+	}
+
+	CXCodeCompleteResults* result = nullptr;
+
+	friend class translation_unit;
+};
+
 class translation_unit
 {
 public:
@@ -290,6 +313,8 @@ public:
 		clang_tokenize(clang_tu, range.clang_range, &tokens, &num_tokens);
 		return token_list(clang_tu, tokens, num_tokens);
 	}
+
+	code_completion_results code_complete_at(const char* filename, unsigned line, unsigned column, const char* unsaved_data, std::size_t unsaved_data_size);
 
 	bool is_null() const { return clang_tu == nullptr; }
 

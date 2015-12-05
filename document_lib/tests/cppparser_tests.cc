@@ -119,6 +119,22 @@ BOOST_AUTO_TEST_CASE(feral_literal_test)
 }
 */
 
+BOOST_AUTO_TEST_CASE(completion_test)
+{
+	std::string code =
+R"(#include <string>
+void fun() {
+	std::string s;
+	s.
+*/)";
+
+	document d;
+	d.load_from_raw_data(code, "code.cc", std::make_unique<cpp_parser>());
+
+	// TODO
+
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 }}}

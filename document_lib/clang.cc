@@ -54,6 +54,21 @@ void translation_unit::reparse(const char* filename, const char* unsaved_data, s
 		throw std::runtime_error("Error reparsing translation unit");
 }
 
+code_completion_results translation_unit::code_complete_at(const char* filename, unsigned line, unsigned column, const char* unsaved_data, std::size_t unsaved_data_size)
+{
+	CXUnsavedFile* uf_ptr = nullptr;
+	CXUnsavedFile unsaved_file;
+	if (unsaved_data)
+	{
+		unsaved_file.Contents = unsaved_data;
+		unsaved_file.Length = unsaved_data_size;
+		unsaved_file.Filename = filename;
+		uf_ptr = &unsaved_file;
+	}
+
+	return clang_codeCompleteAt(clang_tu, filename, line, column, uf_ptr, uf_ptr ? 1 : 0, clang_defaultCodeCompleteOptions());
+}
+
 void translation_unit::dispose()
 {
 	if (clang_tu)
