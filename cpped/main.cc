@@ -1,7 +1,7 @@
 #include <ncursesw/ncurses.h>
 
 #include "ncurses_env.hh"
-#include "editor.hh"
+#include "editor_window.hh"
 #include "styles.hh"
 
 #include "document_lib/document.hh"
@@ -31,8 +31,7 @@ int main(int argc, char** argv)
 
 
 	cpped::style_manager styles;
-	cpped::editor editor(ss, document, styles);
-	editor.render();
+	cpped::editor_window editor(ss, document, styles);
 
 	while(true)
 	{

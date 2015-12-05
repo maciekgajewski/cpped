@@ -5,22 +5,19 @@
 
 namespace cpped {
 
-class ncurses_window;
-class style_manager;
-
 namespace document{
 	class document;
 }
 
+class editor_window;
+
 class editor
 {
 public:
-	editor(ncurses_window& win, document::document& d, style_manager& sm);
+	editor(editor_window& win, document::document& d);
 
 	void on_key(int key);
 	void on_mouse(const MEVENT& event);
-	void render();
-	void set_document(document::document& doc);
 
 private:
 
@@ -35,21 +32,15 @@ private:
 	void scroll_left();
 	void scroll_right();
 
-	void refresh_cursor();
-
-	// rendering
-	unsigned render_text(attr_t attr, unsigned phys_column, const char* begin, const char* end); // returns last physical column
-	void put_visual_tab();
-	void update_status_line();
-
 	// workspace/doc coordinates
-	unsigned get_workspace_width() const;
-	int get_workspace_height() const;
 	int column_to_workspace_x(unsigned column) const;
 	int documet_to_workspace_y(unsigned docy) const;
 	unsigned workspace_to_document_x(unsigned wx) const;
 	unsigned workspace_to_document_y(unsigned wy) const;
 	void adjust_cursor_column_to_desired(unsigned new_line_len);
+
+	void request_full_render();
+	void request_cursor_update();
 
 	// converts document x (character in line) into column, taking all tabs into account
 	unsigned document_x_to_column(unsigned docy, unsigned docx) const;
@@ -57,24 +48,19 @@ private:
 	// manipulation
 	void insert_at_cursor(char c);
 
-	unsigned first_line = 0;
-	unsigned first_column = 0;
-	unsigned left_margin_width = 0; // calculated when rendering
-	unsigned top_margin = 0;
-	unsigned bottom_margin = 1;
+	unsigned first_line_ = 0;
+	unsigned first_column_ = 0;
 
-	// cursor's screen pos
-	unsigned cursor_doc_x = 0;
-	unsigned cursor_doc_y = 0;
-	unsigned desired_cursor_column = 0;
+	// cursor document poisition
+	unsigned cursor_x_ = 0;
+	unsigned cursor_y_ = 0;
+	unsigned desired_cursor_column_ = 0;
 
 	// settings
-	unsigned tab_width = 4;
-	bool visualise_tabs = true;
+	unsigned tab_width_ = 4;
 
-	ncurses_window& window;
-	document::document* doc;
-	style_manager& styles;
+	document::document& doc_;
+	editor_window& window_;
 };
 
 }
