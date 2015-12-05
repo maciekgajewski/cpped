@@ -53,12 +53,14 @@ int main(int argc, char** argv)
 
 	for(const clang::code_completion_result& result : completion_results)
 	{
-		std::cout << "* result, cursor kind=" << result.get_cursor_kind_as_string() << std::endl;
-
 		clang::completion_string cs = result.get_completion_string();
+		std::cout << "* result, cursor kind=" << result.get_cursor_kind_as_string()
+			<< ", priority=" << cs.get_priority()
+			<< ", brief comment=" << cs.get_brief_comment()
+			<< std::endl;
 		for(unsigned i = 0; i < cs.get_num_chunks(); i++)
 		{
-			std::cout << "  - " << cs.get_chunk_text(i) << std::endl;
+			std::cout << "  - text='" << cs.get_chunk_text(i) << "', kind=" << clang::completion_chunk_kind_to_str(cs.get_chunk_kind(i)) << std::endl;
 		}
 	}
 

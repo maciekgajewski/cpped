@@ -101,7 +101,9 @@ private:
 
 inline std::ostream& operator<<(std::ostream& s, const string& cs)
 {
-	return s << cs.c_str();
+	if (cs.c_str())
+		s << cs.c_str();
+	return s;
 }
 
 class cursor
@@ -257,6 +259,9 @@ public:
 
 	unsigned get_num_chunks() const { return clang_getNumCompletionChunks(clang_completion_string); }
 	string get_chunk_text(unsigned idx) { return clang_getCompletionChunkText(clang_completion_string, idx); }
+	CXCompletionChunkKind get_chunk_kind(unsigned idx) const { return clang_getCompletionChunkKind(clang_completion_string, idx); }
+	unsigned get_priority() const { return clang_getCompletionPriority(clang_completion_string); }
+	string get_brief_comment() const { return  clang_getCompletionBriefComment(clang_completion_string); }
 
 private:
 
@@ -265,6 +270,8 @@ private:
 
 	friend class code_completion_result;
 };
+
+const char* completion_chunk_kind_to_str(CXCompletionChunkKind kind);
 
 class code_completion_result
 {

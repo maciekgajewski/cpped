@@ -66,7 +66,8 @@ code_completion_results translation_unit::code_complete_at(const char* filename,
 		uf_ptr = &unsaved_file;
 	}
 
-	CXCodeCompleteResults* results =  clang_codeCompleteAt(clang_tu, filename, line, column, uf_ptr, uf_ptr ? 1 : 0, clang_defaultCodeCompleteOptions());
+	CXCodeCompleteResults* results =  clang_codeCompleteAt(clang_tu, filename, line, column, uf_ptr, uf_ptr ? 1 : 0,
+			clang_defaultCodeCompleteOptions()|CXCodeComplete_IncludeBriefComments);
 	if (!results)
 		throw std::runtime_error("Code completion failed");
 
@@ -102,6 +103,36 @@ source_location::info source_location::get_location_info() const
 	info l;
 	clang_getFileLocation(clang_location, &l.file.clang_file, &l.line, &l.column, &l.offset);
 	return l;
+}
+
+const char* completion_chunk_kind_to_str(CXCompletionChunkKind kind)
+{
+	switch(kind)
+	{
+		case CXCompletionChunk_Optional: return "Optional";
+		case CXCompletionChunk_TypedText: return "TypedText";
+		case CXCompletionChunk_Text: return "Text";
+		case CXCompletionChunk_Placeholder: return "Placeholder";
+		case CXCompletionChunk_Informative: return "Informative";
+		case CXCompletionChunk_CurrentParameter: return "CurrentParameter";
+		case CXCompletionChunk_LeftParen: return "LeftParen";
+		case CXCompletionChunk_RightParen: return "RightParen";
+		case CXCompletionChunk_LeftBracket: return "LeftBracket";
+		case CXCompletionChunk_RightBracket: return "RightBracket";
+		case CXCompletionChunk_LeftBrace: return "LeftBrace";
+		case CXCompletionChunk_RightBrace: return "RightBrace";
+		case CXCompletionChunk_LeftAngle: return "LeftAngle";
+		case CXCompletionChunk_RightAngle: return "RightAngle";
+		case CXCompletionChunk_Comma: return "Comma";
+		case CXCompletionChunk_ResultType: return "ResultType";
+		case CXCompletionChunk_Colon: return "Colon";
+		case CXCompletionChunk_SemiColon: return "SemiColon";
+		case CXCompletionChunk_Equal: return "Equal";
+		case CXCompletionChunk_HorizontalSpace: return "HorizontalSpace";
+		case CXCompletionChunk_VerticalSpace: return "VerticalSpace";
+	};
+
+	return "?";
 }
 
 }}
