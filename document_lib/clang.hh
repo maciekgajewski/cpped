@@ -95,6 +95,8 @@ private:
 	CXString clang_string;
 
 	friend class cursor;
+	friend class completion_string;
+	friend class code_completion_result;
 };
 
 inline std::ostream& operator<<(std::ostream& s, const string& cs)
@@ -249,25 +251,76 @@ private:
 	friend class translation_unit;
 };
 
+class completion_string
+{
+public:
+
+	unsigned get_num_chunks() const { return clang_getNumCompletionChunks(clang_completion_string); }
+	string get_chunk_text(unsigned idx) { return clang_getCompletionChunkText(clang_completion_string, idx); }
+
+private:
+
+	completion_string(CXCompletionString s) : clang_completion_string(s) {}
+	CXCompletionString clang_completion_string;
+
+	friend class code_completion_result;
+};
+
+class code_completion_result
+{
+public:
+
+	CXCursorKind get_cursor_kind() const { return result->CursorKind; }
+	string get_cursor_kind_as_string() const { return clang_getCursorKindSpelling(result->CursorKind); }
+
+	completion_string get_completion_string() const { return completion_string(result->CompletionString); }
+
+private:
+
+	code_completion_result(CXCompletionResult* r) : result(r) {}
+	CXCompletionResult* result;
+
+	friend class code_completion_results;
+};
+
 class code_completion_results
 {
 public:
 
+	class iterator : public std::iterator<std::random_access_iterator_tag, code_completion_result>
+	{
+	public:
+		const code_completion_result& operator*() const { return result; }
+		const code_completion_result* operator->()const { return &result; }
+		bool operator==(const iterator& o) const { return result.result == o.result.result; }
+		bool operator!=(const iterator& o) const { return result.result != o.result.result; }
+		void operator++() { result.result++; }
+	private:
+		iterator(CXCompletionResult* r) : result(r) {}
+		code_completion_result result;
+
+		friend class code_completion_results;
+	};
+
 	~code_completion_results() { dispose(); }
 
-	bool is_null() const { return result == nullptr; }
+	bool is_null() const { return results == nullptr; }
+
+	iterator begin() const { return iterator(results->Results); }
+	iterator end() const { return iterator(results->Results + results->NumResults); }
+
 private:
 
-	code_completion_results(CXCodeCompleteResults* cr)  { dispose(); result = cr; }
+	code_completion_results(CXCodeCompleteResults* cr)  { dispose(); results = cr; }
 
 	void dispose()
 	{
-		if (result)
-			clang_disposeCodeCompleteResults(result);
-		result = nullptr;
+		if (results)
+			clang_disposeCodeCompleteResults(results);
+		results = nullptr;
 	}
 
-	CXCodeCompleteResults* result = nullptr;
+	CXCodeCompleteResults* results = nullptr;
 
 	friend class translation_unit;
 };

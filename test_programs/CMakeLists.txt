@@ -1,0 +1,3 @@
+add_subdirectory(parser)
+add_subdirectory(annotate_source)
+add_subdirectory(completer)

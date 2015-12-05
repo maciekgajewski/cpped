@@ -89,8 +89,8 @@ private:
 	char* begin;
 	unsigned length;
 	std::vector<line_token> tokens;
-
 };
+
 
 class document
 {

@@ -66,7 +66,11 @@ code_completion_results translation_unit::code_complete_at(const char* filename,
 		uf_ptr = &unsaved_file;
 	}
 
-	return clang_codeCompleteAt(clang_tu, filename, line, column, uf_ptr, uf_ptr ? 1 : 0, clang_defaultCodeCompleteOptions());
+	CXCodeCompleteResults* results =  clang_codeCompleteAt(clang_tu, filename, line, column, uf_ptr, uf_ptr ? 1 : 0, clang_defaultCodeCompleteOptions());
+	if (!results)
+		throw std::runtime_error("Code completion failed");
+
+	return results;
 }
 
 void translation_unit::dispose()
