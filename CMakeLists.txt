@@ -13,5 +13,4 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} COMPONENTS filesystem unit_test_framew
 
 add_subdirectory(document_lib)
 add_subdirectory(cpped)
-add_subdirectory(parser)
-add_subdirectory(annotate_source)
+add_subdirectory(test_programs)
