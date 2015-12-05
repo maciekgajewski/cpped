@@ -59,10 +59,13 @@ void editor_window::render(unsigned first_column, unsigned first_line, unsigned 
 
 void editor_window::refresh_cursor(int wy, int wx)
 {
-	if (wx >= 0 && wy >= 0 && wx < get_workspace_width() && wy < get_workspace_height())
+	int x = wx + left_margin_width_;
+	int y = wy + top_margin_;
+
+	if (x >= 0 && y >= 0 && x < get_workspace_width() && y < get_workspace_height())
 	{
 		::curs_set(1);
-		window_.move(wy, wx);
+		window_.move(y, x);
 	}
 	else
 	{

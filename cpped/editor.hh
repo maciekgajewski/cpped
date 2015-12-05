@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ncursesw/ncurses.h>
+#include <ncursesw/ncurses.h> // only for key codes and MEVENT
 
 
 namespace cpped {

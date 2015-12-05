@@ -1,7 +1,5 @@
 #pragma once
 
-#include <ncursesw/ncurses.h>
-
 #include "editor.hh"
 
 namespace cpped {

@@ -4,7 +4,6 @@
 
 #include "document_lib/document.hh"
 
-
 namespace cpped {
 
 editor::editor(editor_window& win, document::document& d)
@@ -102,8 +101,8 @@ void editor::request_cursor_update()
 	int cx = column - int(first_column_);
 	int cy = int(cursor_y_ )- int(first_line_);
 
-	window_.refresh_cursor(cx, cy);
 	window_.update_status_line(cursor_y_, cursor_x_, column);
+	window_.refresh_cursor(cy, cx);
 }
 
 void editor::cursor_down()
