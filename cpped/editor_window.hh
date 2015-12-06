@@ -2,6 +2,8 @@
 
 #include "editor.hh"
 
+#include <chrono>
+
 namespace cpped {
 
 class ncurses_window;
@@ -15,13 +17,13 @@ class editor_window
 {
 public:
 
-	editor_window(ncurses_window& win, document::document& d, style_manager& sm);
+	editor_window(ncurses_window& win, style_manager& sm, document::document& doc);
 
 	void on_key(int key) { editor_.on_key(key); }
 	void on_mouse(const MEVENT& event) { editor_.on_mouse(event); }
 
-	void render(unsigned first_column, unsigned first_line, unsigned tab_width);
-	void update_status_line(unsigned docy, unsigned docx, unsigned column);
+	void render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width);
+	void update_status_line(unsigned docy, unsigned docx, unsigned column, std::chrono::high_resolution_clock::duration last_parse_time);
 	void refresh_cursor(int wy, int wx);
 
 	unsigned get_workspace_width() const;
@@ -41,7 +43,6 @@ private:
 	bool visualise_tabs_ = true;
 
 	ncurses_window& window_;
-	document::document& doc_;
 	style_manager& styles_;
 	editor editor_;
 };

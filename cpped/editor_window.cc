@@ -9,23 +9,23 @@
 
 namespace cpped {
 
-editor_window::editor_window(ncurses_window& win, document::document& d, style_manager& sm)
-	: window_(win), doc_(d), styles_(sm), editor_(*this, d)
+editor_window::editor_window(ncurses_window& win, style_manager& sm, document::document& doc)
+	: window_(win), styles_(sm), editor_(*this, doc)
 {
 }
 
-void editor_window::render(unsigned first_column, unsigned first_line, unsigned tab_width)
+void editor_window::render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width)
 {
 	window_.clear();
 
 	int line_count_digits = 8;
-	if (doc_.get_line_count() < 10)
+	if (doc.get_line_count() < 10)
 		line_count_digits = 1;
-	else if (doc_.get_line_count() < 100)
+	else if (doc.get_line_count() < 100)
 		line_count_digits = 2;
-	else if (doc_.get_line_count() < 1000)
+	else if (doc.get_line_count() < 1000)
 		line_count_digits = 3;
-	else if (doc_.get_line_count() < 10000)
+	else if (doc.get_line_count() < 10000)
 		line_count_digits = 4;
 
 	left_margin_width_ = line_count_digits + 2;
@@ -35,7 +35,7 @@ void editor_window::render(unsigned first_column, unsigned first_line, unsigned 
 
 	// iterate over lines
 	int line_no = 0;
-	doc_.for_lines(first_line, window_.get_height(), [&](const document::document_line& line)
+	doc.for_lines(first_line, window_.get_height(), [&](const document::document_line& line)
 	{
 		window_.move(line_no, 0);
 
@@ -124,7 +124,7 @@ void editor_window::put_visual_tab()
 	}
 }
 
-void editor_window::update_status_line(unsigned docy, unsigned docx, unsigned column)
+void editor_window::update_status_line(unsigned docy, unsigned docx, unsigned column, std::chrono::high_resolution_clock::duration last_parse_time)
 {
 	window_.move(window_.get_height()-1, 0);
 	window_.clear_to_eol();
@@ -137,7 +137,7 @@ void editor_window::update_status_line(unsigned docy, unsigned docx, unsigned co
 	// last parse time
 	using namespace std::literals::chrono_literals;
 	window_.move(window_.get_height()-1, 20);
-	std::snprintf(buf, 32, "%.2fms", 0.001 * doc_.get_last_parse_time()/1us);
+	std::snprintf(buf, 32, "%.2fms", 0.001 * last_parse_time/1us);
 	window_.print(buf);
 
 }

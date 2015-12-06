@@ -91,7 +91,7 @@ void editor::adjust_cursor_column_to_desired(unsigned new_line_len)
 
 void editor::request_full_render()
 {
-	window_.render(first_column_, first_line_, tab_width_);
+	window_.render(doc_, first_column_, first_line_, tab_width_);
 	request_cursor_update();
 }
 
@@ -101,13 +101,13 @@ void editor::request_cursor_update()
 	int cx = column - int(first_column_);
 	int cy = int(cursor_y_ )- int(first_line_);
 
-	window_.update_status_line(cursor_y_, cursor_x_, column);
+	window_.update_status_line(cursor_y_, cursor_x_, column, doc_.get_last_parse_time());
 	window_.refresh_cursor(cy, cx);
 }
 
 void editor::cursor_down()
 {
-	if (cursor_y_ < doc_.get_line_count())
+	if (cursor_y_ < doc_.get_line_count()-1)
 	{
 		cursor_y_++;
 		unsigned new_line_len = doc_.line_length(cursor_y_);

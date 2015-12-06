@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 
 
 	cpped::style_manager styles;
-	cpped::editor_window editor(ss, document, styles);
+	cpped::editor_window editor(ss, styles, document);
 
 	while(true)
 	{
