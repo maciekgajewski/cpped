@@ -5,7 +5,6 @@
 #include <stdexcept>
 #include <fstream>
 #include <regex>
-#include <iostream>
 
 namespace cpped {
 
@@ -32,7 +31,6 @@ void project::add_directory(const std::string& source_dir)
 		if (entry.status().type() == fs::regular_file)
 		{
 			files_.push_back(entry.path().string());
-			std::cout << "Adding file: " << entry.path().string() << std::endl;
 		}
 	}
 }

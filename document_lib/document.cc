@@ -29,6 +29,12 @@ std::ostream& operator << (std::ostream& s, const line_token& t)
 }
 
 
+document::document()
+{
+	// add one empty line
+	lines_.emplace_back(*this, nullptr, 0);
+}
+
 document::~document()
 {
 }
@@ -36,7 +42,7 @@ document::~document()
 void document::load_from_raw_data(const std::string& data, const std::string& fake_path, std::unique_ptr<iparser>&& p)
 {
 	file_name = fake_path;
-	raw_data.assign(data.begin(), data.end());
+	raw_data_.assign(data.begin(), data.end());
 	parse_raw_buffer();
 
 	parser = std::move(p);
@@ -51,14 +57,14 @@ void document::load_from_file(const std::string& path, std::unique_ptr<iparser>&
 		throw std::runtime_error("Error opening file");
 	}
 
-	raw_data.clear();
+	raw_data_.clear();
 
 	const unsigned bufsize = 4096;
 	char buf[bufsize];
 	auto c = f.readsome(buf, bufsize);
 	while( c > 0)
 	{
-		raw_data.insert(raw_data.end(), buf, buf+c);
+		raw_data_.insert(raw_data_.end(), buf, buf+c);
 		c = f.readsome(buf, bufsize);
 	}
 
@@ -83,27 +89,27 @@ void document::parse_language()
 void document::insert(const char* position, char c)
 {
 	const char* old_data = nullptr;
-	if (raw_data.size() + 1 > raw_data.capacity())
+	if (raw_data_.size() + 1 > raw_data_.capacity())
 	{
 		// this will reallocate. Preserve original data ptr
-		old_data = raw_data.data();
+		old_data = raw_data_.data();
 	}
-	raw_data.insert(raw_data.begin() + (position-raw_data.data()), c);
+	raw_data_.insert(raw_data_.begin() + (position-raw_data_.data()), c);
 
 	if (old_data)
 	{
 		// old_data is invalid now, do not dereference!
-		for(document_line& line : lines)
+		for(document_line& line : lines_)
 		{
-			line.refresh_position(old_data, raw_data.data());
+			line.refresh_position(old_data, raw_data_.data());
 		}
 	}
 }
 
 void document::shift_lines(document_line* after, unsigned shift)
 {
-	auto it = lines.begin() + (after-lines.data());
-	for(it++; it != lines.end(); it++)
+	auto it = lines_.begin() + (after-lines_.data());
+	for(it++; it != lines_.end(); it++)
 	{
 		it->shift(shift);
 	}
@@ -112,8 +118,8 @@ void document::shift_lines(document_line* after, unsigned shift)
 
 void document::insert_line(document_line* after, document_line&& new_line)
 {
-	auto it = lines.begin() + (after-lines.data()) + 1;
-	lines.insert(it, std::move(new_line));
+	auto it = lines_.begin() + (after-lines_.data()) + 1;
+	lines_.insert(it, std::move(new_line));
 }
 
 struct range
@@ -130,16 +136,16 @@ struct range
 
 void document::parse_raw_buffer()
 {
-	lines.clear();
+	lines_.clear();
 
 	// tokenize by lines
 	boost::char_separator<char> endline_sep("\n", "", boost::keep_empty_tokens);
-	boost::tokenizer<decltype(endline_sep), std::vector<char>::const_iterator, range> tokens(raw_data, endline_sep);
+	boost::tokenizer<decltype(endline_sep), std::vector<char>::const_iterator, range> tokens(raw_data_, endline_sep);
 
 	for(const range& token : tokens)
 	{
-		lines.emplace_back(*this, const_cast<char*>(&*token.begin), token.end - token.begin);
-		assert(lines.back().get_data() >= raw_data.data() && lines.back().get_data() <= raw_data.data()+raw_data.size());
+		lines_.emplace_back(*this, const_cast<char*>(&*token.begin), token.end - token.begin);
+		assert(lines_.back().get_data() >= raw_data_.data() && lines_.back().get_data() <= raw_data_.data()+raw_data_.size());
 	}
 }
 

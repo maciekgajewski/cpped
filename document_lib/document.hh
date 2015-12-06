@@ -96,32 +96,33 @@ class document
 {
 public:
 
+	document();
 	~document();
 
 	void load_from_raw_data(const std::string& data, const std::string& fake_path, std::unique_ptr<iparser>&& parser = nullptr);
 	void load_from_file(const std::string& path, std::unique_ptr<iparser>&& parser = nullptr);
 
-	unsigned get_line_count() const { return lines.size(); }
+	unsigned get_line_count() const { return lines_.size(); }
 
 	unsigned line_length(unsigned index)
 	{
-		if (index == lines.size())
+		if (index == lines_.size())
 			return 0; // fake last line
 		else
 			return get_line(index).get_length();
 	}
 
-	document_line& get_line(unsigned index) { return lines.at(index); }
-	const document_line& get_line(unsigned index) const { return lines.at(index); }
+	document_line& get_line(unsigned index) { return lines_.at(index); }
+	const document_line& get_line(unsigned index) const { return lines_.at(index); }
 
 	// iterates over no more than 'count' lines in range, starting from first_line
 	template<typename FUN>
 	void for_lines(unsigned first_line, unsigned max_count, FUN f)
 	{
-		if (first_line < lines.size())
+		if (first_line < lines_.size())
 		{
-			unsigned count = std::min<unsigned>(lines.size()-first_line, max_count);
-			auto it = lines.begin() + first_line;
+			unsigned count = std::min<unsigned>(lines_.size()-first_line, max_count);
+			auto it = lines_.begin() + first_line;
 			for(unsigned i = 0; i < count; ++i, ++it)
 			{
 				f(*it);
@@ -131,7 +132,7 @@ public:
 
 	void parse_language();
 
-	const std::vector<char>& get_raw_data() const { return raw_data; }
+	const std::vector<char>& get_raw_data() const { return raw_data_; }
 	const std::string& get_file_name() const { return file_name; }
 
 	void insert(const char* position, char c);
@@ -145,8 +146,8 @@ private:
 
 	void parse_raw_buffer();
 
-	std::vector<char> raw_data;
-	std::vector<document_line> lines;
+	std::vector<char> raw_data_;
+	std::vector<document_line> lines_;
 	std::string file_name;
 
 	std::unique_ptr<iparser> parser;

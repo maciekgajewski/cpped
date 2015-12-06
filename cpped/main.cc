@@ -34,7 +34,6 @@ int main(int argc, char** argv)
 				throw std::runtime_error("-cmake requires cmake build dir as an argument");
 			}
 			project = cpped::load_cmake_project(argv[2]);
-			return 0;
 		}
 		else
 		{
