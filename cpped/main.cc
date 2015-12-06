@@ -3,11 +3,16 @@
 #include "ncurses_env.hh"
 #include "editor_window.hh"
 #include "styles.hh"
+#include "project.hh"
 
 #include "document_lib/document.hh"
 #include "document_lib/cpp_parser.hh"
 
 #include <iostream>
+#include <string>
+
+
+using namespace std::literals::string_literals;
 
 // zażółć gęślą jaźń
 //		t
@@ -19,11 +24,24 @@
 int main(int argc, char** argv)
 {
 	cpped::document::document document;
+	cpped::project project;
 	if (argc > 1)
 	{
-		document.load_from_file(argv[1], std::make_unique<cpped::document::cpp_parser>());
+		if (argv[1] == "-cmake"s)
+		{
+			if (argc < 3)
+			{
+				throw std::runtime_error("-cmake requires cmake build dir as an argument");
+			}
+			project = cpped::load_cmake_project(argv[2]);
+			return 0;
+		}
+		else
+		{
+			document.load_from_file(argv[1], std::make_unique<cpped::document::cpp_parser>());
+			document.parse_language();
+		}
 	}
-	document.parse_language();
 
 	::setlocale(LC_ALL, "en_EN.utf-8");
 	cpped::ncurses_env env;
