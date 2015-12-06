@@ -13,38 +13,39 @@ editor::editor(editor_window& win, document::document& d)
 	request_full_render();
 }
 
-void editor::on_key(int key)
+bool editor::on_special_key(int key_code, const char* /*key_name*/)
 {
 
 	// hard-coded actions
-	switch(key)
+	switch(key_code)
 	{
 		case KEY_UP:
 			cursor_up();
-			break;
+			return true;
 		case KEY_DOWN:
 			cursor_down();
-			break;
+			return true;
 		case KEY_LEFT:
 			cursor_left();
-			break;
+			return true;
 		case KEY_RIGHT:
 			cursor_right();
-			break;
-
-		default:
-		{
-			if ((key >=32 && key < 256) || key == '\n' || key == '\t')
-			{
-				insert_at_cursor(char(key));
-			}
-		}
+			return true;
 	}
+
+	return false;
 }
 
-void editor::on_mouse(const MEVENT& event)
+unsigned editor::on_sequence(const std::string& sequence)
+{
+	insert_at_cursor(sequence);
+	return sequence.length();
+}
+
+bool editor::on_mouse(const MEVENT& event)
 {
 	// ?
+	return false;
 }
 
 void editor::cursor_up()
@@ -86,6 +87,29 @@ void editor::adjust_cursor_column_to_desired(unsigned new_line_len)
 	{
 		cursor_x_--;
 		current_column = document_x_to_column(cursor_y_, cursor_x_);
+	}
+}
+
+void editor::ensure_cursor_visible()
+{
+	// y
+	if (cursor_y_ < first_line_)
+	{
+		first_line_ = cursor_y_;
+	}
+	else if (cursor_y_ > first_line_ + window_.get_workspace_height())
+	{
+		first_line_ = cursor_y_ - window_.get_workspace_height();
+	}
+
+	// x
+	if (cursor_x_ < first_column_)
+	{
+		first_column_ = 0;
+	}
+	else if (cursor_x_ > first_column_ + window_.get_workspace_width())
+	{
+		first_column_ = cursor_x_ - window_.get_workspace_width();
 	}
 }
 
@@ -226,6 +250,7 @@ unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 
 	unsigned x = 0;
 	const char* text = line.get_data();
+	assert(line.get_length() >= docx);
 	for(; docx > 0; docx--, text++)
 	{
 		if (*text == '\t')
@@ -236,22 +261,27 @@ unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 	return x;
 }
 
-void editor::insert_at_cursor(char c)
+void editor::insert_at_cursor(const std::string& s)
 {
-	document::document_line& line = doc_.get_line(cursor_y_);
-	line.insert(cursor_x_, c);
-	if (c == '\n')
-	{
-		cursor_x_ = 0;
-		desired_cursor_column_ = 0;
-		cursor_y_++;
-	}
-	else
-	{
-		cursor_x_++;
-		desired_cursor_column_ = document_x_to_column(cursor_y_, cursor_x_);
-	}
+	doc_.insert(cursor_y_, cursor_x_, s);
 	doc_.parse_language();
+
+	// calculate new cursor pos
+	for(char c : s)
+	{
+		if (c == '\n')
+		{
+			cursor_x_ = 0;
+			cursor_y_++;
+		}
+		else
+		{
+			cursor_x_++;
+		}
+	}
+
+	desired_cursor_column_ = document_x_to_column(cursor_y_, cursor_x_);
+	ensure_cursor_visible();
 	request_full_render();
 }
 

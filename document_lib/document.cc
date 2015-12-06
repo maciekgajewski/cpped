@@ -73,6 +73,25 @@ void document::load_from_file(const std::string& path, std::unique_ptr<iparser>&
 	parser = std::move(p);
 }
 
+void document::insert(unsigned line, unsigned col, const std::string& text)
+{
+	// TODO rewrtie
+	for(char c : text)
+	{
+		auto& doc_line = get_line(line);
+		doc_line.insert(col, c);
+		if (c == '\n')
+		{
+			col = 0;
+			line++;
+		}
+		else
+		{
+			col++;
+		}
+	}
+}
+
 void document::parse_language()
 {
 	if (parser)
@@ -89,14 +108,16 @@ void document::parse_language()
 void document::insert(const char* position, char c)
 {
 	const char* old_data = nullptr;
+	bool reallocated = false;
 	if (raw_data_.size() + 1 > raw_data_.capacity())
 	{
 		// this will reallocate. Preserve original data ptr
 		old_data = raw_data_.data();
+		reallocated = true;
 	}
 	raw_data_.insert(raw_data_.begin() + (position-raw_data_.data()), c);
 
-	if (old_data)
+	if (reallocated)
 	{
 		// old_data is invalid now, do not dereference!
 		for(document_line& line : lines_)

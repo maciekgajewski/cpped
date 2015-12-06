@@ -2,6 +2,7 @@
 
 #include <ncursesw/ncurses.h> // only for key codes and MEVENT
 
+#include <string>
 
 namespace cpped {
 
@@ -16,8 +17,9 @@ class editor
 public:
 	editor(editor_window& win, document::document& d);
 
-	void on_key(int key);
-	void on_mouse(const MEVENT& event);
+	bool on_special_key(int key_code, const char* key_name);
+	unsigned on_sequence(const std::string& sequence);
+	bool on_mouse(const MEVENT& event);
 
 private:
 
@@ -39,6 +41,8 @@ private:
 	unsigned workspace_to_document_y(unsigned wy) const;
 	void adjust_cursor_column_to_desired(unsigned new_line_len);
 
+	void ensure_cursor_visible();
+
 	void request_full_render();
 	void request_cursor_update();
 
@@ -46,7 +50,7 @@ private:
 	unsigned document_x_to_column(unsigned docy, unsigned docx) const;
 
 	// manipulation
-	void insert_at_cursor(char c);
+	void insert_at_cursor(const std::string& s);
 
 	unsigned first_line_ = 0;
 	unsigned first_column_ = 0;

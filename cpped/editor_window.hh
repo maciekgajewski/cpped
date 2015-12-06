@@ -1,6 +1,7 @@
 #pragma once
 
 #include "editor.hh"
+#include "event_window.hh"
 
 #include <chrono>
 
@@ -13,14 +14,15 @@ namespace document{
 	class document;
 }
 
-class editor_window
+class editor_window final : public event_window
 {
 public:
 
-	editor_window(ncurses_window& win, style_manager& sm, document::document& doc);
+	editor_window(event_dispatcher& ed, ncurses_window& win, style_manager& sm, document::document& doc);
 
-	void on_key(int key) { editor_.on_key(key); }
-	void on_mouse(const MEVENT& event) { editor_.on_mouse(event); }
+	unsigned on_sequence(const std::string& s) override;
+	bool on_special_key(int key_code, const char* key_name) override;
+	void on_mouse(const MEVENT& event) override;
 
 	void render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width);
 	void update_status_line(unsigned docy, unsigned docx, unsigned column, std::chrono::high_resolution_clock::duration last_parse_time);

@@ -9,9 +9,27 @@
 
 namespace cpped {
 
-editor_window::editor_window(ncurses_window& win, style_manager& sm, document::document& doc)
-	: window_(win), styles_(sm), editor_(*this, doc)
+editor_window::editor_window(event_dispatcher& ed, ncurses_window& win, style_manager& sm, document::document& doc)
+	: event_window(ed, win, 0, nullptr), window_(win), styles_(sm), editor_(*this, doc)
 {
+}
+
+unsigned editor_window::on_sequence(const std::string& s)
+{
+	// TODO handle any events belonging to me
+	return editor_.on_sequence(s);
+}
+
+bool editor_window::on_special_key(int key_code, const char* key_name)
+{
+	// TODO handle any events belonging to me
+	return editor_.on_special_key(key_code, key_name);
+}
+
+void editor_window::on_mouse(const MEVENT& event)
+{
+	// TODO translate event into workspace coords
+	// send to editor
 }
 
 void editor_window::render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width)

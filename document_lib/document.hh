@@ -115,6 +115,8 @@ public:
 	document_line& get_line(unsigned index) { return lines_.at(index); }
 	const document_line& get_line(unsigned index) const { return lines_.at(index); }
 
+	void insert(unsigned line, unsigned col, const std::string& text);
+
 	// iterates over no more than 'count' lines in range, starting from first_line
 	template<typename FUN>
 	void for_lines(unsigned first_line, unsigned max_count, FUN f)

@@ -4,6 +4,7 @@
 #include "editor_window.hh"
 #include "styles.hh"
 #include "project.hh"
+#include "event_dispatcher.hh"
 
 #include "document_lib/document.hh"
 #include "document_lib/cpp_parser.hh"
@@ -47,18 +48,11 @@ int main(int argc, char** argv)
 	auto ss = env.get_stdscr();
 
 
+	cpped::event_dispatcher dispatcher;
 	cpped::style_manager styles;
-	cpped::editor_window editor(ss, styles, document);
+	cpped::editor_window editor(dispatcher, ss, styles, document);
+	editor.set_active(); // so it recevies input
 
-	while(true)
-	{
-		int key = ::getch();
-		if (key == 'q')
-			break;
-		MEVENT mouse_event;
-		if(::getmouse(&mouse_event) == OK)
-			editor.on_mouse(mouse_event);
-		else
-			editor.on_key(key);
-	}
+	dispatcher.set_global_quit_key("^X");
+	dispatcher.run();
 }

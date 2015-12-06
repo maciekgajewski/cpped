@@ -10,6 +10,8 @@ add_executable(cpped
 	styles.hh styles.cc
 	editor_window.cc editor_window.hh
 	project.hh project.cc
+	event_dispatcher.cc event_dispatcher.hh
+	event_window.cc event_window.hh
 )
 
 target_link_libraries(cpped
