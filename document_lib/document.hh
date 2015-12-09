@@ -60,6 +60,7 @@ public:
 
 	std::string to_string() const { return std::string(begin, begin+length); }
 
+	// TODO remove these as well
 	void clear_tokens() { tokens.clear(); }
 	void push_back_token(const line_token& t);
 
@@ -67,13 +68,15 @@ public:
 	template<typename FUN>
 	void for_each_token(FUN fun) const;
 
-	// inserting text
+	const std::vector<line_token>& get_tokens() const { return tokens;} // for testing
+
+
+	//BEGIN remove these
+//	// inserting text
 	void insert(unsigned position, char c);
 
-	// shofts wrt the parent data buffer
+//	// shofts wrt the parent data buffer
 	void shift(unsigned s) { begin += s; }
-
-	const std::vector<line_token>& get_tokens() const { return tokens;} // for testing
 
 	// call if the underlying buffer changes
 	void refresh_position(const char* old_data, char* new_data)
@@ -81,6 +84,7 @@ public:
 		auto offset = begin - old_data;
 		begin = new_data + offset;
 	}
+	// END remove these
 
 private:
 
@@ -91,6 +95,11 @@ private:
 	std::vector<line_token> tokens;
 };
 
+struct position
+{
+	unsigned line;
+	unsigned column;
+};
 
 class document
 {
@@ -115,7 +124,7 @@ public:
 	document_line& get_line(unsigned index) { return lines_.at(index); }
 	const document_line& get_line(unsigned index) const { return lines_.at(index); }
 
-	void insert(unsigned line, unsigned col, const std::string& text);
+	void insert(position pos, const std::string& text);
 
 	// iterates over no more than 'count' lines in range, starting from first_line
 	template<typename FUN>
@@ -136,6 +145,8 @@ public:
 
 	const std::vector<char>& get_raw_data() const { return raw_data_; }
 	const std::string& get_file_name() const { return file_name; }
+
+	std::string to_string() const; // mostly for testing
 
 	void insert(const char* position, char c);
 

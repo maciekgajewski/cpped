@@ -2,13 +2,11 @@
 
 #include <ncursesw/ncurses.h> // only for key codes and MEVENT
 
+#include "document_lib/document.hh"
+
 #include <string>
 
 namespace cpped {
-
-namespace document{
-	class document;
-}
 
 class editor_window;
 
@@ -56,8 +54,7 @@ private:
 	unsigned first_column_ = 0;
 
 	// cursor document poisition
-	unsigned cursor_x_ = 0;
-	unsigned cursor_y_ = 0;
+	document::position cursor_pos_ = {0, 0};
 	unsigned desired_cursor_column_ = 0;
 
 	// settings

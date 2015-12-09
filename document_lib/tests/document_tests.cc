@@ -27,25 +27,32 @@ R"(1
 	}
 }
 
-BOOST_AUTO_TEST_CASE(cpp_parsing)
+BOOST_AUTO_TEST_CASE(insert)
 {
-	std::string code =
-R"(#include <string>
-
-// hello boss
-const char* s = "a\
-lamakaota";
-
-struct X {
-  int i = 666;
-  std::string s = "string literal";
-};)";
-
+	std::string text =
+R"(111
+2222
+33333)";
 
 	document doc;
-	doc.load_from_raw_data(code, "fake.cc");
+	doc.load_from_raw_data(text, "fake.cc");
 
-	doc.parse_language(); // this test onlt has value if there is any debug printing. At least we'll see if it doesn't crash...
+	BOOST_CHECK_EQUAL(doc.to_string(), text);
+
+	doc.insert(position{1, 2}, "44");
+	BOOST_CHECK_EQUAL(doc.to_string(), "111\n224422\n33333");
+
+	doc.insert(position{0, 0}, "0");
+	BOOST_CHECK_EQUAL(doc.to_string(), "0111\n224422\n33333");
+
+	doc.insert(position{0, 4}, "xx");
+	BOOST_CHECK_EQUAL(doc.to_string(), "0111xx\n224422\n33333");
+
+	doc.insert(position{2, 0}, "abcdef");
+	BOOST_CHECK_EQUAL(doc.to_string(), "0111xx\n224422\nabcdef33333");
+
+	doc.insert(position{2, 11}, "END");
+	BOOST_CHECK_EQUAL(doc.to_string(), "0111xx\n224422\nabcdef33333END");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

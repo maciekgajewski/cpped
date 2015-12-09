@@ -50,18 +50,18 @@ bool editor::on_mouse(const MEVENT& event)
 
 void editor::cursor_up()
 {
-	if (cursor_y_ > 0)
+	if (cursor_pos_.line > 0)
 	{
-		cursor_y_--;
-		unsigned new_line_len = doc_.line_length(cursor_y_);
-		if (cursor_x_ > new_line_len)
+		cursor_pos_.line--;
+		unsigned new_line_len = doc_.line_length(cursor_pos_.line);
+		if (cursor_pos_.column > new_line_len)
 		{
-			cursor_x_ = new_line_len;
+			cursor_pos_.column = new_line_len;
 		}
 
 		adjust_cursor_column_to_desired(new_line_len);
 
-		if (documet_to_workspace_y(cursor_y_) ==-1)
+		if (documet_to_workspace_y(cursor_pos_.line) ==-1)
 		{
 			assert(first_line_ > 0);
 			first_line_--;
@@ -77,39 +77,39 @@ void editor::cursor_up()
 
 void editor::adjust_cursor_column_to_desired(unsigned new_line_len)
 {
-	unsigned current_column = document_x_to_column(cursor_y_, cursor_x_);
-	while(current_column < desired_cursor_column_ && cursor_x_ < new_line_len)
+	unsigned current_column = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
+	while(current_column < desired_cursor_column_ && cursor_pos_.column < new_line_len)
 	{
-		cursor_x_++;
-		current_column = document_x_to_column(cursor_y_, cursor_x_);
+		cursor_pos_.column++;
+		current_column = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 	}
-	while(current_column > desired_cursor_column_ + tab_width_ && cursor_x_ > 0)
+	while(current_column > desired_cursor_column_ + tab_width_ && cursor_pos_.column > 0)
 	{
-		cursor_x_--;
-		current_column = document_x_to_column(cursor_y_, cursor_x_);
+		cursor_pos_.column--;
+		current_column = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 	}
 }
 
 void editor::ensure_cursor_visible()
 {
 	// y
-	if (cursor_y_ < first_line_)
+	if (cursor_pos_.line < first_line_)
 	{
-		first_line_ = cursor_y_;
+		first_line_ = cursor_pos_.line;
 	}
-	else if (cursor_y_ > first_line_ + window_.get_workspace_height())
+	else if (cursor_pos_.line > first_line_ + window_.get_workspace_height())
 	{
-		first_line_ = cursor_y_ - window_.get_workspace_height();
+		first_line_ = cursor_pos_.line - window_.get_workspace_height();
 	}
 
 	// x
-	if (cursor_x_ < first_column_)
+	if (cursor_pos_.column < first_column_)
 	{
 		first_column_ = 0;
 	}
-	else if (cursor_x_ > first_column_ + window_.get_workspace_width())
+	else if (cursor_pos_.column > first_column_ + window_.get_workspace_width())
 	{
-		first_column_ = cursor_x_ - window_.get_workspace_width();
+		first_column_ = cursor_pos_.column - window_.get_workspace_width();
 	}
 }
 
@@ -121,28 +121,28 @@ void editor::request_full_render()
 
 void editor::request_cursor_update()
 {
-	int column = document_x_to_column(cursor_y_, cursor_x_);
+	int column = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 	int cx = column - int(first_column_);
-	int cy = int(cursor_y_ )- int(first_line_);
+	int cy = int(cursor_pos_.line )- int(first_line_);
 
-	window_.update_status_line(cursor_y_, cursor_x_, column, doc_.get_last_parse_time());
+	window_.update_status_line(cursor_pos_.line, cursor_pos_.column, column, doc_.get_last_parse_time());
 	window_.refresh_cursor(cy, cx);
 }
 
 void editor::cursor_down()
 {
-	if (cursor_y_ < doc_.get_line_count()-1)
+	if (cursor_pos_.line < doc_.get_line_count()-1)
 	{
-		cursor_y_++;
-		unsigned new_line_len = doc_.line_length(cursor_y_);
-		if (cursor_x_ > new_line_len)
+		cursor_pos_.line++;
+		unsigned new_line_len = doc_.line_length(cursor_pos_.line);
+		if (cursor_pos_.column > new_line_len)
 		{
-			cursor_x_ = new_line_len;
+			cursor_pos_.column = new_line_len;
 		}
 
 		adjust_cursor_column_to_desired(new_line_len);
 
-		if (documet_to_workspace_y(cursor_y_) == window_.get_workspace_height())
+		if (documet_to_workspace_y(cursor_pos_.line) == window_.get_workspace_height())
 		{
 			// scroll one line down
 			first_line_ ++;
@@ -158,10 +158,10 @@ void editor::cursor_down()
 
 void editor::cursor_left()
 {
-	if (cursor_x_ > 0)
+	if (cursor_pos_.column > 0)
 	{
-		cursor_x_--;
-		desired_cursor_column_ = document_x_to_column(cursor_y_, cursor_x_);
+		cursor_pos_.column--;
+		desired_cursor_column_ = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 		int workspace_x = column_to_workspace_x(desired_cursor_column_);
 
 		if (workspace_x < 0)
@@ -179,11 +179,11 @@ void editor::cursor_left()
 
 void editor::cursor_right()
 {
-	int ll = doc_.line_length(cursor_y_);
-	if (cursor_x_ < ll)
+	int ll = doc_.line_length(cursor_pos_.line);
+	if (cursor_pos_.column < ll)
 	{
-		cursor_x_++;
-		desired_cursor_column_ = document_x_to_column(cursor_y_, cursor_x_);
+		cursor_pos_.column++;
+		desired_cursor_column_ = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 		int workspace_x = column_to_workspace_x(desired_cursor_column_);
 
 		if(workspace_x >= window_.get_workspace_width())
@@ -263,7 +263,7 @@ unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 
 void editor::insert_at_cursor(const std::string& s)
 {
-	doc_.insert(cursor_y_, cursor_x_, s);
+	doc_.insert(cursor_pos_, s);
 	doc_.parse_language();
 
 	// calculate new cursor pos
@@ -271,16 +271,16 @@ void editor::insert_at_cursor(const std::string& s)
 	{
 		if (c == '\n')
 		{
-			cursor_x_ = 0;
-			cursor_y_++;
+			cursor_pos_.column = 0;
+			cursor_pos_.line++;
 		}
 		else
 		{
-			cursor_x_++;
+			cursor_pos_.column++;
 		}
 	}
 
-	desired_cursor_column_ = document_x_to_column(cursor_y_, cursor_x_);
+	desired_cursor_column_ = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 	ensure_cursor_visible();
 	request_full_render();
 }

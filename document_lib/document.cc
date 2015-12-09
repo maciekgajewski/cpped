@@ -73,21 +73,21 @@ void document::load_from_file(const std::string& path, std::unique_ptr<iparser>&
 	parser = std::move(p);
 }
 
-void document::insert(unsigned line, unsigned col, const std::string& text)
+void document::insert(position pos, const std::string& text)
 {
 	// TODO rewrtie
 	for(char c : text)
 	{
-		auto& doc_line = get_line(line);
-		doc_line.insert(col, c);
+		auto& doc_line = get_line(pos.line);
+		doc_line.insert(pos.column, c);
 		if (c == '\n')
 		{
-			col = 0;
-			line++;
+			pos.column = 0;
+			pos.line++;
 		}
 		else
 		{
-			col++;
+			pos.column++;
 		}
 	}
 }
@@ -103,6 +103,11 @@ void document::parse_language()
 		last_parse_time = end_time - start_time;
 	}
 
+}
+
+std::string document::to_string() const
+{
+	return std::string(raw_data_.begin(), raw_data_.end());
 }
 
 void document::insert(const char* position, char c)
