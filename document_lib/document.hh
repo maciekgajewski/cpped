@@ -2,7 +2,7 @@
 
 #include "iparser.hh"
 
-#include "details/document_data.hh"
+#include "document_data.hh"
 
 #include <vector>
 #include <string>
@@ -16,34 +16,30 @@ namespace cpped { namespace  document {
 
 class document;
 
-
+// read-only view on all the data about document line
 class document_line
 {
 public:
 
-	document_line(document_line&&) = default;
-	document_line(document& doc, char* b, unsigned l) : parent(doc), begin(b), length(l) {}
+	document_line(const line_data& line) : line_data_(line) {}
 
-	unsigned get_length() const { return length; }
-	const char* get_data() const { return begin; }
+	unsigned get_length() const { return line_data_.get_length(); }
+	const char* get_data() const { return &*line_data_.get_start(); }
 
-	std::string to_string() const { return std::string(begin, begin+length); }
+	std::string to_string() const { return line_data_.to_string(); }
 
 	// Calls 'fun' for each token of the line. If section of the line is not covered by a token, empty token is used
 	template<typename FUN>
-	void for_each_token(FUN fun) const;
+	void for_each_token(FUN fun) const
+	{
+		line_data_.for_each_token(fun);
+	}
 
-	const std::vector<line_token>& get_tokens() const { return tokens;} // for testing
+	const std::vector<line_token>& get_tokens() const { return line_data_.get_tokens();} // for testing
 
 private:
 
-	details::line_data& line_;
-};
-
-struct position
-{
-	unsigned line;
-	unsigned column;
+	const line_data& line_data_;
 };
 
 class document
@@ -53,21 +49,17 @@ public:
 	document();
 	~document();
 
-	void load_from_raw_data(const std::string& data, const std::string& fake_path, std::unique_ptr<iparser>&& parser = nullptr);
-	void load_from_file(const std::string& path, std::unique_ptr<iparser>&& parser = nullptr);
+	void load_from_raw_data(const std::string& data, const std::string& fake_path, std::unique_ptr<iparser>&& parser_ = nullptr);
+	void load_from_file(const std::string& path, std::unique_ptr<iparser>&& parser_ = nullptr);
 
-	unsigned get_line_count() const { return lines_.size(); }
+	unsigned get_line_count() const { return current_data_->get_line_count(); }
 
 	unsigned line_length(unsigned index)
 	{
-		if (index == lines_.size())
-			return 0; // fake last line
-		else
-			return get_line(index).get_length();
+		return get_line(index).get_length();
 	}
 
-	document_line& get_line(unsigned index) { return lines_.at(index); }
-	const document_line& get_line(unsigned index) const { return lines_.at(index); }
+	document_line get_line(unsigned index) const { return document_line(current_data_->get_line(index)); }
 
 	// insert string at location. Returns the position of the end of inserted text
 	position insert(position pos, const std::string& text);
@@ -76,75 +68,33 @@ public:
 	template<typename FUN>
 	void for_lines(unsigned first_line, unsigned max_count, FUN f)
 	{
-		if (first_line < lines_.size())
-		{
-			unsigned count = std::min<unsigned>(lines_.size()-first_line, max_count);
-			auto it = lines_.begin() + first_line;
-			for(unsigned i = 0; i < count; ++i, ++it)
+		current_data_->for_lines(first_line, max_count,
+			[&](const line_data& ld)
 			{
-				f(*it);
-			}
-		}
+				f(document_line(ld));
+			});
 	}
 
 	void parse_language();
 
-	const std::vector<char>& get_raw_data() const { return raw_data_; }
-	const std::string& get_file_name() const { return file_name; }
+	const std::vector<char>& get_raw_data() const { return current_data_->get_raw_data(); }
+	const std::string& get_file_name() const { return file_name_; }
 
 	std::string to_string() const; // mostly for testing
 
-	void insert(const char* position, char c);
+	std::chrono::high_resolution_clock::duration get_last_parse_time() const { return last_parse_time_; }
 
-	void shift_lines(document_line* after, unsigned shift);
-	void insert_line(document_line* after, document_line&& new_line);
-
-	std::chrono::high_resolution_clock::duration get_last_parse_time() const { return last_parse_time; }
+	document_data& get_data() { return *current_data_; } // for tests
 
 private:
 
-	std::vector<details::document_data> data_;
-	std::vector<details::document_data>::const_iterator current_data_;
+	std::list<document_data> data_;
+	std::list<document_data>::iterator current_data_;
 
-	std::string file_name;
+	std::string file_name_;
 
-	std::unique_ptr<iparser> parser;
-	std::chrono::high_resolution_clock::duration last_parse_time;
+	std::unique_ptr<iparser> parser_;
+	std::chrono::high_resolution_clock::duration last_parse_time_;
 };
-
-template<typename FUN>
-void document_line::for_each_token(FUN fun) const
-{
-	unsigned current = 0;
-	auto it = tokens.begin();
-	line_token none_token { 0, 0, token_type::none };
-
-	while(current < length)
-	{
-		if (it == tokens.end())
-		{
-			none_token.begin = current;
-			none_token.end = length;
-			fun(none_token);
-			current = length;
-		}
-		else
-		{
-			const line_token& token = *it;
-			it++;
-			assert(token.begin >= current);
-			assert(token.end <= length);
-			if (token.begin > current)
-			{
-				none_token.begin = current;
-				none_token.end = token.begin;
-				fun(none_token);
-			}
-			fun(token);
-			current = token.end;
-		}
-	}
-}
-
 
 }}

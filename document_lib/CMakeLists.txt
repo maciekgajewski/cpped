@@ -3,7 +3,8 @@ add_library(document_lib
 	clang.hh clang.cc
 	iparser.hh
 	cpp_parser.cc cpp_parser.hh
-	details/document_data.cc details/document_data.hh
+	document_data.cc document_data.hh
+	line_data.cc line_data.hh
 	line_token.hh line_token.cc
 )
 

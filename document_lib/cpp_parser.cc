@@ -5,7 +5,7 @@
 namespace cpped { namespace document {
 
 cpp_parser::cpp_parser()
-:	index(0, 0)
+:	index_(0, 0)
 {
 }
 
@@ -44,39 +44,38 @@ static token_type determine_token_type(const clang::token& token)
 
 
 
-void cpp_parser::parse(document& doc)
+void cpp_parser::parse(document_data& data, const std::string& file_name)
 {
-	const auto& raw_data = doc.get_raw_data();
-	const std::string& file_name = doc.get_file_name();
+	const auto& raw_data = data.get_raw_data();
 
-	if (tu.is_null())
+	if (translation_unit_.is_null())
 	{
 		// first parsing
-		tu.parse(index, file_name.c_str(), raw_data.data(), raw_data.size(), {/*cmdline*/});
+		translation_unit_.parse(index_, file_name.c_str(), raw_data.data(), raw_data.size(), {/*cmdline*/});
 	}
 	else
 	{
-		tu.reparse(file_name.c_str(), raw_data.data(), raw_data.size());
+		translation_unit_.reparse(file_name.c_str(), raw_data.data(), raw_data.size());
 	}
 
-	clang::source_file file = tu.get_file(file_name);
+	clang::source_file file = translation_unit_.get_file(file_name);
 
 	// full file tokenizer. doing it line-by-line is not a good approach
-	clang::source_location file_begin = tu.get_location_for_offset(file, 0);
-	clang::source_location file_end = tu.get_location_for_offset(file, raw_data.size());
+	clang::source_location file_begin = translation_unit_.get_location_for_offset(file, 0);
+	clang::source_location file_end = translation_unit_.get_location_for_offset(file, raw_data.size());
 
 	clang::source_range range(file_begin, file_end);
-	clang::token_list tokens = tu.tokenize(range);
+	clang::token_list tokens = translation_unit_.tokenize(range);
 	tokens.annotate_tokens();
 
-	// clear all tokens in al lines
-	doc.for_lines(0, doc.get_line_count(), [&](auto& line)
+	// clear all tokens in all lines
+	data.for_lines(0, data.get_line_count(), [&](auto& line)
 	{
 		line.clear_tokens();
 	});
 
 	// sanity check
-	if (doc.get_line_count() > 0 && tokens.size() == 0)
+	if (data.get_line_count() > 0 && tokens.size() == 0)
 		throw std::runtime_error("parsing failed");
 
 	for(const clang::token& token : tokens)
@@ -87,14 +86,14 @@ void cpp_parser::parse(document& doc)
 
 		unsigned line_idx = range_begin.line-1;
 		unsigned last_line_idx = range_end.line-1;
-		assert(line_idx < doc.get_line_count());
-		assert(last_line_idx < doc.get_line_count());
+		assert(line_idx < data.get_line_count());
+		assert(last_line_idx < data.get_line_count());
 		assert(line_idx <= last_line_idx);
 
 		line_token lt;
 		lt.type = determine_token_type(token);
 		lt.begin = range_begin.column - 1;
-		document_line* line = &doc.get_line(line_idx);
+		line_data* line = &data.get_line(line_idx);
 		while (line_idx < last_line_idx)
 		{
 			lt.end = line->get_length();
@@ -102,7 +101,7 @@ void cpp_parser::parse(document& doc)
 			lt.begin = 0;
 
 			line_idx++;
-			line = &doc.get_line(line_idx);
+			line = &data.get_line(line_idx);
 		}
 		lt.end = range_end.column-1;
 		line->push_back_token(lt);

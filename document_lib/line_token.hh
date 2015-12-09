@@ -31,4 +31,10 @@ struct line_token
 
 std::ostream& operator << (std::ostream& s, const line_token& t);
 
+struct position
+{
+	unsigned line;
+	unsigned column;
+};
+
 }}

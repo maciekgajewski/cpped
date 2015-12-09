@@ -61,9 +61,9 @@ BOOST_AUTO_TEST_SUITE(line_tests)
 BOOST_AUTO_TEST_CASE(no_tokens)
 {
 	std::string text = "abcdefg gijklm";
-	document doc;
-	doc.load_from_raw_data(text, "");
-	document_line& line = doc.get_line(0);
+	document_data doc;
+	doc.load_from_raw_data(text);
+	line_data& line = doc.get_line(0);
 
 	int token_count = 0;
 	line.for_each_token([&](const line_token& t)
@@ -79,9 +79,9 @@ BOOST_AUTO_TEST_CASE(no_tokens)
 BOOST_AUTO_TEST_CASE(back_to_back_tokens)
 {
 	std::string text = "11222333";
-	document doc;
-	doc.load_from_raw_data(text, "");
-	document_line& line = doc.get_line(0);
+	document_data doc;
+	doc.load_from_raw_data(text);
+	line_data& line = doc.get_line(0);
 
 	token_type expected_types[] = {token_type::keyword, token_type::comment, token_type::literal};
 
@@ -104,9 +104,9 @@ BOOST_AUTO_TEST_CASE(back_to_back_tokens)
 BOOST_AUTO_TEST_CASE(token_gap)
 {
 	std::string text = "11222333";
-	document doc;
-	doc.load_from_raw_data(text, "");
-	document_line& line = doc.get_line(0);
+	document_data doc;
+	doc.load_from_raw_data(text);
+	line_data& line = doc.get_line(0);
 
 	token_type expected_types[] = {token_type::keyword, token_type::none, token_type::literal};
 
@@ -129,9 +129,9 @@ BOOST_AUTO_TEST_CASE(token_gap)
 BOOST_AUTO_TEST_CASE(token_in_the_middle)
 {
 	std::string text = "11222333";
-	document doc;
-	doc.load_from_raw_data(text, "");
-	document_line& line = doc.get_line(0);
+	document_data doc;
+	doc.load_from_raw_data(text);
+	line_data& line = doc.get_line(0);
 
 	token_type expected_types[] = {token_type::none, token_type::literal, token_type::none};
 
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(insert_character_no_token)
 {
 	std::string text = "111\n222\n333";
 	document doc;
-	doc.load_from_raw_data(text, "filename");
+	doc.load_from_raw_data(text, "");
 
 	BOOST_REQUIRE_EQUAL(3, doc.get_line_count());
 
@@ -163,8 +163,7 @@ BOOST_AUTO_TEST_CASE(insert_character_no_token)
 	std::string l1 = doc.get_line(1).to_string();
 	std::string l2 = doc.get_line(2).to_string();
 
-	auto& line1 = doc.get_line(1);
-	line1.insert(1, 'x');
+	doc.insert(position{1, 1}, "x");
 
 	// no changes to previous and subsequent line
 	BOOST_CHECK_EQUAL(doc.get_line(0).to_string(), l0);
@@ -177,8 +176,8 @@ BOOST_AUTO_TEST_CASE(insert_character_no_token)
 BOOST_AUTO_TEST_CASE(insert_character_into_token)
 {
 	std::string text = "111\n22xx\n333";
-	document doc;
-	doc.load_from_raw_data(text, "filename");
+	document_data doc;
+	doc.load_from_raw_data(text);
 
 	BOOST_REQUIRE_EQUAL(3, doc.get_line_count());
 
@@ -187,9 +186,10 @@ BOOST_AUTO_TEST_CASE(insert_character_into_token)
 	line1.push_back_token({0, 2, token_type::comment});
 	line1.push_back_token({2, 4, token_type::literal});
 
-	line1.insert(1, 'x');
+	document_data doc2;
+	doc2.copy_inserting(doc, position{1, 1}, "x");
 
-	const std::vector<line_token>& tokens = line1.get_tokens();
+	const std::vector<line_token>& tokens = doc2.get_line(1).get_tokens();
 
 	BOOST_REQUIRE_EQUAL(2, tokens.size());
 
@@ -209,10 +209,10 @@ BOOST_AUTO_TEST_CASE(insert_newline_no_tokens)
 
 	BOOST_REQUIRE_EQUAL(3, doc.get_line_count());
 
-	auto& line1 = doc.get_line(1);
+	auto line1 = doc.get_line(1);
 	BOOST_CHECK_EQUAL(line1.get_length(), 4);
 
-	line1.insert(2, '\n');
+	doc.insert(position{1, 2}, "\n");
 
 	BOOST_REQUIRE_EQUAL(4, doc.get_line_count());
 	BOOST_CHECK_EQUAL(doc.get_line(0).get_length(), 3);
@@ -234,19 +234,20 @@ BOOST_AUTO_TEST_CASE(insert_newline_between_tokens)
 
 	BOOST_REQUIRE_EQUAL(3, doc.get_line_count());
 
-	doc.get_line(0).push_back_token(line_token{0, 2, token_type::keyword}); // 11
-	doc.get_line(0).push_back_token(line_token{2, 4, token_type::literal}); // 22
+	auto& doc_data = doc.get_data();
+	doc_data.get_line(0).push_back_token(line_token{0, 2, token_type::keyword}); // 11
+	doc_data.get_line(0).push_back_token(line_token{2, 4, token_type::literal}); // 22
 
-	doc.get_line(1).push_back_token(line_token{0, 2, token_type::preprocessor}); // 33
-	doc.get_line(1).push_back_token(line_token{4, 6, token_type::type}); // 44
+	doc_data.get_line(1).push_back_token(line_token{0, 2, token_type::preprocessor}); // 33
+	doc_data.get_line(1).push_back_token(line_token{4, 6, token_type::type}); // 44
 
-	doc.get_line(2).push_back_token(line_token{0, 2, token_type::keyword}); // 55
-	doc.get_line(2).push_back_token(line_token{2, 4, token_type::literal}); // 66
+	doc_data.get_line(2).push_back_token(line_token{0, 2, token_type::keyword}); // 55
+	doc_data.get_line(2).push_back_token(line_token{2, 4, token_type::literal}); // 66
 
-	auto& line1 = doc.get_line(1);
+	auto line1 = doc.get_line(1);
 	BOOST_CHECK_EQUAL(line1.get_length(), 6);
 
-	line1.insert(3, '\n');
+	doc.insert(position{1, 3}, "\n");
 
 	BOOST_REQUIRE_EQUAL(4, doc.get_line_count());
 
@@ -282,18 +283,19 @@ BOOST_AUTO_TEST_CASE(insert_newline_inside_token)
 
 	BOOST_REQUIRE_EQUAL(3, doc.get_line_count());
 
-	doc.get_line(0).push_back_token(line_token{0, 2, token_type::keyword}); // 11
-	doc.get_line(0).push_back_token(line_token{2, 4, token_type::literal}); // 22
+	auto& doc_data = doc.get_data();
+	doc_data.get_line(0).push_back_token(line_token{0, 2, token_type::keyword}); // 11
+	doc_data.get_line(0).push_back_token(line_token{2, 4, token_type::literal}); // 22
 
-	doc.get_line(1).push_back_token(line_token{0, 3, token_type::preprocessor}); // 333
+	doc_data.get_line(1).push_back_token(line_token{0, 3, token_type::preprocessor}); // 333
 
-	doc.get_line(2).push_back_token(line_token{0, 2, token_type::keyword}); // 55
-	doc.get_line(2).push_back_token(line_token{2, 4, token_type::literal}); // 66
+	doc_data.get_line(2).push_back_token(line_token{0, 2, token_type::keyword}); // 55
+	doc_data.get_line(2).push_back_token(line_token{2, 4, token_type::literal}); // 66
 
-	auto& line1 = doc.get_line(1);
+	auto line1 = doc.get_line(1);
 	BOOST_CHECK_EQUAL(line1.get_length(), 3);
 
-	line1.insert(2, '\n');
+	doc.insert(position{1, 2}, "\n");
 
 	BOOST_REQUIRE_EQUAL(4, doc.get_line_count());
 
