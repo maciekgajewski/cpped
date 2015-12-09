@@ -50,7 +50,7 @@ position document::insert(position pos, const std::string& text)
 	// add new at the end
 	data_.emplace_back();
 	auto final_pos = data_.back().copy_inserting(*current_data_, pos, text);
-	current_data_ = next;
+	current_data_++;
 
 	// crop history
 	static const unsigned MAX_HISTORY = 32;

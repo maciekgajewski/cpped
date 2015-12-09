@@ -72,7 +72,7 @@ position document_data::copy_inserting(const document_data& source, position pos
 	{
 		lines_.emplace_back(start, it->get_length());
 		lines_.back().copy_tokens(*it);
-		start += it->get_length();
+		start += it->get_length() + 1;
 	}
 
 	// modify the line into which the text is inserted
@@ -81,7 +81,7 @@ position document_data::copy_inserting(const document_data& source, position pos
 		unsigned len = modified_line->get_length() + text.size();
 		lines_.emplace_back(start, len);
 		lines_.back().copy_and_insert(*modified_line, pos.column, text);
-		start += len;
+		start += len + 1;
 		final_pos.column += text.size();
 	}
 	else
@@ -89,14 +89,14 @@ position document_data::copy_inserting(const document_data& source, position pos
 		// split the line into two, insert lines
 		auto begin = text.begin();
 		auto npos = std::find(text.begin(), text.end(), '\n');
-		unsigned len = modified_line->get_length() + npos - begin;
+		unsigned len = pos.column + npos - begin;
 		lines_.emplace_back(start, len);
 		lines_.back().copy_truncated(*modified_line, pos.column, npos - begin);
-		start += len;
+		start += len +1;
 
 		while(npos != text.end())
 		{
-			begin = npos;
+			begin = npos + 1;
 			npos = std::find(begin, text.end(), '\n');
 
 			if (npos == text.end())
@@ -113,7 +113,7 @@ position document_data::copy_inserting(const document_data& source, position pos
 				len = npos - begin;
 				lines_.emplace_back(start, len);
 			}
-			start += len;
+			start += len + 1;
 		}
 
 	}
@@ -123,8 +123,11 @@ position document_data::copy_inserting(const document_data& source, position pos
 	{
 		lines_.emplace_back(start, modified_line->get_length());
 		lines_.back().copy_tokens(*modified_line);
-		start += modified_line->get_length();
+		start += modified_line->get_length() + 1;
 	}
+
+	start--; // last line doesn't have endl at the end
+
 	assert(start == raw_data_.end() && "inconsisted line lengths after insertion");
 
 	return final_pos;

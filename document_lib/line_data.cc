@@ -6,7 +6,7 @@ namespace cpped { namespace	document {
 
 void line_data::copy_and_insert(const line_data& source, unsigned column, const std::string& text)
 {
-	assert(column >= length_ && "column out of range");
+	assert(column <= length_ && "column out of range");
 	assert(tokens_.empty() && "tokens should be empty, this function should be called immediately after construction");
 	assert(source.length_ + text.size() == length_ && "invalid line length");
 
@@ -24,7 +24,7 @@ void line_data::copy_and_insert(const line_data& source, unsigned column, const 
 
 void line_data::copy_truncated(const line_data& source, unsigned column, unsigned inserted_length)
 {
-	assert(column >= length_ && "column out of range");
+	assert(column <= length_ && "column out of range");
 	assert(tokens_.empty() && "tokens should be empty, this function should be called immediately after construction");
 	assert(column + inserted_length == length_);
 
