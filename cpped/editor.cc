@@ -263,22 +263,8 @@ unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 
 void editor::insert_at_cursor(const std::string& s)
 {
-	doc_.insert(cursor_pos_, s);
+	cursor_pos_ = doc_.insert(cursor_pos_, s);
 	doc_.parse_language();
-
-	// calculate new cursor pos
-	for(char c : s)
-	{
-		if (c == '\n')
-		{
-			cursor_pos_.column = 0;
-			cursor_pos_.line++;
-		}
-		else
-		{
-			cursor_pos_.column++;
-		}
-	}
 
 	desired_cursor_column_ = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 	ensure_cursor_visible();

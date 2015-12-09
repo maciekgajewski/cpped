@@ -3,6 +3,8 @@ add_library(document_lib
 	clang.hh clang.cc
 	iparser.hh
 	cpp_parser.cc cpp_parser.hh
+	details/document_data.cc details/document_data.hh
+	line_token.hh line_token.cc
 )
 
 target_include_directories(document_lib INTERFACE ..)

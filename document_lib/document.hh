@@ -2,42 +2,20 @@
 
 #include "iparser.hh"
 
+#include "details/document_data.hh"
+
 #include <vector>
 #include <string>
 #include <ostream>
 #include <cassert>
 #include <memory>
 #include <chrono>
+#include <list>
 
 namespace cpped { namespace  document {
 
-//  additional info associated with token
-
-enum class token_type
-{
-	none,
-	keyword,
-	literal,
-	preprocessor,
-	type,
-	comment,
-
-	max_tokens
-};
-
-std::ostream& operator << (std::ostream& s, token_type tt);
-
-struct line_token
-{
-	unsigned begin; // index of the fist character of the token
-	unsigned end; // index _past_ the last character of the token (end-begin = length)
-	token_type type;
-
-	bool operator==(const line_token& o) const { return begin == o.begin  && end == o.end && type == o.type; }
-};
-std::ostream& operator << (std::ostream& s, const line_token& t);
-
 class document;
+
 
 class document_line
 {
@@ -46,23 +24,10 @@ public:
 	document_line(document_line&&) = default;
 	document_line(document& doc, char* b, unsigned l) : parent(doc), begin(b), length(l) {}
 
-	document_line& operator = (document_line&& o)
-	{
-		assert(&parent == &o.parent);
-		begin = o.begin;
-		length = o.length;
-		tokens = std::move(o.tokens);
-		return *this;
-	}
-
 	unsigned get_length() const { return length; }
 	const char* get_data() const { return begin; }
 
 	std::string to_string() const { return std::string(begin, begin+length); }
-
-	// TODO remove these as well
-	void clear_tokens() { tokens.clear(); }
-	void push_back_token(const line_token& t);
 
 	// Calls 'fun' for each token of the line. If section of the line is not covered by a token, empty token is used
 	template<typename FUN>
@@ -70,29 +35,9 @@ public:
 
 	const std::vector<line_token>& get_tokens() const { return tokens;} // for testing
 
-
-	//BEGIN remove these
-//	// inserting text
-	void insert(unsigned position, char c);
-
-//	// shofts wrt the parent data buffer
-	void shift(unsigned s) { begin += s; }
-
-	// call if the underlying buffer changes
-	void refresh_position(const char* old_data, char* new_data)
-	{
-		auto offset = begin - old_data;
-		begin = new_data + offset;
-	}
-	// END remove these
-
 private:
 
-	document& parent;
-
-	char* begin;
-	unsigned length;
-	std::vector<line_token> tokens;
+	details::line_data& line_;
 };
 
 struct position
@@ -124,7 +69,8 @@ public:
 	document_line& get_line(unsigned index) { return lines_.at(index); }
 	const document_line& get_line(unsigned index) const { return lines_.at(index); }
 
-	void insert(position pos, const std::string& text);
+	// insert string at location. Returns the position of the end of inserted text
+	position insert(position pos, const std::string& text);
 
 	// iterates over no more than 'count' lines in range, starting from first_line
 	template<typename FUN>
@@ -157,10 +103,9 @@ public:
 
 private:
 
-	void parse_raw_buffer();
+	std::vector<details::document_data> data_;
+	std::vector<details::document_data>::const_iterator current_data_;
 
-	std::vector<char> raw_data_;
-	std::vector<document_line> lines_;
 	std::string file_name;
 
 	std::unique_ptr<iparser> parser;
