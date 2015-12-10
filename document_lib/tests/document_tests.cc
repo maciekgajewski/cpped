@@ -320,6 +320,32 @@ BOOST_AUTO_TEST_CASE(insert_newline_inside_token)
 	BOOST_CHECK_EQUAL(l3_tokens[1], (line_token{2, 4, token_type::literal}));
 }
 
+BOOST_AUTO_TEST_CASE(multiline_insert_no_tokens)
+{
+	std::string text = "1122\n333\n5566";
+	document doc;
+	doc.load_from_raw_data(text, "");
+
+	BOOST_CHECK_EQUAL(doc.to_string(), text);
+
+	// insert multiple lines at the beginning
+	doc.insert(position{0,0}, "aa\nbb\ncc");
+	BOOST_CHECK_EQUAL(doc.to_string(), "aa\nbb\ncc1122\n333\n5566");
+	BOOST_CHECK_EQUAL(doc.get_line_count(), 5);
+
+	// insert multiple lines in the middle
+	doc.insert(position{2, 4}, "xxx\nyyy\nzzz");
+	BOOST_CHECK_EQUAL(doc.to_string(), "aa\nbb\ncc11xxx\nyyy\nzzz22\n333\n5566");
+	BOOST_CHECK_EQUAL(doc.get_line_count(), 7);
+
+	// insert multiple lines at the end
+	doc.insert(position{6, 4}, "alpha\nbeta\ngamma");
+	BOOST_CHECK_EQUAL(doc.to_string(), "aa\nbb\ncc11xxx\nyyy\nzzz22\n333\n5566alpha\nbeta\ngamma");
+	BOOST_CHECK_EQUAL(doc.get_line_count(), 9);
+
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
 
 }}}
