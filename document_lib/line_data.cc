@@ -57,7 +57,7 @@ void line_data::copy_remainder(const line_data& source, unsigned column, unsigne
 	auto first_to_copy = std::find_if(source.tokens_.begin(), source.tokens_.end(),
 		[&](const line_token& token)
 		{
-			return token.begin > column;
+			return token.end > column;
 		});
 
 	tokens_.reserve(source.tokens_.end() - first_to_copy);
@@ -65,8 +65,16 @@ void line_data::copy_remainder(const line_data& source, unsigned column, unsigne
 		[&](const line_token& token)
 		{
 			tokens_.push_back(token);
-			tokens_.back().begin += inserted_length;
-			tokens_.back().end += inserted_length;
+			if (tokens_.back().begin >= column)
+			{
+				tokens_.back().begin += inserted_length - column;
+			}
+			else
+			{
+				// text inserted in the middle of token, truncate the token
+				tokens_.back().begin = 0;
+			}
+			tokens_.back().end += inserted_length - column;
 		});
 }
 

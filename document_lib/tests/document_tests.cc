@@ -55,9 +55,6 @@ R"(111
 	BOOST_CHECK_EQUAL(doc.to_string(), "0111xx\n224422\nabcdef33333END");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(line_tests)
 BOOST_AUTO_TEST_CASE(no_tokens)
 {
 	std::string text = "abcdefg gijklm";
