@@ -27,6 +27,9 @@ private:
 	void cursor_left();
 	void cursor_right();
 
+	void pg_up();
+	void pg_down();
+
 	void scroll_down();
 	void scroll_up();
 	void scroll_left();
@@ -37,7 +40,7 @@ private:
 	int documet_to_workspace_y(unsigned docy) const;
 	unsigned workspace_to_document_x(unsigned wx) const;
 	unsigned workspace_to_document_y(unsigned wy) const;
-	void adjust_cursor_column_to_desired(unsigned new_line_len);
+	void adjust_cursor_column_to_desired();
 
 	void ensure_cursor_visible();
 

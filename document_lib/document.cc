@@ -10,6 +10,7 @@ document::document()
 	// init empty document data
 	data_.emplace_back();
 	data_.back().init_empty();
+	current_data_ = data_.begin();
 }
 
 document::~document()
