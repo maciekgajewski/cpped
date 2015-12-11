@@ -16,3 +16,4 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1) # to generate compilation database
 add_subdirectory(document_lib)
 add_subdirectory(cpped)
 add_subdirectory(test_programs)
+add_subdirectory(ncurses_toolkit_lib)
