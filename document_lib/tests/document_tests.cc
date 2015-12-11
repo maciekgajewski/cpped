@@ -398,7 +398,36 @@ BOOST_AUTO_TEST_CASE(remove_single_line_tokens)
 	BOOST_CHECK_EQUAL(tokens[2], (line_token{3, 4, token_type::type}));    // 4
 	BOOST_CHECK_EQUAL(tokens[3], (line_token{4, 6, token_type::comment})); // 55
 }
+BOOST_AUTO_TEST_CASE(remove_multiple_lines_tokens)
+{
+	std::string text = "112233\ntobe removed\nto be rmeoved as well\naabbcc";
+	document_data data;
+	data.load_from_raw_data(text);
 
+	BOOST_REQUIRE_EQUAL(data.get_line_count(), 4);
+
+	data.get_line(0).push_back_token(line_token{0, 2, token_type::keyword}); // 11
+	data.get_line(0).push_back_token(line_token{2, 4, token_type::literal}); // 22
+	data.get_line(0).push_back_token(line_token{4, 6, token_type::preprocessor}); // 33
+
+	data.get_line(3).push_back_token(line_token{0, 2, token_type::type}); // aa
+	data.get_line(3).push_back_token(line_token{2, 4, token_type::comment}); // bb
+	data.get_line(3).push_back_token(line_token{4, 6, token_type::preprocessor}); // cc
+
+	document_data edited;
+	edited.copy_removing(data, range{position{0, 3}, position{3, 3}}); // leave "112bcc"}
+
+	BOOST_CHECK_EQUAL(edited.to_string(), "112bcc");
+	BOOST_REQUIRE_EQUAL(edited.get_line_count(), 1);
+	BOOST_CHECK_EQUAL(edited.get_line(0).to_string(), "112bcc");
+
+	const auto& tokens = edited.get_line(0).get_tokens();
+	BOOST_REQUIRE_EQUAL(tokens.size(), 4); // 11 2 b cc
+	BOOST_CHECK_EQUAL(tokens[0], (line_token{0, 2, token_type::keyword})); // 11
+	BOOST_CHECK_EQUAL(tokens[1], (line_token{2, 3, token_type::literal})); // 2
+	BOOST_CHECK_EQUAL(tokens[2], (line_token{3, 4, token_type::comment}));    // b
+	BOOST_CHECK_EQUAL(tokens[3], (line_token{4, 6, token_type::preprocessor})); // cc
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 

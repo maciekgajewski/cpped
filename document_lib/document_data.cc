@@ -184,6 +184,8 @@ void document_data::copy_removing(const document_data& source, range to_remove)
 		lines_.emplace_back(start, len);
 		lines_.back().copy_from_two_clipped(*first_changed, to_remove.start.column, *last_changed, to_remove.end.column);
 		start += len + 1;
+
+		modified_line_it = last_changed;
 	}
 
 	for(modified_line_it++; modified_line_it != source.lines_.end(); modified_line_it++)
@@ -195,7 +197,7 @@ void document_data::copy_removing(const document_data& source, range to_remove)
 
 	start--; // last line doesn't have endl at the end
 
-	assert(start == raw_data_.end() && "inconsisted line lengths after insertion");
+	assert(start == raw_data_.end() && "inconsisted line lengths after removal");
 }
 
 position document_data::shift_back(position p, unsigned shift)
