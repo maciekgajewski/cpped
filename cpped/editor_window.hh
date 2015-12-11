@@ -22,7 +22,7 @@ class editor_window final : public nct::event_window
 {
 public:
 
-	editor_window(nct::event_dispatcher& ed, nct::ncurses_window& win, style_manager& sm, document::document& doc);
+	editor_window(WINDOW* w, nct::event_dispatcher& ed, style_manager& sm, document::document& doc);
 
 	unsigned on_sequence(const std::string& s) override;
 	bool on_special_key(int key_code, const char* key_name) override;
@@ -48,7 +48,6 @@ private:
 	// settings
 	bool visualise_tabs_ = true;
 
-	nct::ncurses_window& window_;
 	style_manager& styles_;
 	editor editor_;
 };

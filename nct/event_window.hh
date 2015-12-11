@@ -8,10 +8,11 @@ namespace nct {
 
 class event_dispatcher;
 
-class event_window
+class event_window : public ncurses_window
 {
 public:
-	event_window(event_dispatcher& ed, ncurses_window& window, int z, event_window* parent);
+	event_window(WINDOW* w, event_dispatcher& ed, int z, event_window* parent);
+	event_window(int h, int w, int y, int x, event_dispatcher& ed, int z, event_window* parent);
 	virtual ~event_window();
 
 	// event receviers
@@ -34,7 +35,6 @@ public:
 private:
 
 	event_dispatcher& event_dispatcher_;
-	ncurses_window& window_;
 	int z_;
 	event_window* parent_;
 };

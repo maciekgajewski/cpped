@@ -4,8 +4,14 @@
 
 namespace nct {
 
-event_window::event_window(event_dispatcher& ed, ncurses_window& window, int z, event_window* parent)
-	: event_dispatcher_(ed), window_(window), z_(z), parent_(parent)
+event_window::event_window(WINDOW* w, event_dispatcher& ed, int z, event_window* parent)
+	: ncurses_window(w), event_dispatcher_(ed), z_(z), parent_(parent)
+{
+	event_dispatcher_.add_window(this);
+}
+
+event_window::event_window(int h, int w, int y, int x, event_dispatcher& ed, int z, event_window* parent)
+	: ncurses_window(h, w, y, x), event_dispatcher_(ed), z_(z), parent_(parent)
 {
 	event_dispatcher_.add_window(this);
 }

@@ -10,8 +10,8 @@
 
 namespace cpped {
 
-editor_window::editor_window(nct::event_dispatcher& ed, nct::ncurses_window& win, style_manager& sm, document::document& doc)
-	: event_window(ed, win, 0, nullptr), window_(win), styles_(sm), editor_(*this, doc)
+editor_window::editor_window(WINDOW* w, nct::event_dispatcher& ed, style_manager& sm, document::document& doc)
+	: event_window(w, ed, 0, nullptr), styles_(sm), editor_(*this, doc)
 {
 }
 
@@ -35,7 +35,7 @@ void editor_window::on_mouse(const MEVENT& event)
 
 void editor_window::render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width)
 {
-	window_.clear();
+	clear();
 
 	int line_count_digits = 8;
 	if (doc.get_line_count() < 10)
@@ -54,13 +54,13 @@ void editor_window::render(document::document& doc, unsigned first_column, unsig
 
 	// iterate over lines
 	int line_no = 0;
-	doc.for_lines(first_line, window_.get_height(), [&](const document::document_line& line)
+	doc.for_lines(first_line, get_height(), [&](const document::document_line& line)
 	{
-		window_.move(line_no, 0);
+		move(line_no, 0);
 
 		// print line number
 		std::snprintf(lineno, 32, fmt, first_line+line_no++);
-		window_.attr_print(styles_.line_numbers, lineno, left_margin_width_);
+		attr_print(styles_.line_numbers, lineno, left_margin_width_);
 
 		// print line
 		unsigned column = 0;
@@ -84,7 +84,7 @@ void editor_window::refresh_cursor(int wy, int wx)
 	if (x >= 0 && y >= 0 && x < get_workspace_width() && y < get_workspace_height())
 	{
 		::curs_set(1);
-		window_.move(y, x);
+		move(y, x);
 	}
 	else
 	{
@@ -95,7 +95,7 @@ void editor_window::refresh_cursor(int wy, int wx)
 
 unsigned editor_window::render_text(attr_t attr, unsigned tab_width, unsigned first_column, unsigned phys_column, const char* begin, const char* end)
 {
-	window_.set_attr_on(attr);
+	set_attr_on(attr);
 	unsigned last_column = get_workspace_width() + first_column;
 
 	while(begin != end && phys_column != last_column)
@@ -111,20 +111,20 @@ unsigned editor_window::render_text(attr_t attr, unsigned tab_width, unsigned fi
 					if (w == tab_width && c == 0) // first char of full tab
 						put_visual_tab();
 					else
-						window_.put_char(' ');
+						put_char(' ');
 				}
 			}
 		}
 		else
 		{
 			if (phys_column >= first_column)
-				window_.put_char(*begin);
+				put_char(*begin);
 			phys_column++;
 		}
 		begin++;
 	}
 
-	window_.set_attr_off(attr);
+	set_attr_off(attr);
 
 	return phys_column;
 }
@@ -133,45 +133,45 @@ void editor_window::put_visual_tab()
 {
 	if (visualise_tabs_)
 	{
-		window_.set_attr(A_DIM);
-		window_.put_char('|'); // TODO maybe use some cool unicode char?
-		window_.unset_attr(A_DIM);
+		set_attr(A_DIM);
+		put_char('|'); // TODO maybe use some cool unicode char?
+		unset_attr(A_DIM);
 	}
 	else
 	{
-		window_.put_char(' ');
+		put_char(' ');
 	}
 }
 
 void editor_window::update_status_line(unsigned docy, unsigned docx, unsigned column, std::chrono::high_resolution_clock::duration last_parse_time)
 {
-	window_.move(window_.get_height()-1, 0);
-	window_.clear_to_eol();
+	move(get_height()-1, 0);
+	clear_to_eol();
 	char buf[32];
 
 	// cursor pos. character under cursor
 	std::snprintf(buf, 32, "%d : %d-%d ", docy+1, docx+1, column+1);
-	window_.print(buf);
+	print(buf);
 
 	// last parse time
 	using namespace std::literals::chrono_literals;
-	window_.move(window_.get_height()-1, 20);
+	move(get_height()-1, 20);
 	std::snprintf(buf, 32, "%.2fms", 0.001 * last_parse_time/1us);
-	window_.print(buf);
+	print(buf);
 
 }
 
 unsigned editor_window::get_workspace_width() const
 {
-	if (window_.get_width() < left_margin_width_)
+	if (get_width() < left_margin_width_)
 		return 0;
 	else
-		return window_.get_width() - left_margin_width_;
+		return get_width() - left_margin_width_;
 }
 
 unsigned editor_window::get_workspace_height() const
 {
-	return window_.get_height() - top_margin_ - bottom_margin_;
+	return get_height() - top_margin_ - bottom_margin_;
 }
 
 }
