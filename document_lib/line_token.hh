@@ -37,4 +37,10 @@ struct position
 	unsigned column;
 };
 
+struct range
+{
+	position start;
+	position end;
+};
+
 }}

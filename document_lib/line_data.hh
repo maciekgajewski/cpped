@@ -28,6 +28,10 @@ public:
 	// copy remainder of the line after column, with thext inserted at front
 	void copy_remainder(const line_data& source, unsigned column, unsigned inserted_length);
 
+	void copy_and_remove(const line_data& source, unsigned removed_begin, unsigned removed_end);
+
+	void copy_from_two_clipped(const line_data& first, unsigned last_column, const line_data& second, unsigned first_column);
+
 	// uset by language parser
 	void clear_tokens() { tokens_.clear(); }
 	void push_back_token(const line_token& t);

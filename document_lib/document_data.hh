@@ -20,6 +20,7 @@ public:
 	void load_from_file(const std::string& path);
 	void load_from_raw_data(const std::string& data);
 	position copy_inserting(const document_data& source, position pos, const std::string& text);
+	void copy_removing(const document_data& source, range to_remove);
 
 	std::string to_string() const { return std::string(raw_data_.begin(), raw_data_.end()); }
 
@@ -45,6 +46,9 @@ public:
 	}
 
 	const data_type& get_raw_data() const { return raw_data_; }
+
+	// returns position shifted by number of characters back
+	position shift_back(position p, unsigned shift);
 
 private:
 

@@ -64,6 +64,12 @@ public:
 	// insert string at location. Returns the position of the end of inserted text
 	position insert(position pos, const std::string& text);
 
+	// removes indicated range
+	void remove(range r);
+	// removes characters befoire the positon, returns the position of the begining of the removed range
+	position remove_before(position pos, unsigned count);
+
+
 	// iterates over no more than 'count' lines in range, starting from first_line
 	template<typename FUN>
 	void for_lines(unsigned first_line, unsigned max_count, FUN f)
@@ -87,6 +93,9 @@ public:
 	document_data& get_data() { return *current_data_; } // for tests
 
 private:
+
+	void erase_redo(); // erases any data ahead of current_data_
+	void crop_history(); // reduces the number of items before current_data_ to predefined value
 
 	std::list<document_data> data_;
 	std::list<document_data>::iterator current_data_;

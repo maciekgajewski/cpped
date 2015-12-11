@@ -42,22 +42,33 @@ void document::load_from_file(const std::string& path, std::unique_ptr<iparser>&
 
 position document::insert(position pos, const std::string& text)
 {
-	// erase any data ahead of current iterator
-	auto next = current_data_;
-	next++;
-	data_.erase(next, data_.end());
+	erase_redo();
 
 	// add new at the end
 	data_.emplace_back();
 	auto final_pos = data_.back().copy_inserting(*current_data_, pos, text);
 	current_data_++;
 
-	// crop history
-	static const unsigned MAX_HISTORY = 32;
-	if (data_.size() > MAX_HISTORY)
-		data_.pop_front();
+	crop_history();
 
 	return final_pos;
+}
+
+void document::remove(range r)
+{
+	erase_redo();
+
+	data_.emplace_back();
+	data_.back().copy_removing(*current_data_, r);
+
+	crop_history();
+}
+
+position document::remove_before(position pos, unsigned count)
+{
+	position begin = current_data_->shift_back(pos, count);
+	remove(range{begin, pos});
+	return begin;
 }
 
 void document::parse_language()
@@ -76,6 +87,22 @@ void document::parse_language()
 std::string document::to_string() const
 {
 	return current_data_->to_string();
+}
+
+void document::erase_redo()
+{
+	auto next = current_data_;
+	next++;
+	data_.erase(next, data_.end());
+
+}
+
+void document::crop_history()
+{
+	static const unsigned MAX_HISTORY = 32;
+	if (data_.size() > MAX_HISTORY)
+		data_.pop_front();
+
 }
 
 
