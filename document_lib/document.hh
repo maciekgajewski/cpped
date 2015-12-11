@@ -94,6 +94,8 @@ public:
 
 	document_data& get_data() { return *current_data_; } // for tests
 
+	position get_last_position() const { return current_data_->get_last_position(); }
+
 private:
 
 	void erase_redo(); // erases any data ahead of current_data_

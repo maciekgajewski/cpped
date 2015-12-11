@@ -31,6 +31,10 @@ bool editor::on_special_key(int key_code, const char* /*key_name*/)
 			pg_up(); return true;
 		case KEY_NPAGE:
 			pg_down(); return true;
+		case KEY_BACKSPACE:
+			backspace(); return true;
+		case KEY_DC:
+			del(); return true;
 	}
 
 	return false;
@@ -237,6 +241,25 @@ void editor::scroll_right()
 	// TODO
 }
 
+void editor::backspace()
+{
+	// TODO any smart-unindenting goes here
+	if (cursor_pos_ > document::position{0, 0})
+	{
+		cursor_pos_ = doc_.remove_before(cursor_pos_, 1);
+		ensure_cursor_visible();
+	}
+	request_full_render();
+}
+
+void editor::del()
+{
+	if (cursor_pos_ < doc_.get_last_position())
+	{
+		doc_.remove_after(cursor_pos_, 1);
+	}
+	request_full_render();
+}
 
 int editor::column_to_workspace_x(unsigned column) const
 {

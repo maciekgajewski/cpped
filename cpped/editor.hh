@@ -35,6 +35,9 @@ private:
 	void scroll_left();
 	void scroll_right();
 
+	void backspace();
+	void del();
+
 	// workspace/doc coordinates
 	int column_to_workspace_x(unsigned column) const;
 	int documet_to_workspace_y(unsigned docy) const;

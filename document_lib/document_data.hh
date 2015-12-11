@@ -52,6 +52,8 @@ public:
 	// returns position shifted by number of characters forward
 	position shift_forward(position p, unsigned shift);
 
+	position get_last_position() const { return position{unsigned(lines_.size()-1), unsigned(lines_.back().get_length())}; }
+
 private:
 
 	data_type::const_iterator positon_to_offset(position pos) const;

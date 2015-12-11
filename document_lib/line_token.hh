@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/operators.hpp>
+
 #include <ostream>
 
 namespace cpped { namespace  document {
@@ -31,10 +33,25 @@ struct line_token
 
 std::ostream& operator << (std::ostream& s, const line_token& t);
 
-struct position
+struct position : public boost::partially_ordered<position>
 {
 	unsigned line;
 	unsigned column;
+
+	position(unsigned l, unsigned c) : line(l), column(c) {}
+
+	bool operator<(const position& o) const
+	{
+		if (line == o.line)
+			return column < o.column;
+		else
+			return line < o.line;
+	}
+
+	bool operator == (const position& o) const
+	{
+		return line == o.line && column == o.column;
+	}
 };
 
 struct range
