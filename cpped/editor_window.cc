@@ -1,15 +1,16 @@
 #include "editor_window.hh"
 
-#include "ncurses_window.hh"
 #include "styles.hh"
 
 #include "document_lib/document.hh"
+
+#include "nct/ncurses_window.hh"
 
 #include <cstdio>
 
 namespace cpped {
 
-editor_window::editor_window(event_dispatcher& ed, ncurses_window& win, style_manager& sm, document::document& doc)
+editor_window::editor_window(nct::event_dispatcher& ed, nct::ncurses_window& win, style_manager& sm, document::document& doc)
 	: event_window(ed, win, 0, nullptr), window_(win), styles_(sm), editor_(*this, doc)
 {
 }

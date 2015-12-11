@@ -2,7 +2,7 @@
 
 #include "ncurses_env.hh"
 
-namespace cpped {
+namespace nct {
 
 ncurses_env::ncurses_env()
 {

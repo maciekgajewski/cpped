@@ -2,8 +2,7 @@
 
 #include <ncursesw/ncurses.h>
 
-namespace cpped {
-
+namespace nct {
 
 class ncurses_window
 {

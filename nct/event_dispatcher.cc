@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace cpped {
+namespace nct {
 
 void event_dispatcher::exit()
 {

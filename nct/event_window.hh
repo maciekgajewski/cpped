@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace cpped {
+namespace nct {
 
 class event_dispatcher;
 

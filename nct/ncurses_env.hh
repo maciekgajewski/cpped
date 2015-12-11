@@ -2,7 +2,7 @@
 
 #include "ncurses_window.hh"
 
-namespace cpped {
+namespace nct {
 
 class ncurses_env
 {

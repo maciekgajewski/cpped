@@ -2,9 +2,9 @@
 
 #include "event_dispatcher.hh"
 
-namespace cpped {
+namespace nct {
 
-event_window::event_window(cpped::event_dispatcher& ed, cpped::ncurses_window& window, int z, event_window* parent)
+event_window::event_window(event_dispatcher& ed, ncurses_window& window, int z, event_window* parent)
 	: event_dispatcher_(ed), window_(window), z_(z), parent_(parent)
 {
 	event_dispatcher_.add_window(this);

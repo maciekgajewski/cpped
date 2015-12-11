@@ -1,13 +1,12 @@
-#include <ncursesw/ncurses.h>
-
-#include "ncurses_env.hh"
 #include "editor_window.hh"
 #include "styles.hh"
 #include "project.hh"
-#include "event_dispatcher.hh"
 
 #include "document_lib/document.hh"
 #include "document_lib/cpp_parser.hh"
+
+#include "nct/ncurses_env.hh"
+#include "nct/event_dispatcher.hh"
 
 #include <iostream>
 #include <string>
@@ -44,11 +43,11 @@ int main(int argc, char** argv)
 	}
 
 	::setlocale(LC_ALL, "en_EN.utf-8");
-	cpped::ncurses_env env;
+	nct::ncurses_env env;
 	auto ss = env.get_stdscr();
 
 
-	cpped::event_dispatcher dispatcher;
+	nct::event_dispatcher dispatcher;
 	cpped::style_manager styles;
 	cpped::editor_window editor(dispatcher, ss, styles, document);
 	editor.set_active(); // so it recevies input

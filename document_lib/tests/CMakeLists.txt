@@ -10,3 +10,4 @@ target_link_libraries(document_lib_tests
 	${Boost_unit_test_framework_LIBRARY}
 )
 
+add_test(document_lib_tests document_lib_tests)

@@ -5,7 +5,7 @@
 
 #include <ncursesw/ncurses.h>
 
-namespace cpped {
+namespace nct {
 
 class event_window;
 

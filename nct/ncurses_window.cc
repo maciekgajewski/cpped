@@ -4,7 +4,7 @@
 
 #include <cstdarg>
 
-namespace cpped {
+namespace nct {
 
 ncurses_window::ncurses_window(int height, int width, int starty, int startx)
 {
