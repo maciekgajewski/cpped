@@ -60,6 +60,7 @@ void document::remove(range r)
 
 	data_.emplace_back();
 	data_.back().copy_removing(*current_data_, r);
+	current_data_++;
 
 	crop_history();
 }
@@ -69,6 +70,13 @@ position document::remove_before(position pos, unsigned count)
 	position begin = current_data_->shift_back(pos, count);
 	remove(range{begin, pos});
 	return begin;
+}
+
+position document::remove_after(position pos, unsigned count)
+{
+	position end = current_data_->shift_forward(pos, count);
+	remove(range{pos, end});
+	return end;
 }
 
 void document::parse_language()

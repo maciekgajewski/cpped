@@ -97,7 +97,7 @@ void line_data::copy_and_remove(const line_data& source, unsigned removed_begin,
 			{
 				if (token.begin < removed_begin)
 				{
-					// end of tokenclipped
+					// end of token clipped
 					tokens_.push_back(token);
 					tokens_.back().end = removed_begin;
 				}
@@ -105,10 +105,14 @@ void line_data::copy_and_remove(const line_data& source, unsigned removed_begin,
 			}
 			else
 			{
-				// fully after the removed part
 				tokens_.push_back(token);
 				tokens_.back().end -= (removed_end-removed_begin);
-				tokens_.back().begin -= (removed_end-removed_begin);
+				if (token.begin > removed_end)
+					// fully after the removed part
+					tokens_.back().begin -= (removed_end-removed_begin);
+				else
+					// front of the token clipped
+					tokens_.back().begin = removed_begin;
 			}
 		}
 	}

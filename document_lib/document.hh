@@ -66,8 +66,10 @@ public:
 
 	// removes indicated range
 	void remove(range r);
-	// removes characters befoire the positon, returns the position of the begining of the removed range
+	// removes characters before the positon, returns the position of the begining of the removed range
 	position remove_before(position pos, unsigned count);
+	// removes characters after the positon, returns the position of the end of the removed range
+	position remove_after(position pos, unsigned count);
 
 
 	// iterates over no more than 'count' lines in range, starting from first_line

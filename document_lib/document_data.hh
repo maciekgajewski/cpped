@@ -49,6 +49,8 @@ public:
 
 	// returns position shifted by number of characters back
 	position shift_back(position p, unsigned shift);
+	// returns position shifted by number of characters forward
+	position shift_forward(position p, unsigned shift);
 
 private:
 

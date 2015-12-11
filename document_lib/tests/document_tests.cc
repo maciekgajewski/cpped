@@ -342,7 +342,61 @@ BOOST_AUTO_TEST_CASE(multiline_insert_no_tokens)
 	doc.insert(position{6, 4}, "alpha\nbeta\ngamma");
 	BOOST_CHECK_EQUAL(doc.to_string(), "aa\nbb\ncc11xxx\nyyy\nzzz22\n333\n5566alpha\nbeta\ngamma");
 	BOOST_CHECK_EQUAL(doc.get_line_count(), 9);
+}
 
+BOOST_AUTO_TEST_CASE(remove_single_char_no_tokens)
+{
+	std::string text = "aaa\n123456\nzzz";
+	document doc;
+	doc.load_from_raw_data(text, "");
+
+
+	doc.remove_before(position{1, 1}, 1); // remove '1'
+
+	BOOST_CHECK_EQUAL(doc.get_line_count(), 3);
+	BOOST_CHECK_EQUAL(doc.to_string(), "aaa\n23456\nzzz");
+	BOOST_CHECK_EQUAL(doc.get_line(1).to_string(), "23456");
+
+
+	doc.remove_after(position{1, 4}, 1); // remove '6'
+
+	BOOST_CHECK_EQUAL(doc.get_line_count(), 3);
+	BOOST_CHECK_EQUAL(doc.to_string(), "aaa\n2345\nzzz");
+	BOOST_CHECK_EQUAL(doc.get_line(1).to_string(), "2345");
+
+	doc.remove(range{position{1, 1}, position{1, 3}}); // remove '34'
+	BOOST_CHECK_EQUAL(doc.to_string(), "aaa\n25\nzzz");
+	BOOST_CHECK_EQUAL(doc.get_line(1).to_string(), "25");
+}
+
+BOOST_AUTO_TEST_CASE(remove_single_line_tokens)
+{
+	std::string text = "1122334455";
+
+	document_data data;
+	data.load_from_raw_data(text);
+
+	BOOST_REQUIRE_EQUAL(data.get_line_count(), 1);
+
+	data.get_line(0).push_back_token(line_token{0, 2, token_type::keyword});
+	data.get_line(0).push_back_token(line_token{2, 4, token_type::literal});
+	data.get_line(0).push_back_token(line_token{4, 6, token_type::preprocessor});
+	data.get_line(0).push_back_token(line_token{6, 8, token_type::type});
+	data.get_line(0).push_back_token(line_token{8, 10, token_type::comment});
+
+	document_data edited;
+	edited.copy_removing(data, range{position{0, 3}, position{0, 7}}); // leave "112455"
+
+	BOOST_CHECK_EQUAL(edited.to_string(), "112455");
+	BOOST_REQUIRE_EQUAL(edited.get_line_count(), 1);
+	BOOST_CHECK_EQUAL(edited.get_line(0).to_string(), "112455");
+
+	const auto& tokens = edited.get_line(0).get_tokens();
+	BOOST_REQUIRE_EQUAL(tokens.size(), 4); // 11 2 4 55
+	BOOST_CHECK_EQUAL(tokens[0], (line_token{0, 2, token_type::keyword})); // 11
+	BOOST_CHECK_EQUAL(tokens[1], (line_token{2, 3, token_type::literal})); // 2
+	BOOST_CHECK_EQUAL(tokens[2], (line_token{3, 4, token_type::type}));    // 4
+	BOOST_CHECK_EQUAL(tokens[3], (line_token{4, 6, token_type::comment})); // 55
 }
 
 

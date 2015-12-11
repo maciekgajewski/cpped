@@ -224,6 +224,31 @@ position document_data::shift_back(position p, unsigned shift)
 	return p;
 }
 
+position document_data::shift_forward(position p, unsigned shift)
+{
+	assert(p.line < lines_.size());
+	assert(p.column <= lines_[p.line].get_length());
+	while(shift > 0)
+	{
+		if (lines_[p.line].get_length() - p.column >= shift)
+		{
+			p.column += shift;
+			shift = 0;
+		}
+		else
+		{
+			// move one line down, if possible
+			if (p.line == lines_.size()-1)
+				break;
+
+			shift -= lines_[p.line].get_length() - p.column + 1;
+			p.line++;
+			p.column = 0;
+		}
+	}
+	return p;
+}
+
 data_type::const_iterator document_data::positon_to_offset(position pos) const
 {
 	assert(pos.line < lines_.size());
