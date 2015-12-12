@@ -1,5 +1,8 @@
 #pragma once
 #include "ncurses_inc.hh"
+#include "event_window.hh"
+
+#include <boost/container/flat_map.hpp>
 
 #include <vector>
 #include <string>
@@ -7,7 +10,16 @@
 
 namespace nct {
 
-class event_window;
+class color_palette
+{
+public:
+
+	int get_pair_for_colors(int bg, int fg);
+
+private:
+	boost::container::flat_map<std::pair<int, int>, int> color_pairs;
+};
+
 
 class event_dispatcher
 {
@@ -20,6 +32,10 @@ public:
 	void exit();
 	void run();
 
+	color_palette& get_palette() { return palette_; }
+
+	event_window* get_active_window() const { return active_window_; }
+
 private:
 
 	// window interface
@@ -31,11 +47,13 @@ private:
 	void send_special_key(int c, const char* key_name);
 	void send_sequence(std::string& seq);
 
-	std::vector<event_window*> windows_;
+	window_set windows_;
 	event_window* active_window_ = nullptr;
 	bool run_ = true;
 	std::string quit_key_;
 	WINDOW* get_active_ncurses_window() const;
+
+	color_palette palette_;
 
 	friend class event_window;
 };

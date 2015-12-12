@@ -5,31 +5,8 @@
 namespace cpped
 {
 
-int cpped::color_palette::get_pair_for_colors(int bg, int fg)
-{
-	auto key = std::make_pair(bg, fg);
-	auto it = color_pairs.find(key);
-	if (it == color_pairs.end())
-	{
-		// new pair is needed
-		if (color_pairs.size() == COLOR_PAIRS)
-		{
-			throw std::runtime_error("All color pairs used");
-		}
-
-		int pair = color_pairs.size();
-		::init_pair(pair, fg, bg);
-
-		color_pairs.insert(std::make_pair(key, pair));
-		return pair;
-	}
-	else
-	{
-		return it->second;
-	}
-}
-
-style_manager::style_manager()
+style_manager::style_manager(nct::color_palette& pal)
+	 : palette(pal)
 {
 	int bg = COLOR_BLACK; // default background
 

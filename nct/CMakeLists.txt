@@ -5,6 +5,7 @@ add_library(nct
 	ncurses_window.cc ncurses_window.hh
 	types.hh
 	ncurses_inc.hh
+	line_edit.cc line_edit.hh
 )
 
 target_include_directories(nct INTERFACE ..)

@@ -6,10 +6,39 @@
 #include <boost/optional.hpp>
 
 #include <string>
+#include <vector>
+#include <algorithm>
+#include <stdexcept>
 
 namespace nct {
 
 class event_dispatcher;
+class event_window;
+class color_palette;
+
+class window_set : public std::vector<event_window*>
+{
+public:
+	void insert(event_window* win)
+	{
+		auto it = std::find(begin(), end(), win);
+		if (it != end())
+		{
+			throw std::logic_error("window added twice");
+		}
+		push_back(win);
+	}
+
+	void remove(event_window* win)
+	{
+		auto it = std::find(begin(), end(), win);
+		if (it == end())
+		{
+			throw std::logic_error("window removed twice");
+		}
+		erase(it);
+	}
+};
 
 class event_window
 {
@@ -39,6 +68,7 @@ public:
 	// window state manipulation
 
 	void set_active();
+	bool is_active() const;
 
 	void hide();
 	void show();
@@ -58,10 +88,20 @@ public:
 	// note: the reference may be invalidated by call to hide() or another method. Do not store!
 	ncurses_window& get_ncurses_window();
 
+	// called by the window system
+	void do_show_cursor();
+
 protected:
+
+	virtual void on_resized() {}
+
+	void show_cursor(const position& pos) { cursor_position_ = pos; }
+	void hide_cursor() { cursor_position_ = boost::none; }
 
 	// converts local to global (screen) coordinates
 	position to_global(const position& pos);
+
+	color_palette& get_palette();
 
 private:
 
@@ -71,7 +111,9 @@ private:
 	event_window* parent_;
 	position position_ = {0, 0};
 	size size_ = {0, 0};
-
+	window_set children_;
+	boost::optional<position> cursor_position_;
 };
+
 
 }

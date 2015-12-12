@@ -9,6 +9,31 @@
 
 namespace nct {
 
+int color_palette::get_pair_for_colors(int bg, int fg)
+{
+	auto key = std::make_pair(bg, fg);
+	auto it = color_pairs.find(key);
+	if (it == color_pairs.end())
+	{
+		// new pair is needed
+		if (color_pairs.size() == COLOR_PAIRS)
+		{
+			throw std::runtime_error("All color pairs used");
+		}
+
+		int pair = color_pairs.size();
+		::init_pair(pair, fg, bg);
+
+		color_pairs.insert(std::make_pair(key, pair));
+		return pair;
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+
 void event_dispatcher::exit()
 {
 	run_ = false;
@@ -27,6 +52,9 @@ void event_dispatcher::run()
 		WINDOW* active_window = get_active_ncurses_window();
 		::wtimeout(active_window, 0); // enter non-blocking mode
 		int c = ::wgetch(active_window);
+
+		if (active_window_)
+			active_window_->do_show_cursor();
 
 		if (c == ERR)
 		{
@@ -77,22 +105,12 @@ void event_dispatcher::run()
 
 void event_dispatcher::add_window(event_window* win)
 {
-	auto it = std::find(windows_.begin(), windows_.end(), win);
-	if (it != windows_.end())
-	{
-		throw std::logic_error("window added twice");
-	}
-	windows_.push_back(win);
+	windows_.insert(win);
 }
 
 void event_dispatcher::remove_window(event_window* win)
 {
-	auto it = std::find(windows_.begin(), windows_.end(), win);
-	if (it == windows_.end())
-	{
-		throw std::logic_error("window removed twice");
-	}
-	windows_.erase(it);
+	windows_.remove(win);
 	if (active_window_ == win)
 		active_window_ = nullptr;
 }

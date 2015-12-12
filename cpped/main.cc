@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 	auto scr = env.get_stdscr();
 
 	nct::event_dispatcher dispatcher;
-	cpped::style_manager styles;
+	cpped::style_manager styles(dispatcher.get_palette());
 	cpped::editor_window editor(dispatcher, styles, document);
 	editor.set_size(scr.get_size());
 	editor.set_active(); // so it recevies input

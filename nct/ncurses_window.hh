@@ -28,6 +28,7 @@ public:
 	void clear() { ::wclear(win_); }
 	void clear_to_eol() { ::wclrtoeol(win_); }
 	void move_cursor(int row, int col) { ::wmove(win_, row, col); }
+	void move_cursor(const position& pos) { ::wmove(win_, pos.y, pos.x); }
 
 	// redraw/refresh
 

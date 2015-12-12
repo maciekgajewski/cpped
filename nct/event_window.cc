@@ -1,3 +1,5 @@
+#include "ncurses_inc.hh"
+
 #include "event_window.hh"
 
 #include "event_dispatcher.hh"
@@ -8,16 +10,27 @@ event_window::event_window(event_dispatcher& ed, event_window* parent)
 	: event_dispatcher_(ed), parent_(parent)
 {
 	event_dispatcher_.add_window(this);
+	if (parent)
+		parent->children_.insert(this);
 }
 
 event_window::~event_window()
 {
 	event_dispatcher_.remove_window(this);
+	if (parent_)
+		parent_->children_.remove(this);
+	for(event_window* child: children_)
+		child->parent_ = nullptr;
 }
 
 void event_window::set_active()
 {
 	event_dispatcher_.set_active_window(this);
+}
+
+bool event_window::is_active() const
+{
+	return event_dispatcher_.get_active_window() == this;
 }
 
 void event_window::hide()
@@ -26,6 +39,8 @@ void event_window::hide()
 	{
 		window_.reset();
 		on_hidden();
+		for(event_window* child : children_)
+			child->hide();
 	}
 }
 
@@ -36,24 +51,30 @@ void event_window::show()
 		position global_pos = to_global(position_);
 		window_.emplace(size_.h, size_.w, global_pos.y, global_pos.x);
 		on_shown();
+		for(event_window* child : children_)
+			child->show();
 	}
 }
 
 void event_window::move(const position& pos, const size& sz)
 {
-	if (window_)
+	if (pos != position_ || sz != size_)
 	{
-		if (sz != size_)
+		if (window_)
 		{
-			window_->resize(sz.h, sz.w);
+			if (sz != size_)
+			{
+				window_->resize(sz.h, sz.w);
+			}
+			if (pos != position_)
+			{
+				window_->move(pos.y, pos.x);
+			}
 		}
-		if (pos != position_)
-		{
-			window_->move(pos.y, pos.x);
-		}
+		position_ = pos;
+		size_ = sz;
+		on_resized();
 	}
-	position_ = pos;
-	size_ = sz;
 }
 
 ncurses_window&event_window::get_ncurses_window()
@@ -68,6 +89,19 @@ ncurses_window&event_window::get_ncurses_window()
 	}
 }
 
+void event_window::do_show_cursor()
+{
+	if (window_ && cursor_position_)
+	{
+		::curs_set(1);
+		window_->move_cursor(*cursor_position_);
+	}
+	else
+	{
+		::curs_set(0);
+	}
+}
+
 position event_window::to_global(const position& pos)
 {
 	if (parent_)
@@ -78,6 +112,11 @@ position event_window::to_global(const position& pos)
 	{
 		return position_ + pos;
 	}
+}
+
+color_palette& event_window::get_palette()
+{
+	return event_dispatcher_.get_palette();
 }
 
 }

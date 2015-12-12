@@ -12,6 +12,7 @@ namespace cpped {
 
 editor_window::editor_window(nct::event_dispatcher& ed, style_manager& sm, document::document& doc)
 	: event_window(ed, nullptr), styles_(sm), editor_(*this, doc)
+	, navigator_(ed, this)
 {
 }
 
@@ -36,6 +37,11 @@ void editor_window::on_mouse(const MEVENT& event)
 void editor_window::on_shown()
 {
 	editor_.update();
+}
+
+void editor_window::on_resized()
+{
+	navigator_.move(nct::position{0, 5}, nct::size{0, get_size().w - 5});
 }
 
 void editor_window::render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width)
@@ -98,12 +104,11 @@ void editor_window::refresh_cursor(int wy, int wx)
 
 	if (x >= 0 && y >= 0 && x < get_workspace_width() && y < get_workspace_height())
 	{
-		::curs_set(1);
-		window.move_cursor(y, x);
+		show_cursor({y,x});
 	}
 	else
 	{
-		::curs_set(0); // hide cursor
+		hide_cursor();
 	}
 
 	window.redraw();

@@ -2,6 +2,8 @@
 
 #include "editor.hh"
 
+#include "navigator_widget.hh"
+
 #include "nct/event_window.hh"
 
 #include <chrono>
@@ -36,6 +38,7 @@ public:
 	bool on_special_key(int key_code, const char* key_name) override;
 	void on_mouse(const MEVENT& event) override;
 	void on_shown() override;
+	void on_resized() override;
 
 	void render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width);
 	void update_status_info(const status_info& info);
@@ -59,6 +62,7 @@ private:
 
 	style_manager& styles_;
 	editor editor_;
+	navigator_widget navigator_;
 };
 
 }
