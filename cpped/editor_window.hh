@@ -30,7 +30,7 @@ public:
 	void on_shown() override;
 
 	void render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width);
-	void update_status_line(unsigned docy, unsigned docx, unsigned column, std::chrono::high_resolution_clock::duration last_parse_time);
+	void update_status_line(unsigned docy, unsigned docx, unsigned column, const std::string& status_text);
 	void refresh_cursor(int wy, int wx);
 
 	unsigned get_workspace_width() const;

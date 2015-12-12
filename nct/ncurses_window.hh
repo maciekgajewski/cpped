@@ -1,8 +1,10 @@
 #pragma once
 
+#include "types.hh"
+
 #include <ncursesw/ncurses.h>
 
-#include "types.hh"
+#include <string>
 
 namespace nct {
 
@@ -18,6 +20,7 @@ public:
 
 	void print(const char* text) { ::wprintw(win_, text); }
 	void print(const char* text, unsigned length) {::waddnstr(win_, text, length);}
+	void print(const std::string& s) { print(s.c_str()); }
 	void attr_print(attr_t attr, const char* text, unsigned length);
 	void put_char(chtype c) { ::waddch(win_, c); }
 	void refresh() { ::wrefresh(win_); }

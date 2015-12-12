@@ -129,7 +129,14 @@ void editor::request_cursor_update()
 	int cx = column - int(first_column_);
 	int cy = int(cursor_pos_.line )- int(first_line_);
 
-	window_.update_status_line(cursor_pos_.line, cursor_pos_.column, column, doc_.get_last_parse_time());
+
+	// last parse time
+	using namespace std::literals::chrono_literals;
+
+	char status_text[64];
+	std::snprintf(status_text, 64, "parsing: %.2fms", 0.001 * doc_.get_last_parse_time()/1us);
+
+	window_.update_status_line(cursor_pos_.line, cursor_pos_.column, column, status_text);
 	window_.refresh_cursor(cy, cx);
 }
 

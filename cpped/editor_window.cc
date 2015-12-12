@@ -65,9 +65,10 @@ void editor_window::render(document::document& doc, unsigned first_column, unsig
 	doc.for_lines(first_line, window.get_height(), [&](const document::document_line& line)
 	{
 		window.move_cursor(line_no, 0);
+		line_no++;
 
 		// print line number
-		std::snprintf(lineno, 32, fmt, first_line+line_no++);
+		std::snprintf(lineno, 32, fmt, first_line+line_no);
 		window.attr_print(styles_.line_numbers, lineno, left_margin_width_);
 
 		// print line
@@ -159,7 +160,7 @@ void editor_window::put_visual_tab(nct::ncurses_window& window)
 	}
 }
 
-void editor_window::update_status_line(unsigned docy, unsigned docx, unsigned column, std::chrono::high_resolution_clock::duration last_parse_time)
+void editor_window::update_status_line(unsigned docy, unsigned docx, unsigned column, const std::string& status_text)
 {
 	if (!is_visible()) return;
 	nct::ncurses_window& window = get_ncurses_window();
@@ -172,11 +173,9 @@ void editor_window::update_status_line(unsigned docy, unsigned docx, unsigned co
 	std::snprintf(buf, 32, "%d : %d-%d ", docy+1, docx+1, column+1);
 	window.print(buf);
 
-	// last parse time
-	using namespace std::literals::chrono_literals;
-	window.move_cursor(get_size().h-1, 20);
-	std::snprintf(buf, 32, "%.2fms", 0.001 * last_parse_time/1us);
-	window.print(buf);
+	// TODO status text
+	window.move_cursor(window.get_height()-1, 20);
+	window.print(status_text);
 
 	window.redraw();
 	window.no_out_refresh();
