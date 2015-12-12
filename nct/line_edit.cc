@@ -22,9 +22,17 @@ unsigned line_edit::on_sequence(const std::string& s)
 	// consume everything up to the first \n
 	auto endl_pos = std::find(s.begin(), s.end(), '\n');
 
-	text_.insert(text_.begin() + cursor_pos_, s.begin(), endl_pos);
-	cursor_pos_ += endl_pos - s.begin();
-	update();
+	if (endl_pos != s.begin())
+	{
+		text_.insert(text_.begin() + cursor_pos_, s.begin(), endl_pos);
+		cursor_pos_ += endl_pos - s.begin();
+		text_changed(text_);
+		update();
+	}
+	if (endl_pos != s.end())
+	{
+		enter_pressed();
+	}
 
 	return endl_pos - s.begin();
 }
@@ -83,6 +91,7 @@ void line_edit::backspace()
 	{
 		cursor_pos_--;
 		text_.erase(text_.begin() + cursor_pos_);
+		text_changed(text_);
 		update();
 	}
 }
@@ -92,6 +101,7 @@ void line_edit::del()
 	if (cursor_pos_ < text_.size())
 	{
 		text_.erase(text_.begin() + cursor_pos_);
+		text_changed(text_);
 		update();
 	}
 }

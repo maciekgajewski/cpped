@@ -2,6 +2,8 @@
 
 #include "event_window.hh"
 
+#include <boost/signals2.hpp>
+
 #include <string>
 
 namespace nct {
@@ -16,6 +18,9 @@ public:
 
 	void set_help_text(const std::string& t) { help_text_ = t; }
 	void set_text(const std::string& t);
+
+	boost::signals2::signal<void(const std::string&)> text_changed;
+	boost::signals2::signal<void()> enter_pressed;
 
 private:
 
