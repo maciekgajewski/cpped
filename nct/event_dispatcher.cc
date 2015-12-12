@@ -45,7 +45,7 @@ void event_dispatcher::run()
 	std::string input_buffer;
 	MEVENT mouse_event;
 
-	::doupdate(); // draw any changes that has been shcheduled before the call
+	render_windows(); // draw any changes that has been shcheduled before the call
 
 	while(run_)
 	{
@@ -134,7 +134,7 @@ void event_dispatcher::send_special_key(int c, const char* key_name)
 	{
 		if (win->on_special_key(c, key_name))
 		{
-			::doupdate();
+			render_windows();
 			break;
 		}
 		else
@@ -162,9 +162,21 @@ void event_dispatcher::send_sequence(std::string& seq)
 			remaining_chars = seq.length();
 			win = win->get_parent();
 		}
-		::doupdate();
+		render_windows();
 	}
 	seq.clear();
+}
+
+void event_dispatcher::render_windows()
+{
+	std::sort(windows_.begin(), windows_.end(),
+		[](const event_window* a, const event_window* b) { return a->get_z() < b->get_z(); });
+
+	for(event_window* w : windows_)
+	{
+		w->do_refresh();
+	}
+	::doupdate();
 }
 
 WINDOW* event_dispatcher::get_active_ncurses_window() const

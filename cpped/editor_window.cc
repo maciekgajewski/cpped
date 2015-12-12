@@ -41,7 +41,7 @@ void editor_window::on_shown()
 
 void editor_window::on_resized()
 {
-	navigator_.move(nct::position{0, 5}, nct::size{0, get_size().w - 5});
+	navigator_.move(nct::position{1, 5}, nct::size{1, get_size().w - 5});
 }
 
 void editor_window::render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width)
@@ -90,14 +90,12 @@ void editor_window::render(document::document& doc, unsigned first_column, unsig
 		});
 	});
 
-	window.redraw();
-	window.no_out_refresh();
+	refresh_window();
 }
 
 void editor_window::refresh_cursor(int wy, int wx)
 {
 	if (!is_visible()) return;
-	nct::ncurses_window& window = get_ncurses_window();
 
 	int x = wx + left_margin_width_;
 	int y = wy + top_margin_;
@@ -111,8 +109,7 @@ void editor_window::refresh_cursor(int wy, int wx)
 		hide_cursor();
 	}
 
-	window.redraw();
-	window.no_out_refresh();
+	refresh_window();
 }
 
 unsigned editor_window::render_text(nct::ncurses_window& window, attr_t attr, unsigned tab_width, unsigned first_column, unsigned phys_column, const char* begin, const char* end)
@@ -196,8 +193,7 @@ void editor_window::update_status_info(const status_info& info)
 	window.move_cursor(window.get_height()-1, 20);
 	window.print(info.status_text);
 
-	window.redraw();
-	window.no_out_refresh();
+	refresh_window();
 }
 
 unsigned editor_window::get_workspace_width() const

@@ -79,6 +79,7 @@ public:
 
 	const size& get_size() const { return size_; }
 	const position& get_position() const { return position_; }
+	int get_z() const { return z_; }
 
 	void move(const position& pos, const size& sz);
 	void set_size(const size& sz) { move(position_, sz); }
@@ -90,6 +91,7 @@ public:
 
 	// called by the window system
 	void do_show_cursor();
+	void do_refresh();
 
 protected:
 
@@ -97,6 +99,7 @@ protected:
 
 	void show_cursor(const position& pos) { cursor_position_ = pos; }
 	void hide_cursor() { cursor_position_ = boost::none; }
+	void refresh_window() { refresh_requested_ = true; }
 
 	// converts local to global (screen) coordinates
 	position to_global(const position& pos);
@@ -113,6 +116,7 @@ private:
 	size size_ = {0, 0};
 	window_set children_;
 	boost::optional<position> cursor_position_;
+	bool refresh_requested_ = false; // TODO this is ignored now, remove if not used
 };
 
 

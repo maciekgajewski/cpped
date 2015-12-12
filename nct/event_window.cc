@@ -9,18 +9,24 @@ namespace nct {
 event_window::event_window(event_dispatcher& ed, event_window* parent)
 	: event_dispatcher_(ed), parent_(parent)
 {
-	event_dispatcher_.add_window(this);
 	if (parent)
 		parent->children_.insert(this);
+	else
+		event_dispatcher_.add_window(this);
 }
 
 event_window::~event_window()
 {
-	event_dispatcher_.remove_window(this);
 	if (parent_)
 		parent_->children_.remove(this);
+	else
+		event_dispatcher_.remove_window(this);
+
 	for(event_window* child: children_)
+	{
 		child->parent_ = nullptr;
+		event_dispatcher_.add_window(child);
+	}
 }
 
 void event_window::set_active()
@@ -100,6 +106,23 @@ void event_window::do_show_cursor()
 	{
 		::curs_set(0);
 	}
+}
+
+void event_window::do_refresh()
+{
+	if (window_)
+	{
+//		if (refresh_requested_) We should draw all windows
+//		{
+			window_->redraw();
+			window_->no_out_refresh();
+//			refresh_requested_ = false;
+//		}
+
+		for(event_window* child : children_)
+			child->do_refresh();
+	}
+
 }
 
 position event_window::to_global(const position& pos)

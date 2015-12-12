@@ -20,7 +20,7 @@ private:
 
 	void render();
 
-	std::string text_;
+	std::string text_ = "123 test";
 	unsigned cursor_pos_ = 0;
 	unsigned first_column_ = 0;
 };

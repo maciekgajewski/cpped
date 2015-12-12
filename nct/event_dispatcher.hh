@@ -47,6 +47,8 @@ private:
 	void send_special_key(int c, const char* key_name);
 	void send_sequence(std::string& seq);
 
+	void render_windows();
+
 	window_set windows_;
 	event_window* active_window_ = nullptr;
 	bool run_ = true;

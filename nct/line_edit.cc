@@ -37,7 +37,7 @@ void line_edit::render()
 		hide_cursor();
 	}
 
-
+	refresh_window();
 }
 
 }
