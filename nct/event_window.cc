@@ -32,6 +32,7 @@ event_window::~event_window()
 void event_window::set_active()
 {
 	event_dispatcher_.set_active_window(this);
+	on_activated();
 }
 
 bool event_window::is_active() const
@@ -97,10 +98,10 @@ ncurses_window&event_window::get_ncurses_window()
 
 void event_window::do_show_cursor()
 {
-	if (window_ && cursor_position_)
+	if (window_ && requested_cursor_position_)
 	{
 		::curs_set(1);
-		window_->move_cursor(*cursor_position_);
+		window_->move_cursor(*requested_cursor_position_);
 	}
 	else
 	{

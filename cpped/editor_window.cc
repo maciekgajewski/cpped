@@ -24,7 +24,16 @@ unsigned editor_window::on_sequence(const std::string& s)
 
 bool editor_window::on_special_key(int key_code, const char* key_name)
 {
-	// TODO handle any events belonging to me
+	static const std::string navigation = "^K";
+
+	if (key_name == navigation)
+	{
+		navigator_.set_active();
+		return true;
+	}
+
+
+
 	return editor_.on_special_key(key_code, key_name);
 }
 

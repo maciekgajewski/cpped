@@ -69,6 +69,7 @@ public:
 
 	void set_active();
 	bool is_active() const;
+	virtual void on_activated() {}
 
 	void hide();
 	void show();
@@ -97,8 +98,8 @@ protected:
 
 	virtual void on_resized() {}
 
-	void show_cursor(const position& pos) { cursor_position_ = pos; }
-	void hide_cursor() { cursor_position_ = boost::none; }
+	void show_cursor(const position& pos) { requested_cursor_position_ = pos; }
+	void hide_cursor() { requested_cursor_position_ = boost::none; }
 	void refresh_window() { refresh_requested_ = true; }
 
 	// converts local to global (screen) coordinates
@@ -115,7 +116,7 @@ private:
 	position position_ = {0, 0};
 	size size_ = {0, 0};
 	window_set children_;
-	boost::optional<position> cursor_position_;
+	boost::optional<position> requested_cursor_position_;
 	bool refresh_requested_ = false; // TODO this is ignored now, remove if not used
 };
 

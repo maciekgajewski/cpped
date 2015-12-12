@@ -15,12 +15,88 @@ void line_edit::set_text(const std::__cxx11::string& t)
 	first_column_ = 0;
 }
 
-void line_edit::on_shown()
+unsigned line_edit::on_sequence(const std::string& s)
 {
-	render();
+	assert(cursor_pos_ <= text_.size());
+
+	// consume everything up to the first \n
+	auto endl_pos = std::find(s.begin(), s.end(), '\n');
+
+	text_.insert(text_.begin() + cursor_pos_, s.begin(), endl_pos);
+	cursor_pos_ += endl_pos - s.begin();
+	update();
+
+	return endl_pos - s.begin();
 }
 
-void line_edit::render()
+bool line_edit::on_special_key(int key_code, const char* key_name)
+{
+	switch(key_code)
+	{
+		case KEY_LEFT:
+			cursor_left(); return true;
+		case KEY_RIGHT:
+			cursor_right(); return true;
+		case KEY_BACKSPACE:
+			backspace(); return true;
+		case KEY_DC:
+			del(); return true;
+	}
+
+	return false;
+}
+
+void line_edit::on_shown()
+{
+	update();
+}
+
+void line_edit::cursor_left()
+{
+	if (cursor_pos_ > 0)
+	{
+		cursor_pos_--;
+		if (cursor_pos_ < first_column_)
+		{
+			first_column_ = cursor_pos_;
+		}
+		update();
+	}
+}
+
+void line_edit::cursor_right()
+{
+	if (cursor_pos_ < text_.size())
+	{
+		cursor_pos_++;
+		if (cursor_pos_ + first_column_ >= get_size().w)
+		{
+			first_column_++;
+		}
+		update();
+	}
+}
+
+void line_edit::backspace()
+{
+	if (cursor_pos_ > 0)
+	{
+		cursor_pos_--;
+		text_.erase(text_.begin() + cursor_pos_);
+		update();
+	}
+}
+
+void line_edit::del()
+{
+	if (cursor_pos_ < text_.size())
+	{
+		text_.erase(text_.begin() + cursor_pos_);
+		update();
+	}
+}
+
+void line_edit::update()
 {
 	if (!is_visible()) return;
 	ncurses_window& window = get_ncurses_window();

@@ -7,11 +7,14 @@ namespace cpped
 {
 
 // widget for code navigation,. Something like addressbar in a web broser. An inplementation of QtCreator's Ctrl-K tool.
-class navigator_widget : public nct::event_window
+class navigator_widget final : public nct::event_window
 {
 public:
 
 	navigator_widget(nct::event_dispatcher& ed, nct::event_window* parent);
+
+	void on_activated() override { editor_.set_active(); }
+
 
 private:
 

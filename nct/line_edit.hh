@@ -19,9 +19,17 @@ public:
 
 private:
 
+	unsigned on_sequence(const std::string& s) override;
+	bool on_special_key(int key_code, const char* key_name) override;
+
 	void on_shown() override;
 
-	void render();
+	void cursor_left();
+	void cursor_right();
+	void backspace();
+	void del();
+
+	void update();
 
 	std::string text_;
 	std::string help_text_;
