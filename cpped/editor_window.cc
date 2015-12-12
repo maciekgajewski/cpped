@@ -160,22 +160,28 @@ void editor_window::put_visual_tab(nct::ncurses_window& window)
 	}
 }
 
-void editor_window::update_status_line(unsigned docy, unsigned docx, unsigned column, const std::string& status_text)
+void editor_window::update_status_info(const status_info& info)
 {
 	if (!is_visible()) return;
 	nct::ncurses_window& window = get_ncurses_window();
+
+
+	// top line
+
+
+	// bottom line
 
 	window.move_cursor(window.get_height()-1, 0);
 	window.clear_to_eol();
 	char buf[32];
 
 	// cursor pos. character under cursor
-	std::snprintf(buf, 32, "%d : %d-%d ", docy+1, docx+1, column+1);
+	std::snprintf(buf, 32, "%d : %d-%d ", info.docy+1, info.docx+1, info.column+1);
 	window.print(buf);
 
-	// TODO status text
+	// status text
 	window.move_cursor(window.get_height()-1, 20);
-	window.print(status_text);
+	window.print(info.status_text);
 
 	window.redraw();
 	window.no_out_refresh();

@@ -96,6 +96,8 @@ public:
 
 	position get_last_position() const { return current_data_->get_last_position(); }
 
+	bool has_unsaved_changed() const { return _has_unsaved_changes; }
+
 private:
 
 	void erase_redo(); // erases any data ahead of current_data_
@@ -108,6 +110,8 @@ private:
 
 	std::unique_ptr<iparser> parser_;
 	std::chrono::high_resolution_clock::duration last_parse_time_;
+
+	bool _has_unsaved_changes = false;
 };
 
 }}

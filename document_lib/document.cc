@@ -52,6 +52,8 @@ position document::insert(position pos, const std::string& text)
 
 	crop_history();
 
+	_has_unsaved_changes = true;
+
 	return final_pos;
 }
 
@@ -62,6 +64,8 @@ void document::remove(range r)
 	data_.emplace_back();
 	data_.back().copy_removing(*current_data_, r);
 	current_data_++;
+
+	_has_unsaved_changes = true;
 
 	crop_history();
 }

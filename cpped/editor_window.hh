@@ -22,6 +22,14 @@ class editor_window final : public nct::event_window
 {
 public:
 
+	struct status_info
+	{
+		unsigned docy, docx, column; // current cursor coordinates
+		std::string status_text; // extra text displayed in status line
+		std::string file_name;
+		bool unsaved; // if file has unsaved changes
+	};
+
 	editor_window(nct::event_dispatcher& ed, style_manager& sm, document::document& doc);
 
 	unsigned on_sequence(const std::string& s) override;
@@ -30,7 +38,7 @@ public:
 	void on_shown() override;
 
 	void render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width);
-	void update_status_line(unsigned docy, unsigned docx, unsigned column, const std::string& status_text);
+	void update_status_info(const status_info& info);
 	void refresh_cursor(int wy, int wx);
 
 	unsigned get_workspace_width() const;
@@ -43,7 +51,7 @@ private:
 	void put_visual_tab(nct::ncurses_window& window);
 
 	unsigned left_margin_width_ = 0; // calculated when rendering
-	unsigned top_margin_ = 0;
+	unsigned top_margin_ = 1;
 	unsigned bottom_margin_ = 1;
 
 	// settings
