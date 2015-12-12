@@ -92,6 +92,8 @@ void event_dispatcher::remove_window(event_window* win)
 		throw std::logic_error("window removed twice");
 	}
 	windows_.erase(it);
+	if (active_window_ == win)
+		active_window_ = nullptr;
 }
 
 void event_dispatcher::set_active_window(event_window* win)
