@@ -8,25 +8,26 @@ namespace nct {
 
 ncurses_window::ncurses_window(int height, int width, int starty, int startx)
 {
-	win = ::newwin(height, width, starty, startx);
+	win_ = ::newwin(height, width, starty, startx);
+	::keypad(win_, TRUE);
 }
 
 ncurses_window::ncurses_window(WINDOW* w)
-	:	win(w)
+	:	win_(w)
 {
 }
 
 ncurses_window::~ncurses_window()
 {
-	if (win != stdscr)
-		::delwin(win);
+	if (win_ != stdscr)
+		::delwin(win_);
 }
 
 void ncurses_window::attr_print(attr_t attr, const char* text, unsigned length)
 {
-	::wattron(win, attr);
-	::waddnstr(win, text, length);
-	::wattroff(win, attr);
+	::wattron(win_, attr);
+	::waddnstr(win_, text, length);
+	::wattroff(win_, attr);
 }
 
 }

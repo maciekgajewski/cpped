@@ -35,6 +35,7 @@ private:
 	event_window* active_window_ = nullptr;
 	bool run_ = true;
 	std::string quit_key_;
+	WINDOW* get_active_ncurses_window() const;
 
 	friend class event_window;
 };

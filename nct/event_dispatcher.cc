@@ -20,28 +20,29 @@ void event_dispatcher::run()
 	std::string input_buffer;
 	MEVENT mouse_event;
 
-	::timeout(0);
+	::doupdate(); // draw any changes that has been shcheduled before the call
 
 	while(run_)
 	{
-
-		int c = ::getch();
+		WINDOW* active_window = get_active_ncurses_window();
+		::wtimeout(active_window, 0); // enter non-blocking mode
+		int c = ::wgetch(active_window);
 
 		if (c == ERR)
 		{
 			send_sequence(input_buffer);
 			// no input, back off, wait for more
-			::timeout(10); // pool every 10ms
+			::wtimeout(active_window, 10); // pool every 10ms
 
 			while(true)
 			{
-				c = ::getch();
+				c = ::wgetch(get_active_ncurses_window());
 
 				// TODO poll for events here
 
 				if (c != ERR)
 				{
-					::timeout(0);
+					::wtimeout(active_window, 0);
 					break;
 				}
 			}
@@ -111,9 +112,18 @@ void event_dispatcher::send_special_key(int c, const char* key_name)
 {
 	event_window* win = active_window_;
 
-	while(win && !win->on_special_key(c, key_name))
+	while(win)
 	{
-		win = win->get_parent();
+		if (win->on_special_key(c, key_name))
+		{
+			::doupdate();
+			break;
+		}
+		else
+		{
+			// propagate event to parent window
+			win = win->get_parent();
+		}
 	}
 }
 
@@ -122,17 +132,33 @@ void event_dispatcher::send_sequence(std::string& seq)
 	event_window* win = active_window_;
 	unsigned remaining_chars = seq.length();
 
-	while(win && remaining_chars > 0)
+	if (win && remaining_chars > 0)
 	{
-		unsigned consumed = win->on_sequence(seq);
-		if (consumed > remaining_chars)
-			throw std::logic_error("on_sequence returned more than sequnece length");
+		while(win && remaining_chars > 0)
+		{
+			unsigned consumed = win->on_sequence(seq);
+			if (consumed > remaining_chars)
+				throw std::logic_error("on_sequence returned more than sequnece length");
 
-		seq.erase(0, seq.length() - consumed);
-		remaining_chars = seq.length();
-		win = win->get_parent();
+			seq.erase(0, seq.length() - consumed);
+			remaining_chars = seq.length();
+			win = win->get_parent();
+		}
+		::doupdate();
 	}
 	seq.clear();
+}
+
+WINDOW* event_dispatcher::get_active_ncurses_window() const
+{
+	if (active_window_ && active_window_->is_visible())
+	{
+		return active_window_->get_ncurses_window().get_window();
+	}
+	else
+	{
+		return ::stdscr;
+	}
 }
 
 }

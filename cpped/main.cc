@@ -44,11 +44,14 @@ int main(int argc, char** argv)
 
 	::setlocale(LC_ALL, "en_EN.utf-8");
 	nct::ncurses_env env;
+	auto scr = env.get_stdscr();
 
 	nct::event_dispatcher dispatcher;
 	cpped::style_manager styles;
-	cpped::editor_window editor(stdscr, dispatcher, styles, document);
+	cpped::editor_window editor(dispatcher, styles, document);
+	editor.set_size(scr.get_size());
 	editor.set_active(); // so it recevies input
+	editor.show();
 
 	dispatcher.set_global_quit_key("^X");
 	dispatcher.run();

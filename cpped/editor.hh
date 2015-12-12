@@ -19,6 +19,8 @@ public:
 	unsigned on_sequence(const std::string& sequence);
 	bool on_mouse(const MEVENT& event);
 
+	void update() { request_full_render(); }
+
 private:
 
 	// action handlers
