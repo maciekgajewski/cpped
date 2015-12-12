@@ -30,6 +30,7 @@ public:
 
 	int line_numbers;
 	int visual_tab;
+	int status;
 
 private:
 

@@ -42,6 +42,7 @@ style_manager::style_manager()
 
 	line_numbers = COLOR_PAIR(palette.get_pair_for_colors(COLOR_BLACK, COLOR_RED));
 	visual_tab = COLOR_PAIR(palette.get_pair_for_colors(bg, COLOR_CYAN));
+	status = COLOR_PAIR(palette.get_pair_for_colors(bg, COLOR_WHITE));
 }
 
 }

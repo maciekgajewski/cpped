@@ -1,9 +1,9 @@
 #pragma once
+#include "ncurses_inc.hh"
 
 #include <vector>
 #include <string>
 
-#include <ncursesw/ncurses.h>
 
 namespace nct {
 

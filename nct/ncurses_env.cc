@@ -1,4 +1,4 @@
-#include <ncursesw/ncurses.h>
+#include "ncurses_inc.hh"
 
 #include "ncurses_env.hh"
 

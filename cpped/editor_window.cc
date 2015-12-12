@@ -62,9 +62,9 @@ void editor_window::render(document::document& doc, unsigned first_column, unsig
 
 	// iterate over lines
 	int line_no = 0;
-	doc.for_lines(first_line, window.get_height(), [&](const document::document_line& line)
+	doc.for_lines(first_line, get_workspace_height(), [&](const document::document_line& line)
 	{
-		window.move_cursor(line_no, 0);
+		window.move_cursor(line_no + top_margin_, 0);
 		line_no++;
 
 		// print line number
@@ -150,9 +150,9 @@ void editor_window::put_visual_tab(nct::ncurses_window& window)
 {
 	if (visualise_tabs_)
 	{
-		window.set_attr(A_DIM);
+		window.set_attr_on(A_DIM);
 		window.put_char('|'); // TODO maybe use some cool unicode char?
-		window.unset_attr(A_DIM);
+		window.set_attr_off(A_DIM);
 	}
 	else
 	{
@@ -165,8 +165,16 @@ void editor_window::update_status_info(const status_info& info)
 	if (!is_visible()) return;
 	nct::ncurses_window& window = get_ncurses_window();
 
+	window.set_attr_on(styles_.status);
 
 	// top line
+	// window.horizontal_line(0,0, WACS_D_HLINE, window.get_width()); doesn't work on xfce (?)
+	window.horizontal_line(0, 0, ACS_HLINE, window.get_width());
+	int file_name_x = (window.get_width() - info.file_name.length()) / 2;
+	window.move_cursor(0, file_name_x);
+	window.print(info.file_name);
+	if (info.unsaved)
+		window.print("*");
 
 
 	// bottom line

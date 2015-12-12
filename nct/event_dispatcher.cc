@@ -1,8 +1,8 @@
+#include "ncurses_inc.hh"
+
 #include "event_dispatcher.hh"
 
 #include "event_window.hh"
-
-#include <ncursesw/ncurses.h>
 
 #include <algorithm>
 #include <stdexcept>
