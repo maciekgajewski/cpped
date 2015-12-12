@@ -53,9 +53,6 @@ void event_dispatcher::run()
 		::wtimeout(active_window, 0); // enter non-blocking mode
 		int c = ::wgetch(active_window);
 
-		if (active_window_)
-			active_window_->do_show_cursor();
-
 		if (c == ERR)
 		{
 			send_sequence(input_buffer);
@@ -176,7 +173,10 @@ void event_dispatcher::render_windows()
 	{
 		w->do_refresh();
 	}
+	if (active_window_)
+		active_window_->do_show_cursor();
 	::doupdate();
+
 }
 
 WINDOW* event_dispatcher::get_active_ncurses_window() const

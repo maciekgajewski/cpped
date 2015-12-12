@@ -7,6 +7,7 @@ navigator_widget::navigator_widget(nct::event_dispatcher& ed, nct::event_window*
 	: event_window(ed, parent)
 	, editor_(ed, this)
 {
+	editor_.set_help_text("type here to navigate (ctrl-k)");
 }
 
 void navigator_widget::on_resized()

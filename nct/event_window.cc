@@ -54,7 +54,7 @@ void event_window::show()
 {
 	if (!window_)
 	{
-		position global_pos = to_global(position_);
+		position global_pos = to_global({0 ,0});
 		window_.emplace(size_.h, size_.w, global_pos.y, global_pos.x);
 		on_shown();
 		for(event_window* child : children_)

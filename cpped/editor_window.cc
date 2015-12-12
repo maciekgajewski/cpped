@@ -41,7 +41,7 @@ void editor_window::on_shown()
 
 void editor_window::on_resized()
 {
-	navigator_.move(nct::position{1, 5}, nct::size{1, get_size().w - 5});
+	navigator_.move(nct::position{1, 5}, nct::size{1, get_size().w - 7});
 }
 
 void editor_window::render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width)
