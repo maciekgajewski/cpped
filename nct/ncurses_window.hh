@@ -23,6 +23,7 @@ public:
 	void print(const char* text, unsigned length) {::waddnstr(win_, text, length);}
 	void print(const std::string& s) { print(s.c_str()); }
 	void attr_print(attr_t attr, const char* text, unsigned length);
+	void attr_print(attr_t attr, const std::string& s) { attr_print(attr, s.c_str(), s.length()); }
 	void put_char(chtype c) { ::waddch(win_, c); }
 
 	void clear() { ::wclear(win_); }
@@ -44,6 +45,7 @@ public:
 
 	void set_attr_on(attr_t a) { ::wattron(win_, a); }
 	void set_attr_off(attr_t a) { ::wattroff(win_, a); }
+	void set_background(const chtype ch) { ::wbkgd(win_, ch); }
 
 	// windows position/size
 

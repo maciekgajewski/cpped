@@ -145,4 +145,9 @@ void line_edit::update()
 	refresh_window();
 }
 
+void line_edit::hints_changed()
+{
+	// TODO
+}
+
 }

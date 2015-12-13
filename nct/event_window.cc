@@ -113,15 +113,16 @@ void event_window::do_refresh()
 {
 	if (window_)
 	{
-//		if (refresh_requested_) We should draw all windows
+//		if (refresh_requested_)
 //		{
 			window_->redraw();
 			window_->no_out_refresh();
-//			refresh_requested_ = false;
-//		}
 
-		for(event_window* child : children_)
-			child->do_refresh();
+			for(event_window* child : children_)
+				child->do_refresh();
+
+			refresh_requested_ = false;
+//		}
 	}
 
 }
