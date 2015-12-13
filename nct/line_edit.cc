@@ -54,6 +54,16 @@ bool line_edit::on_special_key(int key_code, const char* key_name)
 	return false;
 }
 
+void line_edit::on_deactivated()
+{
+	hints_widget_.reset();
+}
+
+void line_edit::on_activated()
+{
+	show_hints();
+}
+
 void line_edit::on_shown()
 {
 	update();
@@ -147,7 +157,51 @@ void line_edit::update()
 
 void line_edit::hints_changed()
 {
-	// TODO
+	if (hints_.empty())
+	{
+		hints_widget_.reset();
+	}
+	else
+	{
+		if (!hints_widget_.is_initialized())
+		{
+			hints_widget_.emplace(get_event_dispatcher(), this);
+		}
+		if (is_active() && is_visible())
+		{
+			show_hints();
+		}
+	}
+}
+
+void line_edit::show_hints()
+{
+	if (hints_.empty()) return;
+
+	// create hitns
+	std::vector<list_widget::list_item> items;
+	items.reserve(hints_.size());
+	std::transform(hints_.begin(), hints_.end(), std::back_inserter(items),
+			[&](const completion_hint& hint)
+			{
+				return list_widget::list_item{hint.text, hint.help_text};
+			});
+
+	hints_widget_->set_items(items);
+
+	size content_size = hints_widget_->get_content_size();
+
+	position global_pos = to_global(position{0, 1});
+
+	size sz;
+	int max_h = std::min(LINES - global_pos.y, 40);
+	int max_w = std::min(COLS - global_pos.x, 80);
+
+	sz.h = std::min(max_h, content_size.h);
+	sz.w = std::min(max_w, content_size.w);
+	hints_widget_->move(position{0, 1}, sz);
+
+	hints_widget_->show();
 }
 
 }

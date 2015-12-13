@@ -70,6 +70,7 @@ public:
 	void set_active();
 	bool is_active() const;
 	virtual void on_activated() {}
+	virtual void on_deactivated() {}
 
 	void hide();
 	void show();
@@ -106,6 +107,8 @@ protected:
 	position to_global(const position& pos);
 
 	color_palette& get_palette();
+
+	event_dispatcher& get_event_dispatcher() const { return event_dispatcher_; }
 
 private:
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "event_window.hh"
+#include "list_widget.hh"
 
 #include <boost/signals2.hpp>
 
@@ -16,8 +17,8 @@ public:
 
 	struct completion_hint
 	{
-		const std::string text;
-		const std::string help_text;
+		std::string text;
+		std::string help_text;
 	};
 
 	line_edit(event_dispatcher& ed, event_window* parent);
@@ -37,6 +38,8 @@ private:
 
 	unsigned on_sequence(const std::string& s) override;
 	bool on_special_key(int key_code, const char* key_name) override;
+	void on_deactivated() override;
+	void on_activated() override;
 
 	void on_shown() override;
 
@@ -48,6 +51,7 @@ private:
 	void update();
 
 	void hints_changed();
+	void show_hints();
 
 	std::string text_;
 	std::string help_text_;
@@ -55,6 +59,7 @@ private:
 	unsigned first_column_ = 0;
 
 	std::vector<completion_hint> hints_;
+	boost::optional<list_widget> hints_widget_;
 };
 
 template<typename Container>

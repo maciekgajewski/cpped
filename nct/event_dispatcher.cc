@@ -114,7 +114,12 @@ void event_dispatcher::remove_window(event_window* win)
 
 void event_dispatcher::set_active_window(event_window* win)
 {
-	active_window_ = win;
+	if (active_window_ != win)
+	{
+		if (active_window_)
+			active_window_->on_deactivated();
+		active_window_ = win;
+	}
 }
 
 void event_dispatcher::send_mouse_event(const MEVENT& ev)
