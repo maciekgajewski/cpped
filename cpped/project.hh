@@ -26,15 +26,36 @@ public:
 	document::document& open_file(const boost::filesystem::path& file);
 	document::document& get_open_file(const boost::filesystem::path& file);
 
+	template<typename OutIt>
+	void get_all_project_files(OutIt out) const;
+
+	template<typename OutIt>
+	void get_all_open_files(OutIt out) const;
+
 private:
 
 	std::string name_;
 	std::vector<boost::filesystem::path> files_;
 	std::map<boost::filesystem::path, std::unique_ptr<document::document>> open_files_;
-
-
 };
 
 project load_cmake_project(const std::string& build_directory);
+
+
+template<typename OutIt>
+void project::get_all_project_files(OutIt out) const
+{
+	std::copy(files_.begin(), files_.end(), out);
+}
+
+template<typename OutIt>
+void project::get_all_open_files(OutIt out) const
+{
+	for(const auto& p : open_files_)
+	{
+		*out = p.first;
+		++out;
+	}
+}
 
 }

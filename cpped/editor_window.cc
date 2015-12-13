@@ -10,9 +10,9 @@
 
 namespace cpped {
 
-editor_window::editor_window(nct::event_dispatcher& ed, style_manager& sm, document::document& doc)
+editor_window::editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm, document::document& doc)
 	: event_window(ed, nullptr), styles_(sm), editor_(*this, doc)
-	, navigator_(ed, this)
+	, navigator_(pr, ed, this)
 {
 }
 

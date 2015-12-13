@@ -34,7 +34,7 @@ public:
 		bool unsaved; // if file has unsaved changes
 	};
 
-	editor_window(nct::event_dispatcher& ed, style_manager& sm, document::document& doc);
+	editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm, document::document& doc);
 
 	unsigned on_sequence(const std::string& s) override;
 	bool on_special_key(int key_code, const char* key_name) override;
