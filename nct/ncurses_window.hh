@@ -25,6 +25,7 @@ public:
 	void attr_print(attr_t attr, const char* text, unsigned length);
 	void attr_print(attr_t attr, const std::string& s) { attr_print(attr, s.c_str(), s.length()); }
 	void put_char(chtype c) { ::waddch(win_, c); }
+	void attr_fill_line(attr_t attr, chtype c, int line);
 
 	void clear() { ::wclear(win_); }
 	void clear_to_eol() { ::wclrtoeol(win_); }

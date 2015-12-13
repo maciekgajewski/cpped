@@ -49,6 +49,22 @@ bool line_edit::on_special_key(int key_code, const char* key_name)
 			backspace(); return true;
 		case KEY_DC:
 			del(); return true;
+
+		// forwarded to line
+		case KEY_UP:
+			if (hints_widget_)
+			{
+				hints_widget_->select_previous();
+				return true;
+			}
+			break;
+		case KEY_DOWN:
+			if (hints_widget_)
+			{
+				hints_widget_->select_next();
+				return true;
+			}
+			break;
 	}
 
 	return false;
@@ -163,10 +179,6 @@ void line_edit::hints_changed()
 	}
 	else
 	{
-		if (!hints_widget_.is_initialized())
-		{
-			hints_widget_.emplace(get_event_dispatcher(), this);
-		}
 		if (is_active() && is_visible())
 		{
 			show_hints();
@@ -177,6 +189,11 @@ void line_edit::hints_changed()
 void line_edit::show_hints()
 {
 	if (hints_.empty()) return;
+
+	if (!hints_widget_.is_initialized())
+	{
+		hints_widget_.emplace(get_event_dispatcher(), this);
+	}
 
 	// create hitns
 	std::vector<list_widget::list_item> items;
@@ -191,7 +208,7 @@ void line_edit::show_hints()
 
 	size content_size = hints_widget_->get_content_size();
 
-	position global_pos = to_global(position{0, 1});
+	position global_pos = to_global(position{1, 0});
 
 	size sz;
 	int max_h = std::min(LINES - global_pos.y, 40);
@@ -199,7 +216,7 @@ void line_edit::show_hints()
 
 	sz.h = std::min(max_h, content_size.h);
 	sz.w = std::min(max_w, content_size.w);
-	hints_widget_->move(position{0, 1}, sz);
+	hints_widget_->move(position{1, 0}, sz);
 
 	hints_widget_->show();
 }

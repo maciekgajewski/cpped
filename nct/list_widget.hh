@@ -27,6 +27,11 @@ public:
 	// size required to displaty all the conent
 	size get_content_size() const { return content_size_; }
 
+	// actions
+
+	void select_next();
+	void select_previous();
+
 private:
 
 	bool on_special_key(int key_code, const char* key_name) override;
@@ -36,8 +41,12 @@ private:
 	void update();
 	void items_changed();
 
+	// useful aread
+	unsigned get_workspace_height() const { return get_size().h; }
+	unsigned get_workspace_width() const { return get_size().w; }
+
 	std::vector<list_item> items_;
-	unsigned selected_item_ = 0;
+	unsigned current_item_ = 0;
 	unsigned first_line_ = 0;
 	size content_size_;
 	unsigned longest_text_ = 0;
