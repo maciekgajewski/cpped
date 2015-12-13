@@ -1,10 +1,13 @@
 #include "project.hh"
 
+#include "document_lib/cpp_parser.hh"
+
 #include <boost/filesystem.hpp>
 
 #include <stdexcept>
 #include <fstream>
 #include <regex>
+#include <tuple>
 
 namespace cpped {
 
@@ -14,10 +17,8 @@ project::project()
 {
 }
 
-void project::add_directory(const std::string& source_dir)
+void project::add_directory(const boost::filesystem::path& dir_path)
 {
-	fs::path dir_path(source_dir);
-
 	for(fs::recursive_directory_iterator it(dir_path); it != fs::recursive_directory_iterator(); ++it)
 	{
 		const fs::directory_entry& entry = *it;
@@ -30,14 +31,46 @@ void project::add_directory(const std::string& source_dir)
 		// add file
 		if (entry.status().type() == fs::regular_file)
 		{
-			files_.push_back(entry.path().string());
+			files_.push_back(entry.path());
 		}
 	}
 }
 
-void project::add_compilation_database_file(const std::__cxx11::string& comp_database_path)
+void project::add_compilation_database_file(const fs::path& comp_database_path)
 {
 	// TODO
+}
+
+document::document& project::open_file(const fs::path& file)
+{
+	fs::path absolute = fs::absolute(file);
+	auto it = open_files_.find(absolute);
+	if (it == open_files_.end())
+	{
+		// TODO find compilation database
+		auto doc_ptr = std::make_unique<document::document>();
+		doc_ptr->load_from_file(absolute, std::make_unique<cpped::document::cpp_parser>());
+		doc_ptr->parse_language();
+
+		auto p = open_files_.insert(std::make_pair(absolute, std::move(doc_ptr)));
+		assert(p.second);
+		return *p.first->second;
+	}
+	else
+	{
+		return *it->second;
+	}
+}
+
+document::document&project::get_open_file(const boost::filesystem::path& file)
+{
+	fs::path absolute = fs::absolute(file);
+	auto it = open_files_.find(absolute);
+	if (it == open_files_.end())
+	{
+		throw std::runtime_error("No such file");
+	}
+	return *it->second;
 }
 
 

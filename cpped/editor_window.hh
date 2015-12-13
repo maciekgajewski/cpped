@@ -6,6 +6,8 @@
 
 #include "nct/event_window.hh"
 
+#include <boost/filesystem.hpp>
+
 #include <chrono>
 
 namespace nct {
@@ -28,7 +30,7 @@ public:
 	{
 		unsigned docy, docx, column; // current cursor coordinates
 		std::string status_text; // extra text displayed in status line
-		std::string file_name;
+		boost::filesystem::path file_name;
 		bool unsaved; // if file has unsaved changes
 	};
 

@@ -181,9 +181,10 @@ void editor_window::update_status_info(const status_info& info)
 	// top line
 	// window.horizontal_line(0,0, WACS_D_HLINE, window.get_width()); doesn't work on xfce (?)
 	window.horizontal_line(0, 0, ACS_HLINE, window.get_width());
-	int file_name_x = (window.get_width() - info.file_name.length()) / 2;
+	std::string file_name_string = info.file_name.string();
+	int file_name_x = (window.get_width() - file_name_string.length()) / 2;
 	window.move_cursor(0, file_name_x);
-	window.print(info.file_name);
+	window.print(info.file_name.string());
 	if (info.unsaved)
 		window.print("*");
 

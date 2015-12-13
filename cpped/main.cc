@@ -3,7 +3,6 @@
 #include "project.hh"
 
 #include "document_lib/document.hh"
-#include "document_lib/cpp_parser.hh"
 
 #include "nct/ncurses_env.hh"
 #include "nct/event_dispatcher.hh"
@@ -23,8 +22,9 @@ using namespace std::literals::string_literals;
 //xxxxx	t
 int main(int argc, char** argv)
 {
-	cpped::document::document document;
 	cpped::project project;
+	cpped::document::document empty_document;
+	cpped::document::document* document = &empty_document;
 	if (argc > 1)
 	{
 		if (argv[1] == "-cmake"s)
@@ -37,8 +37,7 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-			document.load_from_file(argv[1], std::make_unique<cpped::document::cpp_parser>());
-			document.parse_language();
+			document = &project.open_file(argv[1]);
 		}
 	}
 
@@ -48,7 +47,7 @@ int main(int argc, char** argv)
 
 	nct::event_dispatcher dispatcher;
 	cpped::style_manager styles(dispatcher.get_palette());
-	cpped::editor_window editor(dispatcher, styles, document);
+	cpped::editor_window editor(dispatcher, styles, *document);
 	editor.set_size(scr.get_size());
 	editor.set_active(); // so it recevies input
 	editor.show();

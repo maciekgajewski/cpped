@@ -4,6 +4,8 @@
 
 #include "document_data.hh"
 
+#include <boost/filesystem.hpp>
+
 #include <vector>
 #include <string>
 #include <ostream>
@@ -50,7 +52,7 @@ public:
 	~document();
 
 	void load_from_raw_data(const std::string& data, const std::string& fake_path, std::unique_ptr<iparser>&& parser_ = nullptr);
-	void load_from_file(const std::string& path, std::unique_ptr<iparser>&& parser_ = nullptr);
+	void load_from_file(const boost::filesystem::path& path, std::unique_ptr<iparser>&& parser_ = nullptr);
 
 	unsigned get_line_count() const { return current_data_->get_line_count(); }
 
@@ -86,7 +88,7 @@ public:
 	void parse_language();
 
 	const std::vector<char>& get_raw_data() const { return current_data_->get_raw_data(); }
-	const std::string& get_file_name() const { return file_name_; }
+	const boost::filesystem::path& get_file_name() const { return file_name_; }
 
 	std::string to_string() const; // mostly for testing
 
@@ -106,7 +108,7 @@ private:
 	std::list<document_data> data_;
 	std::list<document_data>::iterator current_data_;
 
-	std::string file_name_;
+	boost::filesystem::path file_name_;
 
 	std::unique_ptr<iparser> parser_;
 	std::chrono::high_resolution_clock::duration last_parse_time_;

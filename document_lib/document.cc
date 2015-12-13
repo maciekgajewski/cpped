@@ -29,13 +29,13 @@ void document::load_from_raw_data(const std::string& data, const std::string& fa
 	parser_ = std::move(p);
 }
 
-void document::load_from_file(const std::string& path, std::unique_ptr<iparser>&& p)
+void document::load_from_file(const boost::filesystem::path& path, std::unique_ptr<iparser>&& p)
 {
-	file_name_ = path;
+	file_name_ = boost::filesystem::absolute(path);
 
 	data_.clear();
 	data_.emplace_back();
-	data_.back().load_from_file(path);
+	data_.back().load_from_file(file_name_.string());
 	current_data_ = data_.begin();
 
 	parser_ = std::move(p);
@@ -89,7 +89,7 @@ void document::parse_language()
 	if (parser_)
 	{
 		auto start_time = std::chrono::high_resolution_clock::now();
-		parser_->parse(*current_data_, file_name_);
+		parser_->parse(*current_data_, file_name_.string());
 		auto end_time = std::chrono::high_resolution_clock::now();
 
 		last_parse_time_ = end_time - start_time;

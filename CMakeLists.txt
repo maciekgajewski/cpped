@@ -9,7 +9,7 @@ include_directories(/usr/lib/llvm-3.7/include)
 include_directories(/usr/include/llvm-3.7)
 link_directories(/usr/lib/llvm-3.7/lib)
 
-find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework)
+find_package(Boost REQUIRED COMPONENTS system filesystem filesystem)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 

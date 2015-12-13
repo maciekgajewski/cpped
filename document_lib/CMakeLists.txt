@@ -1,3 +1,7 @@
+find_package(Boost REQUIRED COMPONENTS system filesystem)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+
 add_library(document_lib
 	document.hh document.cc
 	clang.hh clang.cc
@@ -13,6 +17,8 @@ target_include_directories(document_lib INTERFACE ..)
 add_subdirectory(tests)
 
 target_link_libraries(document_lib
+
+	${Boost_LIBRARIES}
 
 	LLVM-3.7
 	clang-3.7
