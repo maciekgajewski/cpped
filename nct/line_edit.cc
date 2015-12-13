@@ -26,6 +26,13 @@ unsigned line_edit::on_sequence(const std::string& s)
 	{
 		text_.insert(text_.begin() + cursor_pos_, s.begin(), endl_pos);
 		cursor_pos_ += endl_pos - s.begin();
+
+		if(hints_widget_)
+		{
+			hints_widget_->set_filter(text_);
+			update_hints_size();
+		}
+
 		text_changed(text_);
 		update();
 	}
@@ -205,6 +212,15 @@ void line_edit::show_hints()
 			});
 
 	hints_widget_->set_items(items);
+	hints_widget_->set_filter(text_);
+	update_hints_size();
+
+	hints_widget_->show();
+}
+
+void line_edit::update_hints_size()
+{
+	assert(hints_widget_);
 
 	size content_size = hints_widget_->get_content_size();
 
@@ -218,7 +234,8 @@ void line_edit::show_hints()
 	sz.w = std::min(max_w, content_size.w);
 	hints_widget_->move(position{1, 0}, sz);
 
-	hints_widget_->show();
 }
+
+
 
 }

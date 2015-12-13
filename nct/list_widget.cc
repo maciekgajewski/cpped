@@ -2,6 +2,8 @@
 
 #include "event_dispatcher.hh"
 
+#include <boost/range/adaptor/filtered.hpp>
+
 namespace nct {
 
 list_widget::list_widget(event_dispatcher& ed, list_widget::event_window* parent)
@@ -9,9 +11,20 @@ list_widget::list_widget(event_dispatcher& ed, list_widget::event_window* parent
 {
 }
 
+void list_widget::set_filter(const std::string& filter)
+{
+	if (filter_ != filter)
+	{
+		filter_ = filter;
+		current_item_ = 0;
+		count_displayed_items();
+		update();
+	}
+}
+
 void list_widget::select_next()
 {
-	if (current_item_ < items_.size() - 1)
+	if (current_item_ < items_displayed_ - 1)
 	{
 		current_item_ ++;
 		while (current_item_ > get_workspace_height() + first_line_)
@@ -69,11 +82,21 @@ void list_widget::update()
 	window.clear();
 	window.set_background(normal_attr | ' ');
 
-	unsigned items_to_show = std::min<unsigned>(items_.size(), window.get_height());
+	// predicate for selecting lines with filter
+	auto contains_filter_pred = [this](const list_item& item)
+	{
+		if (filter_.empty()) return true;
+		else return item.text.find(filter_) != std::string::npos;
+	};
 
+	unsigned items_to_show = std::min<unsigned>(items_displayed_, window.get_height());
+
+	auto range = boost::adaptors::filter(items_, contains_filter_pred);
+	auto it = range.begin();
+	std::advance(it, first_line_);
 	for(unsigned line = 0; line < items_to_show; line++)
 	{
-		const list_item& item = items_[line+first_line_];
+		const list_item& item = *it++;
 
 		window.move_cursor(position{int(line), 0});
 		if (line+first_line_ == current_item_)
@@ -108,8 +131,21 @@ void list_widget::items_changed()
 		longest_help = std::max<unsigned>(longest_help, item.help_text.length());
 	}
 
-	content_size_.h = items_.size();
+	count_displayed_items();
+
 	content_size_.w = longest_text_ + 1 + longest_help;
+}
+
+void list_widget::count_displayed_items()
+{
+	auto contains_filter_pred = [this](const list_item& item)
+	{
+		if (filter_.empty()) return true;
+		else return item.text.find(filter_) != std::string::npos;
+	};
+
+	items_displayed_ = std::count_if(items_.begin(), items_.end(), contains_filter_pred);
+	content_size_.h = items_displayed_;
 }
 
 }

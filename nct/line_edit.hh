@@ -52,6 +52,7 @@ private:
 
 	void hints_changed();
 	void show_hints();
+	void update_hints_size();
 
 	std::string text_;
 	std::string help_text_;
