@@ -23,8 +23,7 @@ using namespace std::literals::string_literals;
 int main(int argc, char** argv)
 {
 	cpped::project project;
-	cpped::document::document empty_document;
-	cpped::document::document* document = &empty_document;
+	boost::optional<std::string> file_to_open;
 	if (argc > 1)
 	{
 		if (argv[1] == "-cmake"s)
@@ -37,7 +36,7 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-			document = &project.open_file(argv[1]);
+			file_to_open = argv[1];
 		}
 	}
 
@@ -47,7 +46,13 @@ int main(int argc, char** argv)
 
 	nct::event_dispatcher dispatcher;
 	cpped::style_manager styles(dispatcher.get_palette());
-	cpped::editor_window editor(project, dispatcher, styles, *document);
+	cpped::editor_window editor(project, dispatcher, styles);
+
+	if (file_to_open)
+	{
+		editor.open_file(*file_to_open);
+	}
+
 	editor.set_size(scr.get_size());
 	editor.set_active(); // so it recevies input
 	editor.show();

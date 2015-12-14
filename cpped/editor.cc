@@ -7,10 +7,16 @@
 namespace cpped {
 
 editor::editor(editor_window& win, document::document& d)
-	: doc_(d),
+	: doc_(&d),
 	window_(win)
 {
-	request_full_render();
+}
+
+editor::editor(editor_window& win)
+	: window_(win)
+{
+	unsaved_document_ = std::make_unique<document::document>();
+	doc_ = unsaved_document_.get();
 }
 
 bool editor::on_special_key(int key_code, const char* /*key_name*/)
@@ -52,6 +58,13 @@ bool editor::on_mouse(const MEVENT& event)
 	return false;
 }
 
+void editor::set_document(document::document& doc)
+{
+	doc_ = &doc;
+	unsaved_document_.reset();
+	update();
+}
+
 void editor::cursor_up()
 {
 	if (cursor_pos_.line > 0)
@@ -75,7 +88,7 @@ void editor::cursor_up()
 
 void editor::adjust_cursor_column_to_desired()
 {
-	unsigned new_line_len = doc_.line_length(cursor_pos_.line);
+	unsigned new_line_len = doc_->line_length(cursor_pos_.line);
 	if (cursor_pos_.column > new_line_len)
 	{
 		cursor_pos_.column = new_line_len;
@@ -119,7 +132,7 @@ void editor::ensure_cursor_visible()
 
 void editor::request_full_render()
 {
-	window_.render(doc_, first_column_, first_line_, tab_width_);
+	window_.render(*doc_, first_column_, first_line_, tab_width_);
 	request_cursor_update();
 }
 
@@ -134,15 +147,15 @@ void editor::request_cursor_update()
 	using namespace std::literals::chrono_literals;
 
 	char status_text[64];
-	std::snprintf(status_text, 64, "parsing: %.2fms", 0.001 * doc_.get_last_parse_time()/1us);
+	std::snprintf(status_text, 64, "parsing: %.2fms", 0.001 * doc_->get_last_parse_time()/1us);
 
 	editor_window::status_info info;
 	info.docx = cursor_pos_.column;
 	info.docy = cursor_pos_.line;
 	info.column = column;
 	info.status_text = status_text;
-	info.file_name = doc_.get_file_name();
-	info.unsaved = doc_.has_unsaved_changed();
+	info.file_name = doc_->get_file_name();
+	info.unsaved = doc_->has_unsaved_changed();
 
 	window_.update_status_info(info);
 	window_.refresh_cursor(cy, cx);
@@ -150,7 +163,7 @@ void editor::request_cursor_update()
 
 void editor::cursor_down()
 {
-	if (cursor_pos_.line < doc_.get_line_count()-1)
+	if (cursor_pos_.line < doc_->get_line_count()-1)
 	{
 		cursor_pos_.line++;
 		adjust_cursor_column_to_desired();
@@ -192,7 +205,7 @@ void editor::cursor_left()
 
 void editor::cursor_right()
 {
-	int ll = doc_.line_length(cursor_pos_.line);
+	int ll = doc_->line_length(cursor_pos_.line);
 	if (cursor_pos_.column < ll)
 	{
 		cursor_pos_.column++;
@@ -226,7 +239,7 @@ void editor::pg_up()
 void editor::pg_down()
 {
 	unsigned page_height = window_.get_workspace_height();
-	unsigned lines = doc_.get_line_count();
+	unsigned lines = doc_->get_line_count();
 	if (page_height < lines)
 		first_line_ = std::min(first_line_ + page_height, lines - page_height);
 
@@ -261,7 +274,7 @@ void editor::backspace()
 	// TODO any smart-unindenting goes here
 	if (cursor_pos_ > document::position{0, 0})
 	{
-		cursor_pos_ = doc_.remove_before(cursor_pos_, 1);
+		cursor_pos_ = doc_->remove_before(cursor_pos_, 1);
 		ensure_cursor_visible();
 	}
 	request_full_render();
@@ -269,9 +282,9 @@ void editor::backspace()
 
 void editor::del()
 {
-	if (cursor_pos_ < doc_.get_last_position())
+	if (cursor_pos_ < doc_->get_last_position())
 	{
-		doc_.remove_after(cursor_pos_, 1);
+		doc_->remove_after(cursor_pos_, 1);
 	}
 	request_full_render();
 }
@@ -298,7 +311,7 @@ unsigned editor::workspace_to_document_y(unsigned wy) const
 
 unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 {
-	const document::document_line& line =  doc_.get_line(docy);
+	const document::document_line& line =  doc_->get_line(docy);
 
 	if (docx > line.get_length())
 		throw std::runtime_error("line character out of bounds");
@@ -318,8 +331,8 @@ unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 
 void editor::insert_at_cursor(const std::string& s)
 {
-	cursor_pos_ = doc_.insert(cursor_pos_, s);
-	doc_.parse_language();
+	cursor_pos_ = doc_->insert(cursor_pos_, s);
+	doc_->parse_language();
 
 	desired_cursor_column_ = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 	ensure_cursor_visible();

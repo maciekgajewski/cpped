@@ -10,8 +10,8 @@
 
 namespace cpped {
 
-editor_window::editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm, document::document& doc)
-	: event_window(ed, nullptr), styles_(sm), editor_(*this, doc)
+editor_window::editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm)
+	: event_window(ed, nullptr), project_(pr), styles_(sm), editor_(*this)
 	, navigator_(pr, ed, this)
 {
 }
@@ -217,6 +217,14 @@ unsigned editor_window::get_workspace_width() const
 unsigned editor_window::get_workspace_height() const
 {
 	return get_size().h - top_margin_ - bottom_margin_;
+}
+
+void editor_window::open_file(const boost::filesystem::path& file)
+{
+	// TODO modal dialog to save unsavedchanges in current document
+
+	document::document& doc = project_.open_file(file);
+	editor_.set_document(doc);
 }
 
 }

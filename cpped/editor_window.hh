@@ -34,7 +34,7 @@ public:
 		bool unsaved; // if file has unsaved changes
 	};
 
-	editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm, document::document& doc);
+	editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm);
 
 	unsigned on_sequence(const std::string& s) override;
 	bool on_special_key(int key_code, const char* key_name) override;
@@ -49,6 +49,8 @@ public:
 	unsigned get_workspace_width() const;
 	unsigned get_workspace_height() const;
 
+	void open_file(const boost::filesystem::path& file);
+
 private:
 
 	// rendering
@@ -62,6 +64,7 @@ private:
 	// settings
 	bool visualise_tabs_ = true;
 
+	project& project_;
 	style_manager& styles_;
 	editor editor_;
 	navigator_widget navigator_;

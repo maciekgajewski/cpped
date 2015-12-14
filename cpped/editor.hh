@@ -14,12 +14,15 @@ class editor
 {
 public:
 	editor(editor_window& win, document::document& d);
+	editor(editor_window& win);
 
 	bool on_special_key(int key_code, const char* key_name);
 	unsigned on_sequence(const std::string& sequence);
 	bool on_mouse(const MEVENT& event);
 
 	void update() { request_full_render(); }
+
+	void set_document(document::document& doc);
 
 private:
 
@@ -68,8 +71,9 @@ private:
 	// settings
 	unsigned tab_width_ = 4;
 
-	document::document& doc_;
+	document::document* doc_;
 	editor_window& window_;
+	std::unique_ptr<document::document> unsaved_document_;
 };
 
 }
