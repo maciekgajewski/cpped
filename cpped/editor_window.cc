@@ -110,11 +110,10 @@ void editor_window::refresh_cursor(int wy, int wx)
 {
 	if (!is_visible()) return;
 
-	int x = wx + left_margin_width_;
-	int y = wy + top_margin_;
-
-	if (x >= 0 && y >= 0 && x < get_workspace_width() && y < get_workspace_height())
+	if (wx >= 0 && wy >= 0 && wx < get_workspace_width() && wy < get_workspace_height())
 	{
+		int x = wx + left_margin_width_;
+		int y = wy + top_margin_;
 		show_cursor({y,x});
 	}
 	else
@@ -127,7 +126,6 @@ void editor_window::refresh_cursor(int wy, int wx)
 
 unsigned editor_window::render_text(nct::ncurses_window& window, attr_t attr, unsigned tab_width, unsigned first_column, unsigned phys_column, const char* begin, const char* end)
 {
-	window.set_attr_on(attr);
 	unsigned last_column = get_workspace_width() + first_column;
 
 	while(begin != end && phys_column != last_column)
@@ -143,20 +141,18 @@ unsigned editor_window::render_text(nct::ncurses_window& window, attr_t attr, un
 					if (w == tab_width && c == 0) // first char of full tab
 						put_visual_tab(window);
 					else
-						window.put_char(' ');
+						window.put_char(' ' | attr);
 				}
 			}
 		}
 		else
 		{
 			if (phys_column >= first_column)
-				window.put_char(*begin);
+				window.put_char(*begin | attr);
 			phys_column++;
 		}
 		begin++;
 	}
-
-	window.set_attr_off(attr);
 
 	return phys_column;
 }
@@ -165,9 +161,7 @@ void editor_window::put_visual_tab(nct::ncurses_window& window)
 {
 	if (visualise_tabs_)
 	{
-		window.set_attr_on(A_DIM);
-		window.put_char('|'); // TODO maybe use some cool unicode char?
-		window.set_attr_off(A_DIM);
+		window.put_char('|' | styles_.visual_tab); // TODO maybe use some cool unicode char?
 	}
 	else
 	{

@@ -27,7 +27,7 @@ void ncurses_window::attr_print(attr_t attr, const char* text, unsigned length)
 {
 	::wattron(win_, attr);
 	::waddnstr(win_, text, length);
-	::wattron(win_, attr);
+	::wattroff(win_, attr);
 }
 
 void ncurses_window::attr_fill_line(attr_t attr, chtype c, int line)
