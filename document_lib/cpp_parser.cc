@@ -51,7 +51,7 @@ void cpp_parser::parse(document_data& data, const std::string& file_name)
 	if (translation_unit_.is_null())
 	{
 		// first parsing
-		translation_unit_.parse(index_, file_name.c_str(), raw_data.data(), raw_data.size(), {/*cmdline*/});
+		translation_unit_.parse(index_, file_name.c_str(), raw_data.data(), raw_data.size(), {"-fdiagnostics-color=never"});
 	}
 	else
 	{
