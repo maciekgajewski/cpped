@@ -14,6 +14,7 @@ namespace cpped {
 namespace fs = boost::filesystem;
 
 project::project()
+	: index_(0, 0)
 {
 }
 
@@ -26,7 +27,7 @@ void project::add_directory(const boost::filesystem::path& dir_path)
 		// skip hidden directories
 		if (entry.status().type() == fs::directory_file && entry.path().filename().string()[0] == '.')
 		{
-				it.no_push();
+			it.no_push();
 		}
 		// add file
 		if (entry.status().type() == fs::regular_file)
@@ -38,7 +39,27 @@ void project::add_directory(const boost::filesystem::path& dir_path)
 
 void project::add_compilation_database_file(const fs::path& comp_database_path)
 {
-	// TODO
+	fs::path directory = fs::absolute(comp_database_path).parent_path();
+	clang::compilation_database db(directory);
+
+	for(const fs::path& file : files_)
+	{
+		clang::compile_commands cc = db.get_compile_commands_for_file(file);
+
+		if (!cc.is_null() && cc.size() > 0)
+		{
+			clang::compile_command command = cc.get_command(0);
+
+			file_data& data = get_file_data(file);
+
+			data.compilation_commands_.clear();
+			data.compilation_commands_.reserve(command.size());
+			for(unsigned i = 0; i < command.size(); ++i)
+			{
+				data.compilation_commands_.emplace_back(command.get_arg(i).c_str());
+			}
+		}
+	}
 }
 
 document::document& project::open_file(const fs::path& file)
@@ -71,6 +92,18 @@ document::document&project::get_open_file(const boost::filesystem::path& file)
 		throw std::runtime_error("No such file");
 	}
 	return *it->second;
+}
+
+project::file_data&project::get_file_data(const boost::filesystem::path& file)
+{
+	assert(file.is_absolute());
+	std::unique_ptr<file_data>& p = file_data_[file];
+	if (!p)
+	{
+		p = std::make_unique<file_data>();
+	}
+
+	return *p;
 }
 
 

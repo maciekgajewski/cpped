@@ -1,6 +1,7 @@
 #pragma once
 
 #include "document_lib/document.hh"
+#include "document_lib/clang.hh"
 
 #include <boost/filesystem.hpp>
 
@@ -34,9 +35,37 @@ public:
 
 private:
 
+	enum class file_type
+	{
+		cpp,
+		other
+	};
+
+	struct file_data
+	{
+		std::vector<std::string> compilation_commands_;
+		file_type type_;
+		clang::translation_unit translation_unit_;
+	};
+
+	file_data& get_file_data(const boost::filesystem::path& file);
+
+	// Project name
 	std::string name_;
+
+	// All the files which belong to the project. This may include non-cpp files, but
+	// will not include system headers etc.
+	//
+	// Absolute paths
 	std::vector<boost::filesystem::path> files_;
+
+	// Database of all information about a file that we know
+	std::map<boost::filesystem::path, std::unique_ptr<file_data>> file_data_;
+
+	// Currently open files
 	std::map<boost::filesystem::path, std::unique_ptr<document::document>> open_files_;
+
+	clang::index index_;
 };
 
 project load_cmake_project(const std::string& build_directory);

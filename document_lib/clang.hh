@@ -1,6 +1,9 @@
 #pragma once
 
 #include <clang-c/Index.h>
+#include <clang-c/CXCompilationDatabase.h>
+
+#include <boost/filesystem.hpp>
 
 #include <cstdlib>
 #include <string>
@@ -18,10 +21,20 @@ public:
 	index(int excludeDeclarationsFromPCH,int displayDiagnostics)
 		: clang_idx(clang_createIndex(excludeDeclarationsFromPCH, displayDiagnostics)) {}
 	index(const index&) = delete;
-	~index() { clang_disposeIndex(clang_idx); }
+	index(index&& o) : clang_idx(o.clang_idx) { o.clang_idx = nullptr; }
+	~index() { if (!clang_idx) clang_disposeIndex(clang_idx); }
+
+	index& operator=(index&& o)
+	{
+		if (clang_idx)
+			clang_disposeIndex(clang_idx);
+		clang_idx = o.clang_idx;
+		o.clang_idx = nullptr;
+		return *this;
+	}
 private:
 
-	CXIndex clang_idx;
+	CXIndex clang_idx = nullptr;
 	friend class translation_unit;
 };
 
@@ -97,6 +110,7 @@ private:
 	friend class cursor;
 	friend class completion_string;
 	friend class code_completion_result;
+	friend class compile_command;
 };
 
 inline std::ostream& operator<<(std::ostream& s, const string& cs)
@@ -318,7 +332,7 @@ public:
 
 private:
 
-	code_completion_results(CXCodeCompleteResults* cr)  { dispose(); results = cr; }
+	code_completion_results(CXCodeCompleteResults* cr) { dispose(); results = cr; }
 
 	void dispose()
 	{
@@ -384,5 +398,86 @@ private:
 
 	CXTranslationUnit clang_tu = nullptr;
 };
+
+class compile_command
+{
+public:
+
+	unsigned size() const { return clang_CompileCommand_getNumArgs(cc_); }
+	string get_arg(unsigned idx) const { return clang_CompileCommand_getArg(cc_, idx); }
+
+#if CINDEX_VERSION_MINOR > 31
+	string get_file_name() const { return clang_CompileCommand_getFilename(cc_); }
+#endif
+
+private:
+	compile_command(CXCompileCommand cc) : cc_(cc) {}
+
+	CXCompileCommand cc_ = nullptr;
+
+	friend class compile_commands;
+};
+
+class compile_commands
+{
+public:
+	compile_commands(const compile_commands&) = delete;
+	compile_commands(compile_commands&& o) : cc_(o.cc_)	{ o.cc_ = nullptr; }
+
+	~compile_commands()
+	{
+		if (cc_)
+			clang_CompileCommands_dispose(cc_);
+	}
+
+	unsigned size() const { return clang_CompileCommands_getSize(cc_); }
+	compile_command get_command(unsigned idx) const { return clang_CompileCommands_getCommand(cc_, idx); }
+
+	bool is_null() const { return cc_ == nullptr; }
+
+private:
+	compile_commands(CXCompileCommands cc) : cc_(cc) {}
+
+	CXCompileCommands cc_ = nullptr;
+
+	friend class compilation_database;
+};
+
+class compilation_database
+{
+public:
+	compilation_database(const boost::filesystem::path& directory)
+	{
+		CXCompilationDatabase_Error err = CXCompilationDatabase_CanNotLoadDatabase;
+		cd_ = clang_CompilationDatabase_fromDirectory(directory.string().c_str(), &err);
+		if (err == CXCompilationDatabase_CanNotLoadDatabase)
+		{
+			throw std::runtime_error("Unable to load compilation database");
+		}
+	}
+	compilation_database(const compilation_database&) = delete;
+
+	~compilation_database()
+	{
+		if (cd_)
+			clang_CompilationDatabase_dispose(cd_);
+	}
+
+	compile_commands get_all_compile_commands() const
+	{
+		return clang_CompilationDatabase_getAllCompileCommands(cd_);
+	}
+
+	compile_commands get_compile_commands_for_file(const boost::filesystem::path& file) const
+	{
+		assert(file.is_absolute());
+		return clang_CompilationDatabase_getCompileCommands(cd_, file.string().c_str());
+	}
+
+private:
+
+	CXCompilationDatabase cd_ = nullptr;
+};
+
 
 }}
