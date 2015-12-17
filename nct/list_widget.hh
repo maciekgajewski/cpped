@@ -30,6 +30,8 @@ public:
 	// size required to displaty all the conent
 	size get_content_size() const { return content_size_; }
 
+	list_item* get_current_item(); // return null if no currently selected item
+
 	// actions
 
 	void select_next();

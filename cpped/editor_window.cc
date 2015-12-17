@@ -10,10 +10,14 @@
 
 namespace cpped {
 
+namespace fs = boost::filesystem;
+
 editor_window::editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm)
 	: event_window(ed, nullptr), project_(pr), styles_(sm), editor_(*this)
 	, navigator_(pr, ed, this)
 {
+	navigator_.file_selected_signal.connect(
+		[this](const fs::path& p) { open_file(p); set_active(); });
 }
 
 unsigned editor_window::on_sequence(const std::string& s)

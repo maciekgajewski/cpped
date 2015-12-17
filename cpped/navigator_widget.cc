@@ -11,7 +11,7 @@ navigator_widget::navigator_widget(project& pr, nct::event_dispatcher& ed, nct::
 	, editor_(ed, this)
 {
 	editor_.set_help_text("type here to navigate (ctrl-k)");
-	editor_.enter_pressed.connect([=]() { parent->set_active(); });
+	editor_.hint_selected_signal.connect([this](const nct::line_edit::completion_hint& h) { on_hint_selected(h); });
 }
 
 void navigator_widget::on_activated()
@@ -37,6 +37,17 @@ void navigator_widget::on_activated()
 void navigator_widget::on_resized()
 {
 	editor_.move(nct::position{0, 0}, nct::size{1, get_size().w});
+}
+
+void navigator_widget::on_hint_selected(const nct::line_edit::completion_hint& hint)
+{
+	// exit point - something has been selected
+	// TODO need to distinguis between different hint list types
+
+	editor_.set_text(std::string());
+
+	boost::filesystem::path p(hint.help_text);
+	file_selected_signal(p);
 }
 
 }

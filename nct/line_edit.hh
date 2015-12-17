@@ -31,8 +31,9 @@ public:
 
 // signals
 
-	boost::signals2::signal<void(const std::string&)> text_changed;
-	boost::signals2::signal<void()> enter_pressed;
+	boost::signals2::signal<void(const std::string&)> text_changed_signal;
+	boost::signals2::signal<void()> enter_pressed_signal;
+	boost::signals2::signal<void(const completion_hint&)> hint_selected_signal;
 
 private:
 
@@ -47,6 +48,7 @@ private:
 	void cursor_right();
 	void backspace();
 	void del();
+	void enter();
 
 	void update();
 

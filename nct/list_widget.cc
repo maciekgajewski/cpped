@@ -6,6 +6,17 @@
 
 namespace nct {
 
+struct contains_filter_functor
+{
+	const std::string& filter_;
+
+	bool operator() (const list_widget::list_item& item) const
+	{
+		if (filter_.empty()) return true;
+		else return item.text.find(filter_) != std::string::npos;
+	}
+};
+
 list_widget::list_widget(event_dispatcher& ed, list_widget::event_window* parent)
 	: event_window(ed, parent)
 {
@@ -19,6 +30,22 @@ void list_widget::set_filter(const std::string& filter)
 		current_item_ = 0;
 		count_displayed_items();
 		update();
+	}
+}
+
+list_widget::list_item* list_widget::get_current_item()
+{
+	if (items_displayed_ > 0)
+	{
+		contains_filter_functor contains_filter_pred{filter_};
+		auto range = boost::adaptors::filter(items_, contains_filter_pred);
+		auto it = range.begin();
+		std::advance(it, current_item_);
+		return &*it;
+	}
+	else
+	{
+		return nullptr;
 	}
 }
 
@@ -83,11 +110,7 @@ void list_widget::update()
 	window.set_background(normal_attr | ' ');
 
 	// predicate for selecting lines with filter
-	auto contains_filter_pred = [this](const list_item& item)
-	{
-		if (filter_.empty()) return true;
-		else return item.text.find(filter_) != std::string::npos;
-	};
+	contains_filter_functor contains_filter_pred{filter_};
 
 	unsigned items_to_show = std::min<unsigned>(items_displayed_, window.get_height());
 
@@ -138,12 +161,7 @@ void list_widget::items_changed()
 
 void list_widget::count_displayed_items()
 {
-	auto contains_filter_pred = [this](const list_item& item)
-	{
-		if (filter_.empty()) return true;
-		else return item.text.find(filter_) != std::string::npos;
-	};
-
+	contains_filter_functor contains_filter_pred{filter_};
 	items_displayed_ = std::count_if(items_.begin(), items_.end(), contains_filter_pred);
 	content_size_.h = items_displayed_;
 }

@@ -13,6 +13,8 @@ void line_edit::set_text(const std::__cxx11::string& t)
 {
 	text_ = t;
 	first_column_ = 0;
+	cursor_pos_ = 0;
+	update();
 }
 
 unsigned line_edit::on_sequence(const std::string& s)
@@ -33,12 +35,12 @@ unsigned line_edit::on_sequence(const std::string& s)
 			update_hints_size();
 		}
 
-		text_changed(text_);
+		text_changed_signal(text_);
 		update();
 	}
 	if (endl_pos != s.end())
 	{
-		enter_pressed();
+		enter();
 	}
 
 	return endl_pos - s.begin();
@@ -124,7 +126,7 @@ void line_edit::backspace()
 	{
 		cursor_pos_--;
 		text_.erase(text_.begin() + cursor_pos_);
-		text_changed(text_);
+		text_changed_signal(text_);
 		update();
 	}
 }
@@ -134,8 +136,22 @@ void line_edit::del()
 	if (cursor_pos_ < text_.size())
 	{
 		text_.erase(text_.begin() + cursor_pos_);
-		text_changed(text_);
+		text_changed_signal(text_);
 		update();
+	}
+}
+
+void line_edit::enter()
+{
+	enter_pressed_signal();
+	if (hints_widget_)
+	{
+		list_widget::list_item* item = hints_widget_->get_current_item();
+		if (item)
+		{
+			completion_hint hint{item->text, item->help_text};
+			hint_selected_signal(hint);
+		}
 	}
 }
 
