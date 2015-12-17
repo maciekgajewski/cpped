@@ -3,7 +3,7 @@ add_executable(crash
 )
 
 target_link_libraries(crash
-	ncursesw_g
+	ncursesw
 	${CLANG_LIBRARIES}
 )
 
