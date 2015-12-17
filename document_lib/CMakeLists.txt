@@ -19,7 +19,6 @@ add_subdirectory(tests)
 target_link_libraries(document_lib
 
 	${Boost_LIBRARIES}
+	${CLANG_LIBRARIES}
 
-	LLVM-3.7
-	clang-3.7
 )

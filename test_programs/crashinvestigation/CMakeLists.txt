@@ -3,9 +3,7 @@ add_executable(crash
 )
 
 target_link_libraries(crash
-	ncursesw
-	LLVM-3.7
-	clang-3.7
-
+	ncursesw_g
+	${CLANG_LIBRARIES}
 )
 
