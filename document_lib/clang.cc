@@ -24,8 +24,10 @@ void translation_unit::parse(index& idx, const char* filename, const char* unsav
 			filename,
 			cmdline.data(), cmdline.size(),
 			uf_ptr, uf_ptr ? 1 : 0,
-			///*CXTranslationUnit_CacheCompletionResults*/CXTranslationUnit_DetailedPreprocessingRecord|CXTranslationUnit_PrecompiledPreamble|CXTranslationUnit_Incomplete,
-			clang_defaultEditingTranslationUnitOptions(),
+			CXTranslationUnit_DetailedPreprocessingRecord|
+				CXTranslationUnit_Incomplete|
+				CXTranslationUnit_IncludeBriefCommentsInCodeCompletion|
+				clang_defaultEditingTranslationUnitOptions(),
 			&clang_tu);
 
 	if (ec != CXError_Success)

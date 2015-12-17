@@ -44,11 +44,12 @@ private:
 	struct file_data
 	{
 		std::vector<std::string> compilation_commands_;
-		file_type type_;
+		file_type type_ = file_type::other;
 		clang::translation_unit translation_unit_;
 	};
 
 	file_data& get_file_data(const boost::filesystem::path& file);
+	void parse_file(const boost::filesystem::path& path, file_data& data);
 
 	// Project name
 	std::string name_;

@@ -58,6 +58,8 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 			{
 				data.compilation_commands_.emplace_back(command.get_arg(i).c_str());
 			}
+
+			data.type_ = file_type::cpp; // ic clangs knows how to cimpile it, it must be it
 		}
 	}
 }
@@ -69,9 +71,20 @@ document::document& project::open_file(const fs::path& file)
 	if (it == open_files_.end())
 	{
 		// TODO find compilation database
+		std::unique_ptr<document::iparser> parser;
+		file_data& data = get_file_data(absolute);
+		if (data.type_ == file_type::cpp)
+		{
+			if (data.translation_unit_.is_null())
+			{
+				parse_file(absolute, data);
+			}
+			parser = std::make_unique<document::cpp_parser>(data.translation_unit_);
+		}
+
 		auto doc_ptr = std::make_unique<document::document>();
-		doc_ptr->load_from_file(absolute, std::make_unique<cpped::document::cpp_parser>());
-		doc_ptr->parse_language();
+		doc_ptr->load_from_file(absolute, std::move(parser));
+		doc_ptr->parse_language(); // TODO optimize, no need to parse twice
 
 		auto p = open_files_.insert(std::make_pair(absolute, std::move(doc_ptr)));
 		assert(p.second);
@@ -104,6 +117,32 @@ project::file_data&project::get_file_data(const boost::filesystem::path& file)
 	}
 
 	return *p;
+}
+
+void project::parse_file(const fs::path& path, project::file_data& data)
+{
+	assert(data.type_ == file_type::cpp);
+	assert(data.translation_unit_.is_null());
+	assert(path.is_absolute());
+
+	std::vector<const char*> cmdline;
+	 // +1 for fixed options
+	 // -1 for argv[0]
+	cmdline.reserve(data.compilation_commands_.size());
+	assert(data.compilation_commands_.size() > 1);
+
+	cmdline.push_back("-fdiagnostics-color=never"); // to not break ncurses
+	std::transform(
+		data.compilation_commands_.begin()+1 /* skip 0 */, data.compilation_commands_.end(),
+		std::back_inserter(cmdline),
+		[&](const std::string& c) { return c.c_str(); });
+
+	data.translation_unit_.parse(
+		index_,
+		path.string().c_str(),
+		nullptr, 0, // unsaved data - none yet
+		cmdline);
+
 }
 
 

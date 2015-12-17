@@ -4,9 +4,10 @@
 
 namespace cpped { namespace document {
 
-cpp_parser::cpp_parser()
-:	index_(0, 0)
+cpp_parser::cpp_parser(clang::translation_unit& tu)
+:	translation_unit_(tu)
 {
+	assert(!translation_unit_.is_null());
 }
 
 static token_type determine_token_type(const clang::token& token)
@@ -48,15 +49,7 @@ void cpp_parser::parse(document_data& data, const std::string& file_name)
 {
 	const auto& raw_data = data.get_raw_data();
 
-	if (translation_unit_.is_null())
-	{
-		// first parsing
-		translation_unit_.parse(index_, file_name.c_str(), raw_data.data(), raw_data.size(), {"-fdiagnostics-color=never"});
-	}
-	else
-	{
-		translation_unit_.reparse(file_name.c_str(), raw_data.data(), raw_data.size());
-	}
+	translation_unit_.reparse(file_name.c_str(), raw_data.data(), raw_data.size());
 
 	clang::source_file file = translation_unit_.get_file(file_name);
 

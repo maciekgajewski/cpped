@@ -9,13 +9,12 @@ class cpp_parser : public iparser
 {
 public:
 
-	cpp_parser();
-	void parse(document_data& data, const std::string& file_name) final override;
+	cpp_parser(clang::translation_unit& tu);
+	void parse(document_data& data, const std::string& file_name) override;
 
 private:
 
-	clang::index index_;
-	clang::translation_unit translation_unit_;
+	clang::translation_unit& translation_unit_;
 };
 
 }}
