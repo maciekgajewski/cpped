@@ -4,7 +4,7 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 add_library(clang_lib
 	clang.hh clang.cc
-	clang_flags.cc clang_flags.hh
+	flags.cc flags.hh
 )
 
 target_include_directories(clang_lib INTERFACE ..)

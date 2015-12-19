@@ -1,4 +1,4 @@
-#include "clang_flags.hh"
+#include "flags.hh"
 
 #include <regex>
 
@@ -22,11 +22,18 @@ static void compiler_to_language_flag(const std::string& compiler, std::vector<s
 	}
 }
 
-std::vector<std::string> sanitize_clang_flags(
-	const std::vector<std::string>& in,
-	const fs::path& file, const fs::path& compiler_dir)
+std::vector<std::string> get_sanitized_flags(const compile_command& command, const fs::path& file)
 {
 	assert(file.is_absolute());
+	fs::path compiler_dir = command.get_dir().c_str();
+
+	// copy command out into a vector
+	std::vector<std::string> in;
+	in.reserve(command.size());
+	for(unsigned i = 0; i < command.size(); ++i)
+	{
+		in.emplace_back(command.get_arg(i).c_str());
+	}
 
 	std::vector<std::string> out;
 

@@ -1,6 +1,6 @@
 #include "project.hh"
 
-#include "clang_lib/clang_flags.hh"
+#include "clang_lib/flags.hh"
 
 #include "document_lib/cpp_parser.hh"
 
@@ -51,20 +51,9 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 		if (!cc.is_null() && cc.size() > 0)
 		{
 			clang::compile_command command = cc.get_command(0);
-			fs::path compiler_dir = command.get_dir().c_str();
-
 			file_data& data = get_file_data(file);
-
-			std::vector<std::string> compilation_commands_from_db;
-			compilation_commands_from_db.reserve(command.size());
-			for(unsigned i = 0; i < command.size(); ++i)
-			{
-				compilation_commands_from_db.emplace_back(command.get_arg(i).c_str());
-			}
-
-			data.compilation_commands_ = clang::sanitize_clang_flags(compilation_commands_from_db, file, compiler_dir);
-
-			data.type_ = file_type::cpp; // ic clangs knows how to cimpile it, it must be it
+			data.compilation_commands_ = clang::get_sanitized_flags(command, file);
+			data.type_ = file_type::cpp; // if clangs knows how to compile it, it must be it
 		}
 	}
 }
@@ -131,8 +120,6 @@ void project::parse_file(const fs::path& path, project::file_data& data)
 	assert(path.is_absolute());
 
 	std::vector<const char*> cmdline;
-	 // +1 for fixed options
-	 // -1 for argv[0]
 	cmdline.reserve(data.compilation_commands_.size()+1);
 	assert(data.compilation_commands_.size() > 1);
 
@@ -146,9 +133,7 @@ void project::parse_file(const fs::path& path, project::file_data& data)
 		path.string().c_str(),
 		nullptr, 0, // unsaved data - none yet
 		cmdline);
-
 }
-
 
 struct cmake_info
 {
