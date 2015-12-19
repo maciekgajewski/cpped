@@ -28,6 +28,7 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1) # to generate compilation database
 
+add_subdirectory(clang_lib)
 add_subdirectory(document_lib)
 add_subdirectory(cpped)
 add_subdirectory(test_programs)

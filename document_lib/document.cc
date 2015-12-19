@@ -1,5 +1,4 @@
 #include "document.hh"
-#include "clang.hh"
 
 #include <iostream>
 

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "document_lib/clang.hh"
+#include "clang_lib/clang.hh"
 #include "document_lib/document.hh"
 
 using namespace cpped;

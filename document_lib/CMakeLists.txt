@@ -4,7 +4,6 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 add_library(document_lib
 	document.hh document.cc
-	clang.hh clang.cc
 	iparser.hh
 	cpp_parser.cc cpp_parser.hh
 	document_data.cc document_data.hh
@@ -18,7 +17,8 @@ add_subdirectory(tests)
 
 target_link_libraries(document_lib
 
+	clang_lib
+
 	${Boost_LIBRARIES}
-	${CLANG_LIBRARIES}
 
 )

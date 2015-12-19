@@ -1,7 +1,8 @@
 #pragma once
 
 #include "document_lib/document.hh"
-#include "document_lib/clang.hh"
+
+#include "clang_lib/clang.hh"
 
 #include <boost/filesystem.hpp>
 

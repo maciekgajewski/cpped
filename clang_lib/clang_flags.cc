@@ -4,7 +4,7 @@
 
 // What I'm doing here is (mostly) based on what YCMD is doing
 
-namespace cpped {
+namespace cpped { namespace clang {
 
 namespace fs = boost::filesystem;
 
@@ -81,7 +81,7 @@ std::vector<std::string> sanitize_clang_flags(
 	out.push_back("-fdiagnostics-color=never");
 
 	return out;
-}
+}}
 
 }
 

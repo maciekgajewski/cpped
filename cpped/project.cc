@@ -1,6 +1,6 @@
 #include "project.hh"
 
-#include "clang_flags.hh"
+#include "clang_lib/clang_flags.hh"
 
 #include "document_lib/cpp_parser.hh"
 
@@ -62,7 +62,7 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 				compilation_commands_from_db.emplace_back(command.get_arg(i).c_str());
 			}
 
-			data.compilation_commands_ = sanitize_clang_flags(compilation_commands_from_db, file, compiler_dir);
+			data.compilation_commands_ = clang::sanitize_clang_flags(compilation_commands_from_db, file, compiler_dir);
 
 			data.type_ = file_type::cpp; // ic clangs knows how to cimpile it, it must be it
 		}

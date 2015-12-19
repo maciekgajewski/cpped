@@ -1,6 +1,7 @@
 #include "document_lib/document.hh"
-#include "document_lib/clang.hh"
 #include "document_lib/cpp_parser.hh"
+
+#include "clang_lib/clang.hh"
 
 #include <boost/test/unit_test.hpp>
 

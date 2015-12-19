@@ -1,5 +1,6 @@
 #include "iparser.hh"
-#include "clang.hh"
+
+#include "clang_lib/clang.hh"
 
 namespace cpped { namespace document {
 
