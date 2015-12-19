@@ -1,5 +1,7 @@
 #include "project.hh"
 
+#include "clang_flags.hh"
+
 #include "document_lib/cpp_parser.hh"
 
 #include <boost/filesystem.hpp>
@@ -49,15 +51,18 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 		if (!cc.is_null() && cc.size() > 0)
 		{
 			clang::compile_command command = cc.get_command(0);
+			fs::path compiler_dir = command.get_dir().c_str();
 
 			file_data& data = get_file_data(file);
 
-			data.compilation_commands_.clear();
-			data.compilation_commands_.reserve(command.size());
+			std::vector<std::string> compilation_commands_from_db;
+			compilation_commands_from_db.reserve(command.size());
 			for(unsigned i = 0; i < command.size(); ++i)
 			{
-				data.compilation_commands_.emplace_back(command.get_arg(i).c_str());
+				compilation_commands_from_db.emplace_back(command.get_arg(i).c_str());
 			}
+
+			data.compilation_commands_ = sanitize_clang_flags(compilation_commands_from_db, file, compiler_dir);
 
 			data.type_ = file_type::cpp; // ic clangs knows how to cimpile it, it must be it
 		}
@@ -128,12 +133,11 @@ void project::parse_file(const fs::path& path, project::file_data& data)
 	std::vector<const char*> cmdline;
 	 // +1 for fixed options
 	 // -1 for argv[0]
-	cmdline.reserve(data.compilation_commands_.size());
+	cmdline.reserve(data.compilation_commands_.size()+1);
 	assert(data.compilation_commands_.size() > 1);
 
-	cmdline.push_back("-fdiagnostics-color=never"); // to not break ncurses
 	std::transform(
-		data.compilation_commands_.begin()+1 /* skip 0 */, data.compilation_commands_.end(),
+		data.compilation_commands_.begin(), data.compilation_commands_.end(),
 		std::back_inserter(cmdline),
 		[&](const std::string& c) { return c.c_str(); });
 

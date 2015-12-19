@@ -409,6 +409,7 @@ public:
 #if CINDEX_VERSION_MINOR > 31
 	string get_file_name() const { return clang_CompileCommand_getFilename(cc_); }
 #endif
+	string get_dir() const { return clang_CompileCommand_getDirectory(cc_); }
 
 private:
 	compile_command(CXCompileCommand cc) : cc_(cc) {}

@@ -9,6 +9,7 @@ add_executable(cpped
 	editor_window.cc editor_window.hh
 	project.hh project.cc
 	navigator_widget.cc navigator_widget.hh
+	clang_flags.cc clang_flags.hh
 )
 
 target_link_libraries(cpped
