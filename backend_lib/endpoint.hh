@@ -17,12 +17,21 @@ public:
 
 	void set_fd(int fd);
 
+	// High-level message sending, includes framing
+	template<typename MSG>
+	void send_message(std::uint32_t type, const MSG& msg);
+
 private:
 
 	void close();
-	void send(const char* data, std::size_t sz);
 
 	int fd_ = -1;
 };
+
+template<typename MSG>
+void endpoint::send_message(std::uint32_t type, const MSG& msg)
+{
+	//buffered_writer writer
+}
 
 }}

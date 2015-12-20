@@ -4,6 +4,5 @@ add_executable(completer
 
 target_link_libraries(completer
 	document_lib
-
 )
 
