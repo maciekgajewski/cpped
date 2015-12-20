@@ -27,3 +27,6 @@ Unfortunately, it's C. I've found a nice C++ wrapper in clang-tags project, but 
 The editor supports only ASCII. There is no trivial way to provide support for unicode. I can't convert the data to wchar_t* on loading, as I need undisturbed char* buffer for parsingg with libclang.
 I came up with an idea of container wrapping char utf-8 data, ut it would be a non-random-access container. Should be fine, as I manipualte one line at the time. I'll implement it one day.
 
+## 20-12-2015
+
+YouCompleteMe proven to be a great source of insipirartion. Why very little (if any) of the actual code is re-usable for me, it provides great examples on how to deal with liblcang quirks. Most importantly, it valdiates libclang as the tool to use for C++ parsing.
