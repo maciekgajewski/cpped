@@ -2,7 +2,6 @@
 
 #include <unistd.h>
 
-#include <stdexcept>
 #include <utility>
 
 namespace cpp { namespace backend {
@@ -33,20 +32,6 @@ void endpoint::close()
 	if (fd_ >= 0)
 	{
 		::close(fd_);
-	}
-}
-
-void endpoint::send(const char* data, std::size_t sz)
-{
-	std::size_t sent = 0;
-	while(sent < sz)
-	{
-		auto res = ::write(fd_, data + sent, sz-sent);
-		if (res <= 0)
-		{
-			throw std::runtime_error("Error writing to socket");
-		}
-		sent += res;
 	}
 }
 
