@@ -4,6 +4,7 @@ add_library(backend_lib
 	socket_writer.cc socket_writer.hh
 	serialize.hh
 	buffered_writer.hh
+	socket_reader.hh
 )
 
 target_include_directories(backend_lib INTERFACE ..)

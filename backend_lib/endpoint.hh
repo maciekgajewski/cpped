@@ -1,6 +1,7 @@
 #pragma once
 
 #include "socket_writer.hh"
+#include "socket_reader.hh"
 #include "buffered_writer.hh"
 #include "serialize.hh"
 
@@ -24,8 +25,13 @@ public:
 	void set_fd(int fd);
 
 	// High-level message sending, includes framing
-	template<typename MSG>
-	void send_message(const MSG& msg);
+	template<typename Msg>
+	void send_message(const Msg& msg);
+
+	// High-level message receiving.
+	// Dispatcher is called with two params
+	template<typename Dispatcher>
+	void receive_message(Dispatcher d);
 
 private:
 
