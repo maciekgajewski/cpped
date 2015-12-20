@@ -54,6 +54,8 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 			file_data& data = get_file_data(file);
 			data.compilation_commands_ = clang::get_sanitized_flags(command, file);
 			data.type_ = file_type::cpp; // if clangs knows how to compile it, it must be it
+			// perform initial parsing now
+			parse_file(file, data);
 		}
 	}
 }
