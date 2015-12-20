@@ -20,6 +20,8 @@ int main(int argc, char** argv)
 			nullptr, 0, // unsaved data
 			clang_defaultEditingTranslationUnitOptions());
 
+	(void)clang_tu2;
+
 	//::_tracef("after calling parse");
 
 

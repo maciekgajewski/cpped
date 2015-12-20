@@ -7,7 +7,6 @@ add_executable(document_lib_tests
 
 target_link_libraries(document_lib_tests
 	document_lib
-	${Boost_unit_test_framework_LIBRARY}
 )
 
 add_test(document_lib_tests document_lib_tests)

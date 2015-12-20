@@ -1,7 +1,3 @@
-find_package(Boost REQUIRED COMPONENTS system filesystem)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
-
 add_executable(cpped
 	main.cc
 	editor.cc editor.hh
@@ -15,5 +11,6 @@ target_link_libraries(cpped
 	document_lib
 	nct
 
-	${Boost_LIBRARIES}
+	${Boost_FILESYSTEM_LIBRARY}
+	${Boost_SYSTEM_LIBRARY}
 )

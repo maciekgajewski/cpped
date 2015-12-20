@@ -22,9 +22,13 @@ link_directories(${CLANG_LINK_DIRS})
 #INCLUDE_DIRECTORIES(/home/maciek/workspace/build/ncurses-debug/include)
 #LINK_DIRECTORIES(/home/maciek/workspace/build/ncurses-debug/lib)
 
-find_package(Boost REQUIRED COMPONENTS system filesystem filesystem)
+find_package(Boost COMPONENTS system filesystem)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+
+if(NOT ${Boost_FILESYSTEM_FOUND})
+	message(FATAL_ERROR "Required boost components not found")
+endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1) # to generate compilation database
 

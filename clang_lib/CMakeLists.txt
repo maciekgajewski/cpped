@@ -1,7 +1,3 @@
-find_package(Boost REQUIRED COMPONENTS system filesystem)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
-
 add_library(clang_lib
 	clang.hh clang.cc
 	flags.cc flags.hh
@@ -11,7 +7,7 @@ target_include_directories(clang_lib INTERFACE ..)
 
 target_link_libraries(clang_lib
 
-	${Boost_LIBRARIES}
+	${Boost_FILESESTEM_LIBRARY}
+	${Boost_SYSTEM_LIBRARY}
 	${CLANG_LIBRARIES}
-
 )
