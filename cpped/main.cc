@@ -7,20 +7,16 @@
 #include "nct/ncurses_env.hh"
 #include "nct/event_dispatcher.hh"
 
+#include "backend_lib/backend.hh"
+
 #include <iostream>
 #include <string>
 
 
 using namespace std::literals::string_literals;
 
-// zażółć gęślą jaźń
-//		t
-//x		t
-//xx	t
-//xxx	t
-//xxxx	t
-//xxxxx	t
-int main(int argc, char** argv)
+
+void run_frontend(int argc, char** argv)
 {
 	cpped::project project;
 	boost::optional<std::string> file_to_open;
@@ -59,4 +55,14 @@ int main(int argc, char** argv)
 
 	dispatcher.set_global_quit_key("^X");
 	dispatcher.run();
+}
+
+int main(int argc, char** argv)
+{
+	cpped::backend::backend backend;
+	cpped::backend::endpoint* endpoint = backend.fork();
+	if (endpoint)
+	{
+		run_frontend(argc, argv);
+	}
 }

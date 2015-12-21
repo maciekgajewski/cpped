@@ -10,6 +10,7 @@ add_executable(cpped
 target_link_libraries(cpped
 	document_lib
 	nct
+	backend_lib
 
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}

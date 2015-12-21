@@ -4,7 +4,7 @@
 
 #include <utility>
 
-namespace cpp { namespace backend {
+namespace cpped { namespace backend {
 
 endpoint::endpoint(int fd)
 	: fd_(fd)

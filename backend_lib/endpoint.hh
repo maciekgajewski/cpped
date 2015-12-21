@@ -10,15 +10,14 @@
 #include <cstdlib>
 #include <cstdint>
 
-namespace cpp { namespace backend {
-
-
+namespace cpped { namespace backend {
 
 // Communication endpoint used to talk to the other process
 class endpoint
 {
 public:
 
+	endpoint() = default;
 	endpoint(int fd);
 	endpoint(const endpoint&) = delete;
 	endpoint(endpoint&& e);

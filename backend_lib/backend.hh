@@ -4,7 +4,7 @@
 
 #include <unistd.h>
 
-namespace cpp { namespace backend {
+namespace cpped { namespace backend {
 
 
 // The Backend. Contains the backend process, takes care of forking and inter-process conmmunication

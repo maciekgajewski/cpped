@@ -4,7 +4,7 @@
 
 #include <unistd.h>
 
-namespace cpp { namespace backend {
+namespace cpped { namespace backend {
 
 class socket_writer
 {

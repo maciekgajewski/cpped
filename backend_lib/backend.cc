@@ -1,5 +1,9 @@
 #include "backend.hh"
 
+#include "event_dispatcher.hh"
+
+#include "messages.hh"
+
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -7,13 +11,13 @@
 #include <cassert>
 #include <stdexcept>
 
-namespace cpp { namespace backend {
+namespace cpped { namespace backend {
 
 backend::~backend()
 {
 	if (pid_ != 0)
 	{
-		// wait for child process
+		endpoint_.send_message(messages::stop{});
 		::waitpid(pid_, nullptr, 0);
 	}
 }
@@ -47,7 +51,9 @@ endpoint* backend::fork()
 	{
 		::close(sockets[0]);
 		endpoint_.set_fd(sockets[1]);
-		// TODO run child here
+
+		event_dispatcher dispatcher(endpoint_);
+		dispatcher.run();
 
 		return nullptr;
 	}

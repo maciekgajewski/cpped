@@ -6,6 +6,9 @@ add_library(backend_lib
 	buffered_writer.hh
 	socket_reader.hh
 	type_dispatcher.hh
+	messages.hh
+	event_dispatcher.cc event_dispatcher.hh
+	project.cc project.hh
 )
 
 target_include_directories(backend_lib INTERFACE ..)

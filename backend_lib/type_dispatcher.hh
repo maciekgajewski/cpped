@@ -7,14 +7,14 @@
 #include <stdexcept>
 #include <functional>
 
-namespace cpp { namespace backend {
+namespace cpped { namespace backend {
 
 using type_id = std::uint64_t;
 
 template<typename T>
 type_id get_type_id()
 {
-	return static_cast<type_id>(typeid(T).name());
+	return (type_id)(typeid(T).name());
 }
 
 template<typename ... Args>
