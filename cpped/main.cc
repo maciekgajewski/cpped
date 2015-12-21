@@ -9,6 +9,8 @@
 
 #include "backend_lib/backend.hh"
 
+#include <boost/program_options.hpp>
+
 #include <iostream>
 #include <string>
 
@@ -59,6 +61,35 @@ void run_frontend(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
+	namespace po = boost::program_options;
+
+	po::options_description named_options("Allowed options");
+	named_options.add_options()
+		("help,h", "print this message")
+		("cmake", po::value<std::string>(), "Open CMake project")
+		;
+	po::positional_options_description positional_options;
+	positional_options.add("file", -1);
+
+	po::variables_map vm;
+	po::store(po::command_line_parser(argc, argv)
+		.options(named_options).positional(positional_options).run(), vm);
+	po::notify(vm);
+
+
+	if (vm.count("help"))
+	{
+		named_options.print(std::cout);
+		return 1;
+	}
+
+	if (vm.count("cmake"))
+	{
+		std::cout << "would open cmake project at :" << vm["cmake"].as<std::string>() << std::endl;
+	}
+
+	return 0;
+
 	cpped::backend::backend backend;
 	cpped::backend::endpoint* endpoint = backend.fork();
 	if (endpoint)
