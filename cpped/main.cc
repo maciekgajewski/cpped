@@ -17,26 +17,34 @@
 
 using namespace std::literals::string_literals;
 
+void usage(const boost::program_options::options_description& options)
+{
+	std::cout <<
+R"(
+CppEd - a C++ editor
 
-void run_frontend(int argc, char** argv)
+usage: cpped [options] [file ...]                  edit specified file(s)
+   or: cpped [options] --cmake <build directory>   open CMake project
+)" << std::endl;
+
+	options.print(std::cout);
+}
+
+void run_frontend(const boost::program_options::variables_map& options)
 {
 	cpped::project project;
 	boost::optional<std::string> file_to_open;
-	if (argc > 1)
+
+	if (options.count("cmake"))
 	{
-		if (argv[1] == "-cmake"s)
-		{
-			if (argc < 3)
-			{
-				throw std::runtime_error("-cmake requires cmake build dir as an argument");
-			}
-			project = cpped::load_cmake_project(argv[2]);
-		}
-		else
-		{
-			file_to_open = argv[1];
-		}
+		project = cpped::load_cmake_project(options["cmake"].as<std::string>());
 	}
+	else
+	{
+		auto files = options["file"].as<std::vector<std::string>>();
+		file_to_open = files[0];
+	}
+
 
 	::setlocale(LC_ALL, "en_EN.utf-8");
 	nct::ncurses_env env;
@@ -63,37 +71,48 @@ int main(int argc, char** argv)
 {
 	namespace po = boost::program_options;
 
-	po::options_description named_options("Allowed options");
-	named_options.add_options()
+	po::options_description visible_options("Recognized options");
+	visible_options.add_options()
 		("help,h", "print this message")
 		("cmake", po::value<std::string>(), "Open CMake project")
 		;
+
+	po::options_description hidden_options;
+	hidden_options.add_options()
+		("file", po::value<std::vector<std::string>>(), "input file")
+		;
+
+	po::options_description all_options;
+	all_options.add(visible_options).add(hidden_options);
+
 	po::positional_options_description positional_options;
 	positional_options.add("file", -1);
 
 	po::variables_map vm;
-	po::store(po::command_line_parser(argc, argv)
-		.options(named_options).positional(positional_options).run(), vm);
-	po::notify(vm);
 
-
-	if (vm.count("help"))
+	try
 	{
-		named_options.print(std::cout);
+		po::store(po::command_line_parser(argc, argv)
+			.options(all_options).positional(positional_options).run(), vm);
+		po::notify(vm);
+	}
+	catch(const std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		usage(visible_options);
 		return 1;
 	}
 
-	if (vm.count("cmake"))
+	if (vm.count("help"))
 	{
-		std::cout << "would open cmake project at :" << vm["cmake"].as<std::string>() << std::endl;
+		usage(visible_options);
+		return 1;
 	}
-
-	return 0;
 
 	cpped::backend::backend backend;
 	cpped::backend::endpoint* endpoint = backend.fork();
 	if (endpoint)
 	{
-		run_frontend(argc, argv);
+		run_frontend(vm);
 	}
 }
