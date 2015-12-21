@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+#include <cstddef>
 #include <cstdint>
 #include <unordered_map>
 #include <stdexcept>
@@ -35,8 +37,10 @@ private:
 
 template<typename ... Args>
 template<typename T>
-void type_dispatcher<Args...>::add_type()
+void type_dispatcher<Args...>::add_type(const function_type& f)
 {
+	type_id type = get_type_id<T>();
+	handlers_[type] = f;
 }
 
 
@@ -49,7 +53,7 @@ void type_dispatcher<Args...>::dispatch(type_id type, Args&&... args) const
 		throw std::runtime_error("Unknown type");
 	}
 
-	const function_type^ f = it->second;
+	const function_type& f = it->second;
 	f(std::forward<Args>(args)...);
 }
 

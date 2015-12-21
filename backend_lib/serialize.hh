@@ -2,6 +2,7 @@
 
 // Very fast, non-portable serialization for inter-process communication
 
+#include <cstddef>
 #include <type_traits>
 
 
@@ -14,7 +15,7 @@ void read(Reader& reader, void* buf, std::size_t sz)
 	std::size_t completed = 0;
 	while(completed < sz)
 	{
-		auto result = reader.read(buf+completed, sz-completed);
+		auto result = reader.read(static_cast<char*>(buf)+completed, sz-completed);
 		completed += result;
 	}
 }
