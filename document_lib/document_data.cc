@@ -44,12 +44,12 @@ void document_data::load_from_raw_data(const std::string& data)
 	create_lines();
 }
 
-position document_data::copy_inserting(const document_data& source, position pos, const std::string& text)
+document_position document_data::copy_inserting(const document_data& source, document_position pos, const std::string& text)
 {
 	assert(empty());
 	assert(pos.line < source.lines_.size());
 
-	position final_pos = pos;
+	document_position final_pos = pos;
 
 	// copy data, inserting the new chunk
 	raw_data_.reserve(source.raw_data_.size() + text.length());
@@ -133,7 +133,7 @@ position document_data::copy_inserting(const document_data& source, position pos
 	return final_pos;
 }
 
-void document_data::copy_removing(const document_data& source, range to_remove)
+void document_data::copy_removing(const document_data& source, document_range to_remove)
 {
 	assert(empty() && "this is to be called immediately after initialization");
 	assert(to_remove.start.line < source.lines_.size());
@@ -200,7 +200,7 @@ void document_data::copy_removing(const document_data& source, range to_remove)
 	assert(start == raw_data_.end() && "inconsisted line lengths after removal");
 }
 
-position document_data::shift_back(position p, unsigned shift)
+document_position document_data::shift_back(document_position p, unsigned shift)
 {
 	assert(p.line < lines_.size());
 	assert(p.column <= lines_[p.line].get_length());
@@ -226,7 +226,7 @@ position document_data::shift_back(position p, unsigned shift)
 	return p;
 }
 
-position document_data::shift_forward(position p, unsigned shift)
+document_position document_data::shift_forward(document_position p, unsigned shift)
 {
 	assert(p.line < lines_.size());
 	assert(p.column <= lines_[p.line].get_length());
@@ -251,7 +251,7 @@ position document_data::shift_forward(position p, unsigned shift)
 	return p;
 }
 
-data_type::const_iterator document_data::positon_to_offset(position pos) const
+data_type::const_iterator document_data::positon_to_offset(document_position pos) const
 {
 	assert(pos.line < lines_.size());
 	assert(pos.column <= lines_[pos.line].get_length());

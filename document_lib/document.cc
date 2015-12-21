@@ -16,7 +16,7 @@ document::~document()
 {
 }
 
-void document::load_from_raw_data(const std::string& data, const std::string& fake_path, std::unique_ptr<iparser>&& p)
+void document::load_from_raw_data(const std::string& data, const std::string& fake_path)
 {
 	file_name_ = fake_path;
 
@@ -24,11 +24,9 @@ void document::load_from_raw_data(const std::string& data, const std::string& fa
 	data_.emplace_back();
 	data_.back().load_from_raw_data(data);
 	current_data_ = data_.begin();
-
-	parser_ = std::move(p);
 }
 
-void document::load_from_file(const boost::filesystem::path& path, std::unique_ptr<iparser>&& p)
+void document::load_from_file(const boost::filesystem::path& path)
 {
 	file_name_ = boost::filesystem::absolute(path);
 
@@ -36,11 +34,9 @@ void document::load_from_file(const boost::filesystem::path& path, std::unique_p
 	data_.emplace_back();
 	data_.back().load_from_file(file_name_.string());
 	current_data_ = data_.begin();
-
-	parser_ = std::move(p);
 }
 
-position document::insert(position pos, const std::string& text)
+document_position document::insert(document_position pos, const std::string& text)
 {
 	erase_redo();
 
@@ -56,7 +52,7 @@ position document::insert(position pos, const std::string& text)
 	return final_pos;
 }
 
-void document::remove(range r)
+void document::remove(document_range r)
 {
 	erase_redo();
 
@@ -69,31 +65,23 @@ void document::remove(range r)
 	crop_history();
 }
 
-position document::remove_before(position pos, unsigned count)
+document_position document::remove_before(document_position pos, unsigned count)
 {
-	position begin = current_data_->shift_back(pos, count);
-	remove(range{begin, pos});
+	document_position begin = current_data_->shift_back(pos, count);
+	remove(document_range{begin, pos});
 	return begin;
 }
 
-position document::remove_after(position pos, unsigned count)
+document_position document::remove_after(document_position pos, unsigned count)
 {
-	position end = current_data_->shift_forward(pos, count);
-	remove(range{pos, end});
+	document_position end = current_data_->shift_forward(pos, count);
+	remove(document_range{pos, end});
 	return end;
 }
 
 void document::parse_language()
 {
-	if (parser_)
-	{
-		auto start_time = std::chrono::high_resolution_clock::now();
-		parser_->parse(*current_data_, file_name_.string());
-		auto end_time = std::chrono::high_resolution_clock::now();
-
-		last_parse_time_ = end_time - start_time;
-	}
-
+	// TODO
 }
 
 std::string document::to_string() const
@@ -116,8 +104,5 @@ void document::crop_history()
 		data_.pop_front();
 
 }
-
-
-
 
 }}

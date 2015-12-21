@@ -19,8 +19,8 @@ public:
 	void init_empty();
 	void load_from_file(const std::string& path);
 	void load_from_raw_data(const std::string& data);
-	position copy_inserting(const document_data& source, position pos, const std::string& text);
-	void copy_removing(const document_data& source, range to_remove);
+	document_position copy_inserting(const document_data& source, document_position pos, const std::string& text);
+	void copy_removing(const document_data& source, document_range to_remove);
 
 	std::string to_string() const { return std::string(raw_data_.begin(), raw_data_.end()); }
 
@@ -48,15 +48,15 @@ public:
 	const data_type& get_raw_data() const { return raw_data_; }
 
 	// returns position shifted by number of characters back
-	position shift_back(position p, unsigned shift);
+	document_position shift_back(document_position p, unsigned shift);
 	// returns position shifted by number of characters forward
-	position shift_forward(position p, unsigned shift);
+	document_position shift_forward(document_position p, unsigned shift);
 
-	position get_last_position() const { return position{unsigned(lines_.size()-1), unsigned(lines_.back().get_length())}; }
+	document_position get_last_position() const { return document_position{unsigned(lines_.size()-1), unsigned(lines_.back().get_length())}; }
 
 private:
 
-	data_type::const_iterator positon_to_offset(position pos) const;
+	data_type::const_iterator positon_to_offset(document_position pos) const;
 
 	void create_lines(); // creates token-less lines for freshly loaded buffer
 

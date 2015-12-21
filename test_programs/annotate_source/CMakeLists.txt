@@ -4,6 +4,7 @@ add_executable(annotate_source
 
 target_link_libraries(annotate_source
 	document_lib
+	clang_lib
 
 )
 

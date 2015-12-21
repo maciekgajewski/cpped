@@ -39,19 +39,19 @@ R"(111
 
 	BOOST_CHECK_EQUAL(doc.to_string(), text);
 
-	doc.insert(position{1, 2}, "44");
+	doc.insert(document_position{1, 2}, "44");
 	BOOST_CHECK_EQUAL(doc.to_string(), "111\n224422\n33333");
 
-	doc.insert(position{0, 0}, "0");
+	doc.insert(document_position{0, 0}, "0");
 	BOOST_CHECK_EQUAL(doc.to_string(), "0111\n224422\n33333");
 
-	doc.insert(position{0, 4}, "xx");
+	doc.insert(document_position{0, 4}, "xx");
 	BOOST_CHECK_EQUAL(doc.to_string(), "0111xx\n224422\n33333");
 
-	doc.insert(position{2, 0}, "abcdef");
+	doc.insert(document_position{2, 0}, "abcdef");
 	BOOST_CHECK_EQUAL(doc.to_string(), "0111xx\n224422\nabcdef33333");
 
-	doc.insert(position{2, 11}, "END");
+	doc.insert(document_position{2, 11}, "END");
 	BOOST_CHECK_EQUAL(doc.to_string(), "0111xx\n224422\nabcdef33333END");
 }
 
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(insert_character_no_token)
 	std::string l1 = doc.get_line(1).to_string();
 	std::string l2 = doc.get_line(2).to_string();
 
-	doc.insert(position{1, 1}, "x");
+	doc.insert(document_position{1, 1}, "x");
 
 	// no changes to previous and subsequent line
 	BOOST_CHECK_EQUAL(doc.get_line(0).to_string(), l0);
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(insert_character_into_token)
 	line1.push_back_token({2, 4, token_type::literal});
 
 	document_data doc2;
-	doc2.copy_inserting(doc, position{1, 1}, "x");
+	doc2.copy_inserting(doc, document_position{1, 1}, "x");
 
 	const std::vector<line_token>& tokens = doc2.get_line(1).get_tokens();
 
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(insert_newline_no_tokens)
 	auto line1 = doc.get_line(1);
 	BOOST_CHECK_EQUAL(line1.get_length(), 4);
 
-	doc.insert(position{1, 2}, "\n");
+	doc.insert(document_position{1, 2}, "\n");
 
 	BOOST_REQUIRE_EQUAL(4, doc.get_line_count());
 	BOOST_CHECK_EQUAL(doc.get_line(0).get_length(), 3);
@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE(insert_newline_between_tokens)
 	auto line1 = doc.get_line(1);
 	BOOST_CHECK_EQUAL(line1.get_length(), 6);
 
-	doc.insert(position{1, 3}, "\n");
+	doc.insert(document_position{1, 3}, "\n");
 
 	BOOST_REQUIRE_EQUAL(4, doc.get_line_count());
 
@@ -292,7 +292,7 @@ BOOST_AUTO_TEST_CASE(insert_newline_inside_token)
 	auto line1 = doc.get_line(1);
 	BOOST_CHECK_EQUAL(line1.get_length(), 3);
 
-	doc.insert(position{1, 2}, "\n");
+	doc.insert(document_position{1, 2}, "\n");
 
 	BOOST_REQUIRE_EQUAL(4, doc.get_line_count());
 
@@ -329,17 +329,17 @@ BOOST_AUTO_TEST_CASE(multiline_insert_no_tokens)
 	BOOST_CHECK_EQUAL(doc.to_string(), text);
 
 	// insert multiple lines at the beginning
-	doc.insert(position{0,0}, "aa\nbb\ncc");
+	doc.insert(document_position{0,0}, "aa\nbb\ncc");
 	BOOST_CHECK_EQUAL(doc.to_string(), "aa\nbb\ncc1122\n333\n5566");
 	BOOST_CHECK_EQUAL(doc.get_line_count(), 5);
 
 	// insert multiple lines in the middle
-	doc.insert(position{2, 4}, "xxx\nyyy\nzzz");
+	doc.insert(document_position{2, 4}, "xxx\nyyy\nzzz");
 	BOOST_CHECK_EQUAL(doc.to_string(), "aa\nbb\ncc11xxx\nyyy\nzzz22\n333\n5566");
 	BOOST_CHECK_EQUAL(doc.get_line_count(), 7);
 
 	// insert multiple lines at the end
-	doc.insert(position{6, 4}, "alpha\nbeta\ngamma");
+	doc.insert(document_position{6, 4}, "alpha\nbeta\ngamma");
 	BOOST_CHECK_EQUAL(doc.to_string(), "aa\nbb\ncc11xxx\nyyy\nzzz22\n333\n5566alpha\nbeta\ngamma");
 	BOOST_CHECK_EQUAL(doc.get_line_count(), 9);
 }
@@ -351,20 +351,20 @@ BOOST_AUTO_TEST_CASE(remove_single_char_no_tokens)
 	doc.load_from_raw_data(text, "");
 
 
-	doc.remove_before(position{1, 1}, 1); // remove '1'
+	doc.remove_before(document_position{1, 1}, 1); // remove '1'
 
 	BOOST_CHECK_EQUAL(doc.get_line_count(), 3);
 	BOOST_CHECK_EQUAL(doc.to_string(), "aaa\n23456\nzzz");
 	BOOST_CHECK_EQUAL(doc.get_line(1).to_string(), "23456");
 
 
-	doc.remove_after(position{1, 4}, 1); // remove '6'
+	doc.remove_after(document_position{1, 4}, 1); // remove '6'
 
 	BOOST_CHECK_EQUAL(doc.get_line_count(), 3);
 	BOOST_CHECK_EQUAL(doc.to_string(), "aaa\n2345\nzzz");
 	BOOST_CHECK_EQUAL(doc.get_line(1).to_string(), "2345");
 
-	doc.remove(range{position{1, 1}, position{1, 3}}); // remove '34'
+	doc.remove({{1, 1}, {1, 3}}); // remove '34'
 	BOOST_CHECK_EQUAL(doc.to_string(), "aaa\n25\nzzz");
 	BOOST_CHECK_EQUAL(doc.get_line(1).to_string(), "25");
 }
@@ -385,7 +385,7 @@ BOOST_AUTO_TEST_CASE(remove_single_line_tokens)
 	data.get_line(0).push_back_token(line_token{8, 10, token_type::comment});
 
 	document_data edited;
-	edited.copy_removing(data, range{position{0, 3}, position{0, 7}}); // leave "112455"
+	edited.copy_removing(data, document_range{document_position{0, 3}, document_position{0, 7}}); // leave "112455"
 
 	BOOST_CHECK_EQUAL(edited.to_string(), "112455");
 	BOOST_REQUIRE_EQUAL(edited.get_line_count(), 1);
@@ -415,7 +415,7 @@ BOOST_AUTO_TEST_CASE(remove_multiple_lines_tokens)
 	data.get_line(3).push_back_token(line_token{4, 6, token_type::preprocessor}); // cc
 
 	document_data edited;
-	edited.copy_removing(data, range{position{0, 3}, position{3, 3}}); // leave "112bcc"}
+	edited.copy_removing(data, document_range{document_position{0, 3}, document_position{3, 3}}); // leave "112bcc"}
 
 	BOOST_CHECK_EQUAL(edited.to_string(), "112bcc");
 	BOOST_REQUIRE_EQUAL(edited.get_line_count(), 1);

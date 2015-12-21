@@ -1,5 +1,4 @@
 #include "document_lib/document.hh"
-#include "document_lib/cpp_parser.hh"
 
 #include "clang_lib/clang.hh"
 
@@ -9,31 +8,6 @@
 
 namespace cpped { namespace document { namespace test {
 
-// cpp parserwhichj is self-contained, does not need project
-class test_cpp_parser : public cpp_parser
-{
-public:
-
-	test_cpp_parser() : cpp_parser(tu_), index_(0, 0) {}
-
-	void parse(document_data& data, const std::string& file_name) override
-	{
-		if (tu_.is_null())
-		{
-			tu_.parse(
-				index_,
-				file_name.c_str(),
-				data.get_raw_data().data(), data.get_raw_data().size(), // unsaved data
-				{"-fdiagnostics-color=never"}); // cmdline
-		}
-		cpp_parser::parse(data, file_name);
-	}
-
-private:
-	clang::index index_;
-	clang::translation_unit tu_;
-};
-
 BOOST_AUTO_TEST_SUITE(cpp_parser_tests)
 
 BOOST_AUTO_TEST_CASE(simple_test)
@@ -41,7 +15,7 @@ BOOST_AUTO_TEST_CASE(simple_test)
 	std::string code ="int x=7;";
 
 	document d;
-	d.load_from_raw_data(code, "code.cc", std::make_unique<test_cpp_parser>());
+	d.load_from_raw_data(code, "code.cc");
 	d.parse_language();
 
 	int lines = 0;
@@ -76,7 +50,7 @@ R"(/*345
 */)";
 
 	document d;
-	d.load_from_raw_data(code, "code.cc", std::make_unique<test_cpp_parser>());
+	d.load_from_raw_data(code, "code.cc");
 	d.parse_language();
 
 	BOOST_REQUIRE_EQUAL(d.get_line_count(), 3);
@@ -155,7 +129,7 @@ void fun() {
 */)";
 
 	document d;
-	d.load_from_raw_data(code, "code.cc", std::make_unique<test_cpp_parser>());
+	d.load_from_raw_data(code, "code.cc");
 
 	// TODO
 

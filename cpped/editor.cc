@@ -146,14 +146,11 @@ void editor::request_cursor_update()
 	// last parse time
 	using namespace std::literals::chrono_literals;
 
-	char status_text[64];
-	std::snprintf(status_text, 64, "parsing: %.2fms", 0.001 * doc_->get_last_parse_time()/1us);
-
 	editor_window::status_info info;
 	info.docx = cursor_pos_.column;
 	info.docy = cursor_pos_.line;
 	info.column = column;
-	info.status_text = status_text;
+	info.status_text = "";
 	info.file_name = doc_->get_file_name();
 	info.unsaved = doc_->has_unsaved_changed();
 
@@ -272,7 +269,7 @@ void editor::scroll_right()
 void editor::backspace()
 {
 	// TODO any smart-unindenting goes here
-	if (cursor_pos_ > document::position{0, 0})
+	if (cursor_pos_ > document::document_position{0, 0})
 	{
 		cursor_pos_ = doc_->remove_before(cursor_pos_, 1);
 		ensure_cursor_visible();

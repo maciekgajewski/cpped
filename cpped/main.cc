@@ -37,7 +37,7 @@ void run_frontend(const boost::program_options::variables_map& options)
 
 	if (options.count("cmake"))
 	{
-		project = cpped::load_cmake_project(options["cmake"].as<std::string>());
+		// TODO send request to backend
 	}
 	else
 	{

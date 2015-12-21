@@ -9,6 +9,7 @@ add_library(backend_lib
 	messages.hh
 	event_dispatcher.cc event_dispatcher.hh
 	project.cc project.hh
+	cpp_tokens.cc cpp_tokens.hh
 )
 
 target_include_directories(backend_lib INTERFACE ..)

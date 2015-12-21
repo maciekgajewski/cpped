@@ -3,6 +3,7 @@
 #include <boost/operators.hpp>
 
 #include <ostream>
+#include <vector>
 
 namespace cpped { namespace  document {
 
@@ -22,6 +23,7 @@ enum class token_type
 
 std::ostream& operator << (std::ostream& s, token_type tt);
 
+// Token that's lmimted to one line
 struct line_token
 {
 	unsigned begin; // index of the fist character of the token
@@ -33,14 +35,14 @@ struct line_token
 
 std::ostream& operator << (std::ostream& s, const line_token& t);
 
-struct position : public boost::partially_ordered<position>
+struct document_position : public boost::partially_ordered<document_position>
 {
 	unsigned line;
 	unsigned column;
 
-	position(unsigned l, unsigned c) : line(l), column(c) {}
+	document_position(unsigned l, unsigned c) : line(l), column(c) {}
 
-	bool operator<(const position& o) const
+	bool operator<(const document_position& o) const
 	{
 		if (line == o.line)
 			return column < o.column;
@@ -48,16 +50,23 @@ struct position : public boost::partially_ordered<position>
 			return line < o.line;
 	}
 
-	bool operator == (const position& o) const
+	bool operator == (const document_position& o) const
 	{
 		return line == o.line && column == o.column;
 	}
 };
 
-struct range
+struct document_range
 {
-	position start;
-	position end;
+	document_position start;
+	document_position end;
+};
+
+// Token that can spawn multiple lines
+struct token
+{
+	token_type token;
+	document_range range;
 };
 
 }}

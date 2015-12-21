@@ -65,7 +65,7 @@ private:
 	unsigned first_column_ = 0;
 
 	// cursor document poisition
-	document::position cursor_pos_ = {0, 0};
+	document::document_position cursor_pos_ = {0, 0};
 	unsigned desired_cursor_column_ = 0;
 
 	// settings

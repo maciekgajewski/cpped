@@ -1,7 +1,5 @@
 #pragma once
 
-#include "iparser.hh"
-
 #include "document_data.hh"
 
 #include <boost/filesystem.hpp>
@@ -51,8 +49,8 @@ public:
 	document();
 	~document();
 
-	void load_from_raw_data(const std::string& data, const std::string& fake_path, std::unique_ptr<iparser>&& parser_ = nullptr);
-	void load_from_file(const boost::filesystem::path& path, std::unique_ptr<iparser>&& parser_ = nullptr);
+	void load_from_raw_data(const std::string& data, const std::string& fake_path);
+	void load_from_file(const boost::filesystem::path& path);
 
 	unsigned get_line_count() const { return current_data_->get_line_count(); }
 
@@ -64,14 +62,14 @@ public:
 	document_line get_line(unsigned index) const { return document_line(current_data_->get_line(index)); }
 
 	// insert string at location. Returns the position of the end of inserted text
-	position insert(position pos, const std::string& text);
+	document_position insert(document_position pos, const std::string& text);
 
 	// removes indicated range
-	void remove(range r);
+	void remove(document_range r);
 	// removes characters before the positon, returns the position of the begining of the removed range
-	position remove_before(position pos, unsigned count);
+	document_position remove_before(document_position pos, unsigned count);
 	// removes characters after the positon, returns the position of the end of the removed range
-	position remove_after(position pos, unsigned count);
+	document_position remove_after(document_position pos, unsigned count);
 
 
 	// iterates over no more than 'count' lines in range, starting from first_line
@@ -85,6 +83,7 @@ public:
 			});
 	}
 
+	// Requests parsing
 	void parse_language();
 
 	const std::vector<char>& get_raw_data() const { return current_data_->get_raw_data(); }
@@ -92,11 +91,9 @@ public:
 
 	std::string to_string() const; // mostly for testing
 
-	std::chrono::high_resolution_clock::duration get_last_parse_time() const { return last_parse_time_; }
-
 	document_data& get_data() { return *current_data_; } // for tests
 
-	position get_last_position() const { return current_data_->get_last_position(); }
+	document_position get_last_position() const { return current_data_->get_last_position(); }
 
 	bool has_unsaved_changed() const { return _has_unsaved_changes; }
 
@@ -109,9 +106,6 @@ private:
 	std::list<document_data>::iterator current_data_;
 
 	boost::filesystem::path file_name_;
-
-	std::unique_ptr<iparser> parser_;
-	std::chrono::high_resolution_clock::duration last_parse_time_;
 
 	bool _has_unsaved_changes = false;
 };
