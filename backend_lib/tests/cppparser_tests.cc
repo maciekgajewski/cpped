@@ -1,4 +1,6 @@
-#include "document_lib/document.hh"
+#include "backend_lib/cpp_tokens.hh"
+
+#include "document_lib/document_data.hh"
 
 #include "clang_lib/clang.hh"
 
@@ -6,7 +8,15 @@
 
 #include <iostream>
 
-namespace cpped { namespace document { namespace test {
+namespace cpped { namespace backend { namespace test {
+
+std::vector<document::token> parse_document_data(const document::document_data& d)
+{
+	clang::index idx(0, 0);
+	clang::translation_unit tu;
+	tu.parse(idx, "code.cc", d.get_raw_data().data(), d.get_raw_data().size(), {});
+	return get_cpp_tokens(tu, "code.cc", d.get_raw_data());
+}
 
 BOOST_AUTO_TEST_SUITE(cpp_parser_tests)
 
@@ -14,27 +24,28 @@ BOOST_AUTO_TEST_CASE(simple_test)
 {
 	std::string code ="int x=7;";
 
-	document d;
-	d.load_from_raw_data(code, "code.cc");
-	d.parse_language();
+	document::document_data d;
+	d.load_from_raw_data(code);
+	auto token_list = parse_document_data(d);
+	d.set_tokens(token_list);
 
 	int lines = 0;
 	int tokens = 0;
-	token_type expected_tokens[] = {
-		token_type::keyword,	// int
-		token_type::none,		// (space)
-		token_type::none,		// x
-		token_type::none,		// =
-		token_type::literal,	// 7
-		token_type::none,		// ;
+	document::token_type expected_tokens[] = {
+		document::token_type::keyword,	// int
+		document::token_type::none,		// (space)
+		document::token_type::none,		// x
+		document::token_type::none,		// =
+		document::token_type::literal,	// 7
+		document::token_type::none,		// ;
 		};
 
-	d.for_lines(0, 1, [&](const document_line& line)
+	d.for_lines(0, 1, [&](const document::line_data& line)
 	{
 		lines++;
-		line.for_each_token([&](const line_token& token)
+		line.for_each_token([&](const document::line_token& token)
 		{
-			BOOST_REQUIRE_LT(tokens, sizeof(expected_tokens)/sizeof(token_type));
+			BOOST_REQUIRE_LT(tokens, sizeof(expected_tokens)/sizeof(document::token_type));
 			BOOST_CHECK_EQUAL(expected_tokens[tokens], token.type);
 			tokens++;
 		});
@@ -49,23 +60,24 @@ R"(/*345
 123456789
 */)";
 
-	document d;
-	d.load_from_raw_data(code, "code.cc");
-	d.parse_language();
+	document::document_data d;
+	d.load_from_raw_data(code);
+	auto token_list = parse_document_data(d);
+	d.set_tokens(token_list);
 
 	BOOST_REQUIRE_EQUAL(d.get_line_count(), 3);
 
 	auto& l0_tokens = d.get_line(0).get_tokens();
 	BOOST_REQUIRE_EQUAL(l0_tokens.size() , 1);
-	BOOST_CHECK_EQUAL(l0_tokens[0] , (line_token{0, 5, token_type::comment}));
+	BOOST_CHECK_EQUAL(l0_tokens[0] , (document::line_token{0, 5, document::token_type::comment}));
 
 	auto& l1_tokens = d.get_line(1).get_tokens();
 	BOOST_REQUIRE_EQUAL(l1_tokens.size() , 1);
-	BOOST_CHECK_EQUAL(l1_tokens[0] , (line_token{0, 9, token_type::comment}));
+	BOOST_CHECK_EQUAL(l1_tokens[0] , (document::line_token{0, 9, document::token_type::comment}));
 
 	auto& l2_tokens = d.get_line(2).get_tokens();
 	BOOST_REQUIRE_EQUAL(l2_tokens.size() , 1);
-	BOOST_CHECK_EQUAL(l2_tokens[0] , (line_token{0, 2, token_type::comment}));
+	BOOST_CHECK_EQUAL(l2_tokens[0] , (document::line_token{0, 2, document::token_type::comment}));
 }
 
 
@@ -128,8 +140,8 @@ void fun() {
 	s.
 */)";
 
-	document d;
-	d.load_from_raw_data(code, "code.cc");
+	document::document_data d;
+	d.load_from_raw_data(code);
 
 	// TODO
 

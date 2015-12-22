@@ -14,6 +14,8 @@ add_library(backend_lib
 
 target_include_directories(backend_lib INTERFACE ..)
 
+add_subdirectory(tests)
+
 target_link_libraries(backend_lib
 
 	clang_lib
