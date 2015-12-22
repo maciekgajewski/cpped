@@ -65,7 +65,7 @@ struct document_range
 // Token that can spawn multiple lines
 struct token
 {
-	token_type token;
+	token_type type;
 	document_range range;
 };
 

@@ -251,6 +251,36 @@ document_position document_data::shift_forward(document_position p, unsigned shi
 	return p;
 }
 
+void document_data::set_tokens(const std::vector<token>& tokens)
+{
+	auto begin = tokens.begin();
+
+	for (unsigned line_number = 0; line_number < lines_.size(); ++line_number)
+	{
+		line_data& line = lines_[line_number];
+		line.clear_tokens();
+
+		// find the last token not for this line
+		auto end = std::find_if(begin, tokens.end(),
+			[&](const token& t) { return t.range.start.line > line_number; });
+
+
+		for(auto it = begin; it != end; ++it)
+		{
+			unsigned start_column = it->range.start.line == line_number ?
+				it->range.start.column : 0;
+			unsigned end_column = it->range.end.line == line_number ?
+				it->range.end.column : line.get_length();
+
+			line.push_back_token(line_token{start_column, end_column, it->type});
+		}
+
+		// move 'begin' past the last token ending in this line
+		begin = std::find_if(begin, end,
+			[&](const token& t) { return t.range.end.line > line_number; });
+	}
+}
+
 data_type::const_iterator document_data::positon_to_offset(document_position pos) const
 {
 	assert(pos.line < lines_.size());

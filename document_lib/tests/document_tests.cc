@@ -429,6 +429,46 @@ BOOST_AUTO_TEST_CASE(remove_multiple_lines_tokens)
 	BOOST_CHECK_EQUAL(tokens[3], (line_token{4, 6, token_type::preprocessor})); // cc
 }
 
+BOOST_AUTO_TEST_CASE(set_tokens)
+{
+	std::string text = "1122\n2\n2333\nempty\nxxx";
+	document_data data;
+	data.load_from_raw_data(text);
+
+	std::vector<token> tokens = {
+		token{token_type::comment, {{0,0}, {0,2}}}, // 11
+		token{token_type::keyword, {{0,2}, {2,1}}}, // 22\n2\n2
+		token{token_type::literal, {{2,1}, {2,4}}}, // 333
+		token{token_type::preprocessor, {{4,0}, {4,3}}}, // xxx
+	};
+
+	data.set_tokens(tokens);
+
+	BOOST_REQUIRE_EQUAL(data.get_line_count(), 5);
+
+	const auto& tokens0 = data.get_line(0).get_tokens();
+	BOOST_REQUIRE_EQUAL(tokens0.size(), 2);
+	BOOST_CHECK_EQUAL(tokens0[0], (line_token{0, 2, token_type::comment})); // 11
+	BOOST_CHECK_EQUAL(tokens0[1], (line_token{2, 4, token_type::keyword})); // 22
+
+	const auto& tokens1 = data.get_line(1).get_tokens();
+	BOOST_REQUIRE_EQUAL(tokens1.size(), 1);
+	BOOST_CHECK_EQUAL(tokens1[0], (line_token{0, 1, token_type::keyword})); // 2
+
+	const auto& tokens2 = data.get_line(2).get_tokens();
+	BOOST_REQUIRE_EQUAL(tokens2.size(), 2);
+	BOOST_CHECK_EQUAL(tokens2[0], (line_token{0, 1, token_type::keyword})); // 2
+	BOOST_CHECK_EQUAL(tokens2[1], (line_token{1, 4, token_type::literal})); // 333
+
+	const auto& tokens3 = data.get_line(3).get_tokens();
+	BOOST_REQUIRE_EQUAL(tokens3.size(), 0);
+
+	const auto& tokens4 = data.get_line(4).get_tokens();
+	BOOST_REQUIRE_EQUAL(tokens4.size(), 1);
+	BOOST_CHECK_EQUAL(tokens4[0], (line_token{0, 3, token_type::preprocessor})); // xxx
+
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 }}}

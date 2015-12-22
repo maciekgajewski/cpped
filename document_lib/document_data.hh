@@ -54,6 +54,9 @@ public:
 
 	document_position get_last_position() const { return document_position{unsigned(lines_.size()-1), unsigned(lines_.back().get_length())}; }
 
+	// replaces all the existing tokens
+	void set_tokens(const std::vector<token>& tokens);
+
 private:
 
 	data_type::const_iterator positon_to_offset(document_position pos) const;
