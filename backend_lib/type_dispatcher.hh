@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <stdexcept>
 #include <functional>
+#include <string>
 
 namespace cpped { namespace backend {
 
@@ -14,7 +15,7 @@ using type_id = std::uint64_t;
 template<typename T>
 type_id get_type_id()
 {
-	return (type_id)(typeid(T).name());
+	return T::ID;
 }
 
 template<typename ... Args>
@@ -50,7 +51,7 @@ void type_dispatcher<Args...>::dispatch(type_id type, Args&&... args) const
 	auto it = handlers_.find(type);
 	if (it == handlers_.end())
 	{
-		throw std::runtime_error("Unknown type");
+		throw std::runtime_error("Unknown type: " + std::to_string(type));
 	}
 
 	const function_type& f = it->second;

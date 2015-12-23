@@ -25,9 +25,6 @@ backend::~backend()
 
 endpoint* backend::fork()
 {
-	auto oct = get_type_id<messages::open_cmake_project>();
-	auto st = get_type_id<messages::stop>();
-
 	assert(pid_ == 0);
 
 	int sockets[2];
@@ -59,14 +56,16 @@ endpoint* backend::fork()
 		// backend (child) process
 		OPEN_LOG_FILE("cpped_back.log");
 		LOG("backend process started");
-		LOG("backend process started");
 
 		::close(sockets[0]);
 		endpoint_.set_fd(sockets[1]);
 
 		event_dispatcher dispatcher(endpoint_);
-		//dispatcher.run();
+		project pr(dispatcher);
 
+		dispatcher.run();
+
+		LOG("backend process finishing");
 		return nullptr;
 	}
 }

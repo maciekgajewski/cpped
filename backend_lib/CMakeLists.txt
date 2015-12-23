@@ -1,8 +1,3 @@
-if(ENABLE_LOGGING)
-	add_definitions(-DENABLE_LOGGING)
-endif()
-
-
 add_library(backend_lib
 	backend.cc backend.hh
 	endpoint.cc endpoint.hh
@@ -16,7 +11,7 @@ add_library(backend_lib
 	project.cc project.hh
 	cpp_tokens.cc cpp_tokens.hh
 	project_connector.cc project_connector.hh
-	log.hh
+	log.cc log.hh
 )
 
 target_include_directories(backend_lib INTERFACE ..)

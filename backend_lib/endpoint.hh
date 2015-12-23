@@ -5,6 +5,7 @@
 #include "socket_reader.hh"
 #include "serialize.hh"
 #include "type_dispatcher.hh"
+#include "log.hh"
 
 #include <cstddef>
 #include <cstdlib>
@@ -59,6 +60,8 @@ void endpoint::send_message(const Msg& msg)
 	// This relay on the type-name strings having the same addresses in both processes
 	type_id type = get_type_id<Msg>();
 
+	LOG("Sending message, type=" << type);
+
 	serialize(writer, type);
 	serialize(writer, msg);
 }
@@ -80,6 +83,9 @@ inline void endpoint::receive_message()
 	socket_reader reader(fd_);
 	type_id type;
 	deserialize(reader, type);
+
+	LOG("Received message, type=" << type);
+
 	dispatcher_.dispatch(type, reader);
 }
 

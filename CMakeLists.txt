@@ -33,6 +33,9 @@ endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1) # to generate compilation database
 
 option(ENABLE_LOGGING "enables logging facility" 0)
+if(ENABLE_LOGGING)
+	add_definitions(-DENABLE_LOGGING)
+endif()
 
 add_subdirectory(clang_lib)
 add_subdirectory(document_lib)
