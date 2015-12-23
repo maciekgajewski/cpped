@@ -27,6 +27,12 @@ void endpoint::set_fd(int fd)
 	fd_ = fd;
 }
 
+bool endpoint::has_message()
+{
+	// TODO
+	return true;
+}
+
 void endpoint::close()
 {
 	if (fd_ >= 0)

@@ -30,14 +30,14 @@ usage: cpped [options] [file ...]                  edit specified file(s)
 	options.print(std::cout);
 }
 
-void run_frontend(const boost::program_options::variables_map& options)
+void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_options::variables_map& options)
 {
-	cpped::project project;
+	cpped::project project(endpoint);
 	boost::optional<std::string> file_to_open;
 
 	if (options.count("cmake"))
 	{
-		// TODO send request to backend
+		project.open_cmake_project(options["cmake"].as<std::string>());
 	}
 	else
 	{
@@ -113,6 +113,6 @@ int main(int argc, char** argv)
 	cpped::backend::endpoint* endpoint = backend.fork();
 	if (endpoint)
 	{
-		run_frontend(vm);
+		run_frontend(*endpoint, vm);
 	}
 }

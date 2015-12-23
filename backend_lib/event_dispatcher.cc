@@ -17,7 +17,24 @@ void event_dispatcher::run()
 
 	while(run)
 	{
-		endpoint_.receive_message();
+		if (jobs_.empty())
+		{
+			// block until messages
+			endpoint_.receive_message();
+		}
+		else
+		{
+			if (endpoint_.has_message())
+			{
+				endpoint_.receive_message();
+			}
+			else
+			{
+				auto job = jobs_.front();
+				jobs_.pop();
+				job();
+			}
+		}
 	}
 }
 

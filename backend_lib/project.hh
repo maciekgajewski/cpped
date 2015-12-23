@@ -6,13 +6,18 @@
 
 namespace cpped { namespace backend {
 
+class event_dispatcher;
+
 class project
 {
 public:
 
-	project();
+	project(event_dispatcher& ed);
 
-	void load_cmake_project(const std::string& build_directory);
+	// IPC message habdlers
+
+	void open_cmake_project(const boost::filesystem::path& build_directory);
+	void open_file(const boost::filesystem::path& path);
 
 private:
 
@@ -27,10 +32,13 @@ private:
 		std::vector<std::string> compilation_commands_;
 		file_type type_ = file_type::other;
 		clang::translation_unit translation_unit_;
+
+		// Translation Unit for files that are not part of the project
+		clang::translation_unit provisional_translation_unit_;
 	};
 
 	file_data& get_file_data(const boost::filesystem::path& file);
-	void parse_file(const boost::filesystem::path& path, file_data& data);
+	void parse_file(const boost::filesystem::path& path);
 
 	// Database of all information about a file that we know
 	std::map<boost::filesystem::path, std::unique_ptr<file_data>> file_data_;
@@ -47,6 +55,9 @@ private:
 	// Absolute paths
 	std::vector<boost::filesystem::path> files_;
 
+	//std::map<boost::filesystem::path,
+
+	event_dispatcher& event_dispatcher_;
 	clang::index index_;
 };
 

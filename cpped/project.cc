@@ -1,6 +1,7 @@
 #include "project.hh"
 
-#include "clang_lib/flags.hh"
+#include "backend_lib/endpoint.hh"
+#include "backend_lib/messages.hh"
 
 #include <boost/filesystem.hpp>
 
@@ -11,10 +12,16 @@ namespace cpped {
 
 namespace fs = boost::filesystem;
 
-project::project()
+project::project(backend::endpoint& ep)
+	: endpoint_(ep)
 {
 }
 
+
+void project::open_cmake_project(const boost::filesystem::path& build_dir)
+{
+	endpoint_.send_message(backend::messages::open_cmake_project{build_dir});
+}
 
 document::document& project::open_file(const fs::path& file)
 {

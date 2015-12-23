@@ -37,11 +37,20 @@ struct open_file_request
 {
 	fs::path file;
 };
+template<typename Writer> void serialize(Writer& writer, const open_file_request& m)
+{
+	serialize(writer, m.file);
+}
+template<typename Reader> void deserialize(Reader& reader, open_file_request& m)
+{
+	deserialize(reader, m.file);
+}
 
 // B->F
-struct open_file_data
+struct open_file_reply
 {
 	fs::path file;
+	std::string error;
 	std::string data; // TODO be smarter about large buffers, use copy-less structures
 };
 

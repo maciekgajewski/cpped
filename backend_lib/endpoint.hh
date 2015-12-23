@@ -38,6 +38,10 @@ public:
 	// Dispatcher is called with two params
 	void receive_message();
 
+	// Checks if there is a massage awaiting.
+	// If returns 'false', the next call to receive_message() is likely to block
+	bool has_message();
+
 private:
 
 	void close();

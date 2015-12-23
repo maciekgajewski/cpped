@@ -1,5 +1,8 @@
 #include "project.hh"
 
+#include "event_dispatcher.hh"
+#include "messages.hh"
+
 #include "clang_lib/flags.hh"
 
 #include <boost/filesystem.hpp>
@@ -11,9 +14,15 @@ namespace cpped { namespace backend {
 
 namespace fs = boost::filesystem;
 
-project::project()
-	: index_(0, 0)
+project::project(event_dispatcher& ed)
+	: event_dispatcher_(ed), index_(0, 0)
 {
+	// register message-receiving functions
+
+	event_dispatcher_.register_message_handler<messages::open_cmake_project>(
+		[this](const messages::open_cmake_project& msg) { this->open_cmake_project(msg.build_dir); });
+	event_dispatcher_.register_message_handler<messages::open_file_request>(
+		[this](const messages::open_file_request& msg) { this->open_file(msg.file); });
 }
 
 void project::add_directory(const boost::filesystem::path& dir_path)
@@ -50,8 +59,9 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 			file_data& data = get_file_data(file);
 			data.compilation_commands_ = clang::get_sanitized_flags(command, file);
 			data.type_ = file_type::cpp; // if clangs knows how to compile it, it must be it
-			// perform initial parsing now
-			parse_file(file, data);
+
+			// schedule file parsing
+			event_dispatcher_.schedule_job([this, file]() { parse_file(file); });
 		}
 	}
 }
@@ -67,11 +77,19 @@ project::file_data&project::get_file_data(const boost::filesystem::path& file)
 	return *p;
 }
 
-void project::parse_file(const fs::path& path, project::file_data& data)
+void project::parse_file(const fs::path& path)
 {
+	file_data& data = get_file_data(path);
+
 	assert(data.type_ == file_type::cpp);
 	assert(data.translation_unit_.is_null());
 	assert(path.is_absolute());
+
+	// if there exists a provisonal TU, dispose of it
+	if (!data.provisional_translation_unit_.is_null())
+	{
+		data.provisional_translation_unit_.dispose();
+	}
 
 	std::vector<const char*> cmdline;
 	cmdline.reserve(data.compilation_commands_.size()+1);
@@ -136,19 +154,19 @@ static cmake_info parse_cmake_cache(const std::string& cmake_cache_path)
 	return info;
 }
 
-void project::load_cmake_project(const std::string& build_directory)
+void project::open_cmake_project(const boost::filesystem::path& build_directory)
 {
 	fs::path build_dir(build_directory);
 
 	if (!fs::is_directory(build_dir))
 	{
-		throw std::runtime_error("expected CMake build directory: " + build_directory);
+		throw std::runtime_error("expected CMake build directory: " + build_directory.string());
 	}
 
 	fs::path cmake_cache_path = build_dir / "CMakeCache.txt";
 	if (!fs::exists(cmake_cache_path))
 	{
-		throw std::runtime_error("expected configured CMake build directory: " + build_directory);
+		throw std::runtime_error("expected configured CMake build directory: " + build_directory.string());
 	}
 
 	fs::path compile_commands_path = build_dir / "compile_commands.json";
@@ -162,6 +180,11 @@ void project::load_cmake_project(const std::string& build_directory)
 	name_ = info.project_name;
 	add_directory(info.source_dir);
 	add_compilation_database_file(compile_commands_path.string());
+}
+
+void project::open_file(const boost::filesystem::path& path)
+{
+	// TODO
 }
 
 
