@@ -30,3 +30,8 @@ I came up with an idea of container wrapping char utf-8 data, ut it would be a n
 ## 20-12-2015
 
 YouCompleteMe proven to be a great source of insipirartion. Why very little (if any) of the actual code is re-usable for me, it provides great examples on how to deal with liblcang quirks. Most importantly, it valdiates libclang as the tool to use for C++ parsing.
+
+## 23-12-2015
+
+I decided loggign is the easiest way to see what going on in the backend process. I was contemplating some UI feature, but not now, not now.
+I was trying to use Boost.Logging, but it turned out to be such a pint in the ass: unpleasent to use, unpleasant to build.
