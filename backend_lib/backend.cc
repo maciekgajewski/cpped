@@ -3,6 +3,7 @@
 #include "event_dispatcher.hh"
 #include "project.hh"
 #include "messages.hh"
+#include "log.hh"
 
 #include <sys/wait.h>
 #include <sys/types.h>
@@ -45,13 +46,21 @@ endpoint* backend::fork()
 
 	if (pid_ != 0)
 	{
+		// frontend process
+		OPEN_LOG_FILE("cpped_front.log");
+		LOG("frontend process started");
+
 		::close(sockets[1]);
 		endpoint_.set_fd(sockets[0]);
 		return &endpoint_;
 	}
 	else
 	{
-		// child process
+		// backend (child) process
+		OPEN_LOG_FILE("cpped_back.log");
+		LOG("backend process started");
+		LOG("backend process started");
+
 		::close(sockets[0]);
 		endpoint_.set_fd(sockets[1]);
 

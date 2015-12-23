@@ -22,15 +22,17 @@ link_directories(${CLANG_LINK_DIRS})
 #INCLUDE_DIRECTORIES(/home/maciek/workspace/build/ncurses-debug/include)
 #LINK_DIRECTORIES(/home/maciek/workspace/build/ncurses-debug/lib)
 
-find_package(Boost COMPONENTS system filesystem program_options)
+find_package(Boost COMPONENTS system filesystem program_options date_time)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
-if((NOT Boost_FILESYSTEM_FOUND) OR (NOT Boost_PROGRAM_OPTIONS_FOUND))
+if((NOT Boost_FILESYSTEM_FOUND) OR (NOT Boost_PROGRAM_OPTIONS_FOUND) OR (NOT Boost_DATE_TIME_FOUND))
 	message(FATAL_ERROR "Required boost components not found")
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1) # to generate compilation database
+
+option(ENABLE_LOGGING "enables logging facility" 0)
 
 add_subdirectory(clang_lib)
 add_subdirectory(document_lib)

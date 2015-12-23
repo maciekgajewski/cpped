@@ -1,4 +1,7 @@
-add_definitions(-DBOOST_LOG_DYN_LINK)
+if(ENABLE_LOGGING)
+	add_definitions(-DENABLE_LOGGING)
+endif()
+
 
 add_library(backend_lib
 	backend.cc backend.hh
@@ -13,13 +16,12 @@ add_library(backend_lib
 	project.cc project.hh
 	cpp_tokens.cc cpp_tokens.hh
 	project_connector.cc project_connector.hh
+	log.hh
 )
 
 target_include_directories(backend_lib INTERFACE ..)
 
 add_subdirectory(tests)
-
-message("boost log setup=${Boost_LOG_SETUP_LIBRARY}")
 
 target_link_libraries(backend_lib
 
@@ -27,4 +29,5 @@ target_link_libraries(backend_lib
 
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}
+	${Boost_DATE_TIME_LIBRARY}
 )
