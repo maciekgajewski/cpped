@@ -19,15 +19,17 @@ void translation_unit::parse(index& idx, const char* filename, const char* unsav
 		uf_ptr = &unsaved_file;
 	}
 
+	unsigned parsingOptions = CXTranslationUnit_CacheCompletionResults
+		 | CXTranslationUnit_PrecompiledPreamble
+		 | CXTranslationUnit_IncludeBriefCommentsInCodeCompletion
+		 | CXTranslationUnit_DetailedPreprocessingRecord;
+
 	CXErrorCode ec = clang_parseTranslationUnit2(
 			idx.clang_idx,
 			filename,
 			cmdline.data(), cmdline.size(),
 			uf_ptr, uf_ptr ? 1 : 0,
-			CXTranslationUnit_DetailedPreprocessingRecord|
-				CXTranslationUnit_Incomplete|
-				CXTranslationUnit_IncludeBriefCommentsInCodeCompletion|
-				clang_defaultEditingTranslationUnitOptions(),
+			parsingOptions,
 			&clang_tu);
 
 	if (ec != CXError_Success)

@@ -31,6 +31,9 @@ private:
 
 	backend::endpoint& endpoint_;
 
+	// All project files
+	std::vector<boost::filesystem::path> files_;
+
 	// Currently open files
 	std::map<boost::filesystem::path, std::unique_ptr<document::document>> open_files_;
 };
@@ -41,7 +44,7 @@ project load_cmake_project(const std::string& build_directory);
 template<typename OutIt>
 void project::get_all_project_files(OutIt out) const
 {
-	// TODO request from backend
+	std::copy(files_.begin(), files_.end(), out);
 }
 
 template<typename OutIt>

@@ -43,6 +43,10 @@ public:
 	// If returns 'false', the next call to receive_message() is likely to block
 	bool has_message();
 
+	// Sends the request, and spins waiting for reply
+	template<typename Request, typename Reply>
+	void send_sync_request(const Request& request, Reply& reply);
+
 private:
 
 	void close();
@@ -87,6 +91,30 @@ inline void endpoint::receive_message()
 	LOG("Received message, type=" << type);
 
 	dispatcher_.dispatch(type, reader);
+}
+
+template<typename Request, typename Reply>
+void endpoint::send_sync_request(const Request& request, Reply& reply)
+{
+	send_message(request);
+	type_id reply_type = get_type_id<Reply>();
+
+	while(true) // TODO needs timeout?
+	{
+		socket_reader reader(fd_);
+		type_id type;
+		deserialize(reader, type);
+
+		LOG("Received message, type=" << type << ", waiting for type=" << reply_type);
+
+		if (type == reply_type)
+		{
+			deserialize(reader, reply);
+			return;
+		}
+
+		dispatcher_.dispatch(type, reader);
+	}
 }
 
 }}

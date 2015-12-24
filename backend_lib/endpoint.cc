@@ -1,6 +1,7 @@
 #include "endpoint.hh"
 
 #include <unistd.h>
+#include <sys/select.h>
 
 #include <utility>
 
@@ -29,8 +30,15 @@ void endpoint::set_fd(int fd)
 
 bool endpoint::has_message()
 {
-	// TODO
-	return true;
+	::fd_set set;
+	FD_ZERO(&set);
+	FD_SET(fd_, &set);
+
+	::timeval to{0, 0};
+
+	int result = ::select(fd_+1, &set, nullptr, nullptr, &to);
+
+	return result == 1;
 }
 
 void endpoint::close()

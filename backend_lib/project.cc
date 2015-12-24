@@ -19,8 +19,20 @@ project::project(event_dispatcher& ed)
 {
 	// register message-receiving functions
 
-	event_dispatcher_.register_message_handler<messages::open_cmake_project>(
-		[this](const messages::open_cmake_project& msg) { this->open_cmake_project(msg.build_dir); });
+	event_dispatcher_.register_message_handler<messages::open_cmake_project_request>(
+		[this](const messages::open_cmake_project_request& msg)
+		{
+			try
+			{
+				open_cmake_project(msg.build_dir);
+				event_dispatcher_.send_message(messages::open_cmake_project_reply{{}, files_});
+			}
+			catch(const std::exception& e)
+			{
+				event_dispatcher_.send_message(messages::open_cmake_project_reply{e.what(), {}});
+			}
+		});
+
 	event_dispatcher_.register_message_handler<messages::open_file_request>(
 		[this](const messages::open_file_request& msg) { this->open_file(msg.file); });
 }
@@ -49,26 +61,39 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 	fs::path directory = fs::absolute(comp_database_path).parent_path();
 	clang::compilation_database db(directory);
 
-	for(const fs::path& file : files_)
+	for(const fs::path& path : files_)
 	{
-		clang::compile_commands cc = db.get_compile_commands_for_file(file);
+		clang::compile_commands cc = db.get_compile_commands_for_file(path);
 
 		if (!cc.is_null() && cc.size() > 0)
 		{
-			clang::compile_command command = cc.get_command(0);
-			file_data& data = get_file_data(file);
-			data.compilation_commands_ = clang::get_sanitized_flags(command, file);
+			file_data& data = get_or_create_file_data(path);
 			data.type_ = file_type::cpp; // if clangs knows how to compile it, it must be it
 
+			compilation_unit& u = get_or_create_unit(path);
+			clang::compile_command command = cc.get_command(0);
+			u.set_compilation_commands(clang::get_sanitized_flags(command, path));
+
 			// schedule file parsing
-			event_dispatcher_.schedule_job([this, file]() { parse_file(file); });
+			event_dispatcher_.schedule_job([this, path]() { scheduled_parse_file(path); });
 		}
 	}
 }
-project::file_data&project::get_file_data(const boost::filesystem::path& file)
+
+void project::scheduled_parse_file(const boost::filesystem::path& path)
 {
-	assert(file.is_absolute());
-	std::unique_ptr<file_data>& p = file_data_[file];
+	compilation_unit* unit = get_unit(path);
+	if (unit && !unit->is_parsed())
+	{
+		LOG("Scheduled parsing of " << path);
+		unit->parse();
+	}
+}
+
+project::file_data&project::get_or_create_file_data(const boost::filesystem::path& path)
+{
+	assert(path.is_absolute());
+	std::unique_ptr<file_data>& p = file_data_[path];
 	if (!p)
 	{
 		p = std::make_unique<file_data>();
@@ -77,34 +102,30 @@ project::file_data&project::get_file_data(const boost::filesystem::path& file)
 	return *p;
 }
 
-void project::parse_file(const fs::path& path)
+compilation_unit& project::get_or_create_unit(const boost::filesystem::path& path)
 {
-	file_data& data = get_file_data(path);
-
-	assert(data.type_ == file_type::cpp);
-	assert(data.translation_unit_.is_null());
 	assert(path.is_absolute());
-
-	// if there exists a provisonal TU, dispose of it
-	if (!data.provisional_translation_unit_.is_null())
+	std::unique_ptr<compilation_unit>& p = units_[path];
+	if (!p)
 	{
-		data.provisional_translation_unit_.dispose();
+		p = std::make_unique<compilation_unit>(path, index_);
 	}
 
-	std::vector<const char*> cmdline;
-	cmdline.reserve(data.compilation_commands_.size()+1);
-	assert(data.compilation_commands_.size() > 1);
+	return *p;
+}
 
-	std::transform(
-		data.compilation_commands_.begin(), data.compilation_commands_.end(),
-		std::back_inserter(cmdline),
-		[&](const std::string& c) { return c.c_str(); });
-
-	data.translation_unit_.parse(
-		index_,
-		path.string().c_str(),
-		nullptr, 0, // unsaved data - none yet
-		cmdline);
+compilation_unit* project::get_unit(const boost::filesystem::path& path) const
+{
+	assert(path.is_absolute());
+	auto it = units_.find(path);
+	if (it == units_.end())
+	{
+		return nullptr;
+	}
+	else
+	{
+		return it->second.get();
+	}
 }
 
 struct cmake_info
@@ -156,6 +177,8 @@ static cmake_info parse_cmake_cache(const std::string& cmake_cache_path)
 
 void project::open_cmake_project(const boost::filesystem::path& build_directory)
 {
+	LOG("Opening cmake project at " << build_directory);
+
 	fs::path build_dir(build_directory);
 
 	if (!fs::is_directory(build_dir))
@@ -178,12 +201,14 @@ void project::open_cmake_project(const boost::filesystem::path& build_directory)
 	cmake_info info = parse_cmake_cache(cmake_cache_path.string());
 
 	name_ = info.project_name;
+	LOG("Opening CMake project, name: " << name_ << ", source dir=" << info.source_dir);
 	add_directory(info.source_dir);
 	add_compilation_database_file(compile_commands_path.string());
 }
 
 void project::open_file(const boost::filesystem::path& path)
 {
+	LOG("Opening file " << path);
 	// TODO
 }
 

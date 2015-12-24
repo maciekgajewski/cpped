@@ -19,6 +19,9 @@ public:
 		endpoint_.register_message_handler<Msg>(handler);
 	}
 
+	template<typename Msg>
+	void send_message(const Msg& msg) { endpoint_.send_message(msg); }
+
 	// the job will be executed when there is no messages from the frontend process
 	void schedule_job(const std::function<void()>& job)
 	{

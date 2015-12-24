@@ -3,6 +3,7 @@
 #ifdef ENABLE_LOGGING
 
 #include <fstream>
+#include <string>
 
 #include <boost/date_time.hpp>
 

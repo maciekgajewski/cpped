@@ -20,7 +20,15 @@ project::project(backend::endpoint& ep)
 
 void project::open_cmake_project(const boost::filesystem::path& build_dir)
 {
-	endpoint_.send_message(backend::messages::open_cmake_project{build_dir});
+	backend::messages::open_cmake_project_reply reply;
+	endpoint_.send_sync_request(backend::messages::open_cmake_project_request{build_dir}, reply);
+
+	if (!reply.error.empty())
+	{
+		throw std::runtime_error(reply.error);
+	}
+
+	files_ = std::move(reply.files);
 }
 
 document::document& project::open_file(const fs::path& file)

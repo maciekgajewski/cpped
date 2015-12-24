@@ -19,25 +19,44 @@ template<typename Writer> void serialize(Writer&, const stop&) {}
 template<typename Reader> void deserialize(Reader&, stop&) {}
 
 // F->B - rerquest to open cmake project, parse oll the files, build code model
-struct open_cmake_project
+struct open_cmake_project_request
 {
 	static const std::uint64_t ID = 1;
 	fs::path build_dir;
 };
 
-template<typename Writer> void serialize(Writer& writer, const open_cmake_project& m)
+template<typename Writer> void serialize(Writer& writer, const open_cmake_project_request& m)
 {
 	serialize(writer, m.build_dir);
 }
-template<typename Reader> void deserialize(Reader& reader, open_cmake_project& m)
+template<typename Reader> void deserialize(Reader& reader, open_cmake_project_request& m)
 {
 	deserialize(reader, m.build_dir);
+}
+
+// B->F, feed with all project files
+struct open_cmake_project_reply
+{
+	static const std::uint64_t ID = 2;
+	std::string error;
+	std::vector<fs::path> files;
+};
+
+template<typename Writer> void serialize(Writer& writer, const open_cmake_project_reply& m)
+{
+	serialize(writer, m.error);
+	serialize(writer, m.files);
+}
+template<typename Reader> void deserialize(Reader& reader, open_cmake_project_reply& m)
+{
+	deserialize(reader, m.error);
+	deserialize(reader, m.files);
 }
 
 // F->B. backend replies with open_file_data
 struct open_file_request
 {
-	static const std::uint64_t ID = 2;
+	static const std::uint64_t ID = 3;
 	fs::path file;
 };
 template<typename Writer> void serialize(Writer& writer, const open_file_request& m)
@@ -52,7 +71,7 @@ template<typename Reader> void deserialize(Reader& reader, open_file_request& m)
 // B->F
 struct open_file_reply
 {
-	static const std::uint64_t ID = 3;
+	static const std::uint64_t ID = 4;
 	fs::path file;
 	std::string error;
 	std::string data; // TODO be smarter about large buffers, use copy-less structures

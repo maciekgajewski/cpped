@@ -70,4 +70,27 @@ void deserialize(Reader& reader, boost::filesystem::path& p)
 	p = s;
 }
 
+// vector
+template<typename Writer, typename T>
+void serialize(Writer& writer, const std::vector<T>& vec)
+{
+	serialize(writer, vec.size());
+	for(const T& v : vec)
+	{
+		serialize(writer, v);
+	}
+}
+
+template<typename Reader, typename T>
+void deserialize(Reader& reader, std::vector<T>& vec)
+{
+	std::size_t sz = 0;
+	deserialize(reader, sz);
+	vec.resize(sz);
+	for(T& v : vec)
+	{
+		deserialize(reader, v);
+	}
+}
+
 }}

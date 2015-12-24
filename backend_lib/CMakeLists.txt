@@ -12,6 +12,7 @@ add_library(backend_lib
 	cpp_tokens.cc cpp_tokens.hh
 	project_connector.cc project_connector.hh
 	log.cc log.hh
+	compilation_unit.hh compilation_unit.cc
 )
 
 target_include_directories(backend_lib INTERFACE ..)
