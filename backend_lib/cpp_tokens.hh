@@ -10,10 +10,8 @@
 
 namespace cpped { namespace backend {
 
-// Reparses translation unitm resuts list of tokens
-// TODO split reparsing from getting tokens
-std::vector<document::token> get_cpp_tokens(
-	clang::translation_unit& tu,
+// Builds tokens for a file in the transaltion unit
+std::vector<document::token> get_cpp_tokens(const clang::translation_unit& tu,
 	const boost::filesystem::path& file_name,
 	const std::vector<char>& raw_data);
 

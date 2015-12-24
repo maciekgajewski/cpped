@@ -52,6 +52,8 @@ private:
 	// Looks for compilation unit containing the file
 	compilation_unit* get_unit_for_file(const boost::filesystem::path& path) const;
 
+	std::vector<CXUnsavedFile> get_unsaved_data();
+
 	std::string name_;
 
 	// All the files which belong to the project. This may include non-cpp files, but

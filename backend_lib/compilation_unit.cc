@@ -1,6 +1,7 @@
 #include "compilation_unit.hh"
 
 #include "log.hh"
+#include "cpp_tokens.hh"
 
 namespace cpped { namespace backend {
 
@@ -9,7 +10,7 @@ compilation_unit::compilation_unit(const boost::filesystem::path& path, clang::i
 {
 }
 
-void compilation_unit::parse()
+void compilation_unit::parse(const std::vector<CXUnsavedFile>& unsaved_data)
 {
 	assert(!is_parsed());
 
@@ -27,10 +28,21 @@ void compilation_unit::parse()
 	translation_unit_.parse(
 		index_,
 		path_.string().c_str(),
-		nullptr, 0, // unsaved data - none yet
+		unsaved_data,
 		cmdline);
 
 	LOG("Finished parsing file " << path_);
+}
+
+void compilation_unit::reparse(const std::vector<CXUnsavedFile>& unsaved_data)
+{
+	// TODO
+}
+
+std::vector<document::token> compilation_unit::get_tokens_for_file(const boost::filesystem::path& path, const std::vector<char>& data) const
+{
+	return get_cpp_tokens(
+		translation_unit_, path, data);
 }
 
 }}

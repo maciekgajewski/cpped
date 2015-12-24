@@ -40,13 +40,11 @@ static document::token_type determine_token_type(const clang::token& token)
 
 
 std::vector<document::token> get_cpp_tokens(
-	clang::translation_unit& tu,
+	const clang::translation_unit& tu,
 	const boost::filesystem::path& file_name,
 	const std::vector<char>& raw_data)
 {
 	std::vector<document::token> document_tokens;
-
-	tu.reparse(file_name.c_str(), raw_data.data(), raw_data.size());
 
 	clang::source_file file = tu.get_file(file_name.c_str());
 

@@ -358,9 +358,12 @@ public:
 	void parse(index& idx, const char* filename, const char* unsaved_data, std::size_t unsaved_data_size, const std::vector<const char*> cmdline);
 	void reparse(const char* filename, const char* unsaved_data, std::size_t unsaved_data_size);
 
-	source_file get_file(const char* file_name) { return source_file(clang_getFile(clang_tu, file_name)); }
-	source_file get_file(const std::string& file_name) { return get_file(file_name.c_str()); }
-	source_location get_location(const source_file& file, unsigned line, unsigned column)
+	void parse(index& idx, const char* filename, const std::vector<CXUnsavedFile>& unsaved_data, const std::vector<const char*> cmdline);
+	void reparse(const std::vector<CXUnsavedFile>& unsaved_data);
+
+	source_file get_file(const char* file_name) const { return source_file(clang_getFile(clang_tu, file_name)); }
+	source_file get_file(const std::string& file_name) const { return get_file(file_name.c_str()); }
+	source_location get_location(const source_file& file, unsigned line, unsigned column) const
 	{
 		source_location location(clang_getLocation(clang_tu, file.clang_file, line, column));
 		if (location.is_null())
@@ -370,7 +373,7 @@ public:
 		return location;
 	}
 
-	source_location get_location_for_offset(const source_file& file, unsigned offset)
+	source_location get_location_for_offset(const source_file& file, unsigned offset) const
 	{
 		source_location location(clang_getLocationForOffset(clang_tu, file.clang_file, offset));
 		if (location.is_null())
@@ -380,7 +383,7 @@ public:
 		return location;
 	}
 
-	token_list tokenize(const source_range& range)
+	token_list tokenize(const source_range& range) const
 	{
 		CXToken* tokens = nullptr;
 		unsigned num_tokens = 0;

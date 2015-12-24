@@ -1,5 +1,9 @@
 #pragma once
 
+#include "document_lib/document_data.hh"
+
+#include "clang_lib/clang.hh"
+
 #include <boost/filesystem.hpp>
 
 namespace cpped { namespace backend {
@@ -16,6 +20,10 @@ public:
 	void set_compilation_unit(compilation_unit* cu) { unit_ = cu; }
 
 	const std::vector<char>& get_data() const { return data_; }
+
+	std::vector<document::token> parse(const std::vector<CXUnsavedFile>& unsaved_data);
+
+	bool has_unsaved_data() const { return false; }
 
 private:
 

@@ -103,7 +103,7 @@ void project::scheduled_parse_file(const boost::filesystem::path& path)
 	if (unit && !unit->is_parsed())
 	{
 		LOG("Scheduled parsing of " << path);
-		unit->parse();
+		unit->parse(get_unsaved_data());
 	}
 }
 
@@ -118,6 +118,28 @@ compilation_unit*project::get_unit_for_file(const boost::filesystem::path& path)
 
 	// TODO: look for included files
 	return nullptr;
+}
+
+std::vector<CXUnsavedFile> project::get_unsaved_data()
+{
+	std::vector<CXUnsavedFile> unsaved_data;
+	unsaved_data.reserve(open_files_.size()); // upper bound
+
+	for(const auto& p : open_files_)
+	{
+		const open_file& file = *p.second;
+		const fs::path& path = p.first;
+
+		if (file.has_unsaved_data())
+		{
+			unsaved_data.push_back(
+				CXUnsavedFile{
+					path.c_str(),
+					file.get_data().data(),
+					file.get_data().size()});
+		}
+	}
+	return unsaved_data;
 }
 
 project::file_data&project::get_or_create_file_data(const boost::filesystem::path& path)
