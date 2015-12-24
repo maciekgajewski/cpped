@@ -34,7 +34,24 @@ project::project(event_dispatcher& ed)
 		});
 
 	event_dispatcher_.register_message_handler<messages::open_file_request>(
-		[this](const messages::open_file_request& msg) { this->open_file(msg.file); });
+		[this](const messages::open_file_request& request)
+		{
+			try
+			{
+				open_file& file = this->open(request.file);
+
+				messages::open_file_reply reply;
+				reply.file = request.file;
+				reply.data.assign(file.get_data().begin(), file.get_data().end());
+				// TODO tokens
+
+				event_dispatcher_.send_message(reply);
+			}
+			catch(const std::exception& e)
+			{
+				event_dispatcher_.send_message(messages::open_file_reply{request.file, e.what(), {}});
+			}
+		});
 }
 
 void project::add_directory(const boost::filesystem::path& dir_path)
@@ -88,6 +105,19 @@ void project::scheduled_parse_file(const boost::filesystem::path& path)
 		LOG("Scheduled parsing of " << path);
 		unit->parse();
 	}
+}
+
+compilation_unit*project::get_unit_for_file(const boost::filesystem::path& path) const
+{
+	// check if the file is actually a compilation unit itself
+	auto it = units_.find(path);
+	if (it != units_.end())
+	{
+		return it->second.get();
+	}
+
+	// TODO: look for included files
+	return nullptr;
 }
 
 project::file_data&project::get_or_create_file_data(const boost::filesystem::path& path)
@@ -206,10 +236,29 @@ void project::open_cmake_project(const boost::filesystem::path& build_directory)
 	add_compilation_database_file(compile_commands_path.string());
 }
 
-void project::open_file(const boost::filesystem::path& path)
+open_file& project::open(const boost::filesystem::path& path)
 {
+	assert(path.is_absolute());
+	assert(open_files_.find(path) == open_files_.end());
+
 	LOG("Opening file " << path);
-	// TODO
+
+	auto file_up = std::make_unique<open_file>(path);
+	open_file* file = file_up.get();
+	open_files_[path] = std::move(file_up);
+
+	compilation_unit* cu = get_unit_for_file(path);
+	if (cu)
+	{
+		file->set_compilation_unit(cu);
+	}
+	else
+	{
+		// TODO what now?
+		// TODO create provisional compilation unit
+	}
+
+	return *file;
 }
 
 

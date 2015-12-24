@@ -49,7 +49,7 @@ public:
 	document();
 	~document();
 
-	void load_from_raw_data(const std::string& data, const std::string& fake_path);
+	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path);
 	void load_from_file(const boost::filesystem::path& path);
 
 	unsigned get_line_count() const { return current_data_->get_line_count(); }

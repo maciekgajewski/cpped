@@ -1,6 +1,7 @@
 #pragma once
 
 #include "compilation_unit.hh"
+#include "open_file.hh"
 
 #include "clang_lib/clang.hh"
 
@@ -16,10 +17,10 @@ public:
 
 	project(event_dispatcher& ed);
 
-	// IPC message habdlers
+	// IPC message handlers
 
 	void open_cmake_project(const boost::filesystem::path& build_directory);
-	void open_file(const boost::filesystem::path& path);
+	open_file& open(const boost::filesystem::path& path);
 
 private:
 
@@ -46,8 +47,10 @@ private:
 	void add_directory(const boost::filesystem::path& source_dir);
 	void add_compilation_database_file(const boost::filesystem::path& comp_database_path);
 
-
 	void scheduled_parse_file(const boost::filesystem::path& path);
+
+	// Looks for compilation unit containing the file
+	compilation_unit* get_unit_for_file(const boost::filesystem::path& path) const;
 
 	std::string name_;
 
@@ -59,6 +62,9 @@ private:
 
 	// All the compilation units know by the project
 	std::map<boost::filesystem::path, std::unique_ptr<compilation_unit>> units_;
+
+	// All the currently open files
+	std::map<boost::filesystem::path, std::unique_ptr<open_file>> open_files_;
 
 	event_dispatcher& event_dispatcher_;
 	clang::index index_;

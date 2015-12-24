@@ -33,26 +33,17 @@ void project::open_cmake_project(const boost::filesystem::path& build_dir)
 
 document::document& project::open_file(const fs::path& file)
 {
-	/* TODO send request to backend
 	fs::path absolute = fs::absolute(file);
 	auto it = open_files_.find(absolute);
 	if (it == open_files_.end())
 	{
-		// TODO find compilation database
-		std::unique_ptr<document::iparser> parser;
-		file_data& data = get_file_data(absolute);
-		if (data.type_ == file_type::cpp)
-		{
-			if (data.translation_unit_.is_null())
-			{
-				parse_file(absolute, data);
-			}
-			parser = std::make_unique<document::cpp_parser>(data.translation_unit_);
-		}
+		// request file from backend
+		backend::messages::open_file_request request{absolute};
+		backend::messages::open_file_reply reply;
+		endpoint_.send_sync_request(request, reply);
 
 		auto doc_ptr = std::make_unique<document::document>();
-		doc_ptr->load_from_file(absolute, std::move(parser));
-		doc_ptr->parse_language(); // TODO optimize, no need to parse twice
+		doc_ptr->load_from_raw_data(reply.data, file);
 
 		auto p = open_files_.insert(std::make_pair(absolute, std::move(doc_ptr)));
 		assert(p.second);
@@ -62,8 +53,6 @@ document::document& project::open_file(const fs::path& file)
 	{
 		return *it->second;
 	}
-	*/
-	return get_open_file(file);
 }
 
 document::document& project::get_open_file(const boost::filesystem::path& file)

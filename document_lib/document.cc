@@ -4,6 +4,8 @@
 
 namespace cpped { namespace  document {
 
+namespace fs = boost::filesystem;
+
 document::document()
 {
 	// init empty document data
@@ -16,9 +18,9 @@ document::~document()
 {
 }
 
-void document::load_from_raw_data(const std::string& data, const std::string& fake_path)
+void document::load_from_raw_data(const std::string& data, const fs::path& path)
 {
-	file_name_ = fake_path;
+	file_name_ = path;
 
 	data_.clear();
 	data_.emplace_back();
