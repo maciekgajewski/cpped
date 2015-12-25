@@ -56,6 +56,13 @@ void event_dispatcher::run()
 		if (c == ERR)
 		{
 			send_sequence(input_buffer);
+
+			// Finished processing keys, poll before going down
+			if (poll_function_)
+			{
+				poll_function_();
+			}
+
 			// no input, back off, wait for more
 			::wtimeout(active_window, 10); // pool every 10ms
 
@@ -69,6 +76,13 @@ void event_dispatcher::run()
 				{
 					::wtimeout(active_window, 0);
 					break;
+				}
+				else
+				{
+					if (poll_function_)
+					{
+						poll_function_();
+					}
 				}
 			}
 		}

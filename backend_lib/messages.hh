@@ -2,6 +2,8 @@
 
 #include "serialize.hh"
 
+#include "document_lib/document_data.hh"
+
 #include <boost/filesystem.hpp>
 
 // Messages send between frontend (F) and backend (B) processes
@@ -87,6 +89,27 @@ template<typename Reader> void deserialize(Reader& reader, open_file_reply& m)
 	deserialize(reader, m.file);
 	deserialize(reader, m.error);
 	deserialize(reader, m.data);
+}
+
+// B->F
+struct file_tokens_feed
+{
+	static const std::uint64_t ID = 5;
+	fs::path file;
+	std::uint64_t version;
+	std::vector<document::token> tokens;
+};
+template<typename Writer> void serialize(Writer& writer, const file_tokens_feed& m)
+{
+	serialize(writer, m.file);
+	serialize(writer, m.version);
+	serialize(writer, m.tokens);
+}
+template<typename Reader> void deserialize(Reader& reader, file_tokens_feed& m)
+{
+	deserialize(reader, m.file);
+	deserialize(reader, m.version);
+	deserialize(reader, m.tokens);
 }
 
 }}}

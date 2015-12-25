@@ -10,7 +10,8 @@ document::document()
 {
 	// init empty document data
 	data_.emplace_back();
-	data_.back().init_empty();
+	data_.back().data.init_empty();
+	data_.back().version = 0;
 	current_data_ = data_.begin();
 }
 
@@ -24,8 +25,10 @@ void document::load_from_raw_data(const std::string& data, const fs::path& path)
 
 	data_.clear();
 	data_.emplace_back();
-	data_.back().load_from_raw_data(data);
+	data_.back().data.load_from_raw_data(data);
+	data_.back().version = 0;
 	current_data_ = data_.begin();
+	last_version_ = 0;
 }
 
 void document::load_from_file(const boost::filesystem::path& path)
@@ -34,8 +37,10 @@ void document::load_from_file(const boost::filesystem::path& path)
 
 	data_.clear();
 	data_.emplace_back();
-	data_.back().load_from_file(file_name_.string());
+	data_.back().data.load_from_file(file_name_.string());
+	data_.back().version = 0;
 	current_data_ = data_.begin();
+	last_version_ = 0;
 }
 
 document_position document::insert(document_position pos, const std::string& text)
@@ -44,7 +49,8 @@ document_position document::insert(document_position pos, const std::string& tex
 
 	// add new at the end
 	data_.emplace_back();
-	auto final_pos = data_.back().copy_inserting(*current_data_, pos, text);
+	data_.back().version = ++last_version_;
+	auto final_pos = data_.back().data.copy_inserting(current_data_->data, pos, text);
 	current_data_++;
 
 	crop_history();
@@ -59,7 +65,8 @@ void document::remove(document_range r)
 	erase_redo();
 
 	data_.emplace_back();
-	data_.back().copy_removing(*current_data_, r);
+	data_.back().version = ++last_version_;
+	data_.back().data.copy_removing(current_data_->data, r);
 	current_data_++;
 
 	_has_unsaved_changes = true;
@@ -69,14 +76,14 @@ void document::remove(document_range r)
 
 document_position document::remove_before(document_position pos, unsigned count)
 {
-	document_position begin = current_data_->shift_back(pos, count);
+	document_position begin = current_data_->data.shift_back(pos, count);
 	remove(document_range{begin, pos});
 	return begin;
 }
 
 document_position document::remove_after(document_position pos, unsigned count)
 {
-	document_position end = current_data_->shift_forward(pos, count);
+	document_position end = current_data_->data.shift_forward(pos, count);
 	remove(document_range{pos, end});
 	return end;
 }
@@ -88,7 +95,13 @@ void document::parse_language()
 
 std::string document::to_string() const
 {
-	return current_data_->to_string();
+	return current_data_->data.to_string();
+}
+
+void document::set_tokens(std::uint64_t version, const std::vector<token>& tokens)
+{
+	if (current_data_->version == version)
+		current_data_->data.set_tokens(tokens);
 }
 
 void document::erase_redo()

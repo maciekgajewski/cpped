@@ -2,6 +2,8 @@
 
 #include "document_lib/document.hh"
 
+#include "backend_lib/messages.hh"
+
 #include <boost/filesystem.hpp>
 
 #include <vector>
@@ -28,6 +30,9 @@ public:
 	void get_all_open_files(OutIt out) const;
 
 private:
+
+
+	void on_file_tokens(const backend::messages::file_tokens_feed& token_feed);
 
 	backend::endpoint& endpoint_;
 

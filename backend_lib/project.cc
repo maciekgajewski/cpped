@@ -43,9 +43,17 @@ project::project(event_dispatcher& ed)
 				messages::open_file_reply reply;
 				reply.file = request.file;
 				reply.data.assign(file.get_data().begin(), file.get_data().end());
-				// TODO tokens
-
 				event_dispatcher_.send_message(reply);
+
+				// get tokens now
+				messages::file_tokens_feed tokens_feed;
+				tokens_feed.file = request.file;
+				tokens_feed.version = 0;
+				tokens_feed.tokens = file.parse(get_unsaved_data());
+				if (!tokens_feed.tokens.empty())
+				{
+					event_dispatcher_.send_message(tokens_feed);
+				}
 			}
 			catch(const std::exception& e)
 			{

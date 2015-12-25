@@ -15,6 +15,8 @@ namespace fs = boost::filesystem;
 project::project(backend::endpoint& ep)
 	: endpoint_(ep)
 {
+	endpoint_.register_message_handler<backend::messages::file_tokens_feed>(
+		[this](const backend::messages::file_tokens_feed& tf) { on_file_tokens(tf); });
 }
 
 
@@ -64,6 +66,15 @@ document::document& project::get_open_file(const boost::filesystem::path& file)
 		throw std::runtime_error("No such file");
 	}
 	return *it->second;
+}
+
+void project::on_file_tokens(const backend::messages::file_tokens_feed& token_feed)
+{
+	auto it = open_files_.find(token_feed.file);
+	if (it != open_files_.end())
+	{
+		it->second->set_tokens(token_feed.version, token_feed.tokens);
+	}
 }
 
 }

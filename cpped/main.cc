@@ -63,6 +63,13 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 	editor.set_active(); // so it recevies input
 	editor.show();
 
+	dispatcher.set_poll_function([&]()
+		{
+			while(endpoint.has_message())
+			{
+				endpoint.receive_message();
+			}
+		});
 	dispatcher.set_global_quit_key("^X");
 	dispatcher.run();
 }

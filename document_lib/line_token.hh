@@ -37,9 +37,10 @@ std::ostream& operator << (std::ostream& s, const line_token& t);
 
 struct document_position : public boost::partially_ordered<document_position>
 {
-	unsigned line;
-	unsigned column;
+	unsigned line = 0;
+	unsigned column = 0;
 
+	document_position() = default;
 	document_position(unsigned l, unsigned c) : line(l), column(c) {}
 
 	bool operator<(const document_position& o) const
@@ -56,11 +57,33 @@ struct document_position : public boost::partially_ordered<document_position>
 	}
 };
 
+template<typename Writer> void serialize(Writer& writer, const document_position& m)
+{
+	serialize(writer, m.line);
+	serialize(writer, m.column);
+}
+template<typename Reader> void deserialize(Reader& reader, document_position& m)
+{
+	deserialize(reader, m.line);
+	deserialize(reader, m.column);
+}
+
+
 struct document_range
 {
 	document_position start;
 	document_position end;
 };
+template<typename Writer> void serialize(Writer& writer, const document_range& m)
+{
+	serialize(writer, m.start);
+	serialize(writer, m.end);
+}
+template<typename Reader> void deserialize(Reader& reader, document_range& m)
+{
+	deserialize(reader, m.start);
+	deserialize(reader, m.end);
+}
 
 // Token that can spawn multiple lines
 struct token
@@ -68,5 +91,18 @@ struct token
 	token_type type;
 	document_range range;
 };
+template<typename Writer> void serialize(Writer& writer, const token& m)
+{
+	serialize(writer, m.type);
+	serialize(writer, m.range);
+}
+template<typename Reader> void deserialize(Reader& reader, token& m)
+{
+	deserialize(reader, m.type);
+	deserialize(reader, m.range);
+}
+
+
+
 
 }}

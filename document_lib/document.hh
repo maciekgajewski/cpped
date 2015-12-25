@@ -52,14 +52,14 @@ public:
 	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path);
 	void load_from_file(const boost::filesystem::path& path);
 
-	unsigned get_line_count() const { return current_data_->get_line_count(); }
+	unsigned get_line_count() const { return current_data_->data.get_line_count(); }
 
 	unsigned line_length(unsigned index)
 	{
 		return get_line(index).get_length();
 	}
 
-	document_line get_line(unsigned index) const { return document_line(current_data_->get_line(index)); }
+	document_line get_line(unsigned index) const { return document_line(current_data_->data.get_line(index)); }
 
 	// insert string at location. Returns the position of the end of inserted text
 	document_position insert(document_position pos, const std::string& text);
@@ -76,7 +76,7 @@ public:
 	template<typename FUN>
 	void for_lines(unsigned first_line, unsigned max_count, FUN f)
 	{
-		current_data_->for_lines(first_line, max_count,
+		current_data_->data.for_lines(first_line, max_count,
 			[&](const line_data& ld)
 			{
 				f(document_line(ld));
@@ -86,28 +86,37 @@ public:
 	// Requests parsing
 	void parse_language();
 
-	const std::vector<char>& get_raw_data() const { return current_data_->get_raw_data(); }
+	const std::vector<char>& get_raw_data() const { return current_data_->data.get_raw_data(); }
 	const boost::filesystem::path& get_file_name() const { return file_name_; }
 
 	std::string to_string() const; // mostly for testing
 
-	document_data& get_data() { return *current_data_; } // for tests
+	document_data& get_data() { return current_data_->data; } // for tests
 
-	document_position get_last_position() const { return current_data_->get_last_position(); }
+	document_position get_last_position() const { return current_data_->data.get_last_position(); }
 
 	bool has_unsaved_changed() const { return _has_unsaved_changes; }
 
+	void set_tokens(std::uint64_t version, const std::vector<token>& tokens);
+
 private:
+
+	struct versioned_data
+	{
+		document_data data;
+		std::uint64_t version;
+	};
 
 	void erase_redo(); // erases any data ahead of current_data_
 	void crop_history(); // reduces the number of items before current_data_ to predefined value
 
-	std::list<document_data> data_;
-	std::list<document_data>::iterator current_data_;
+	std::list<versioned_data> data_;
+	std::list<versioned_data>::iterator current_data_;
 
 	boost::filesystem::path file_name_;
 
 	bool _has_unsaved_changes = false;
+	std::uint64_t last_version_ = 0;
 };
 
 }}
