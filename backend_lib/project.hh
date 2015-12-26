@@ -27,6 +27,8 @@ private:
 	enum class file_type
 	{
 		cpp,
+		c,
+		header,
 		other
 	};
 
@@ -40,8 +42,7 @@ private:
 	compilation_unit& get_or_create_unit(const boost::filesystem::path& path);
 	compilation_unit* get_unit(const boost::filesystem::path& path) const;
 
-	// Database of all information about a file that we know
-	std::map<boost::filesystem::path, std::unique_ptr<file_data>> file_data_;
+	static file_type get_type_by_extensions(const boost::filesystem::path& path);
 
 	// adds all files in the directory to the project
 	void add_directory(const boost::filesystem::path& source_dir);
@@ -50,9 +51,18 @@ private:
 	void scheduled_parse_file(const boost::filesystem::path& path);
 
 	// Looks for compilation unit containing the file
-	compilation_unit* get_unit_for_file(const boost::filesystem::path& path) const;
+	compilation_unit* get_or_create_unit_for_file(const boost::filesystem::path& path);
+
+	// Uses heuristics to figure-out the best set of flags for the file
+	std::vector<std::string> get_flags_for_path(const boost::filesystem::path& path) const;
+
+	// Returns default set of flags for file
+	static std::vector<std::string> get_default_flags(const boost::filesystem::path& path);
 
 	std::vector<CXUnsavedFile> get_unsaved_data();
+
+	// Database of all information about a file that we know
+	std::map<boost::filesystem::path, std::unique_ptr<file_data>> file_data_;
 
 	std::string name_;
 

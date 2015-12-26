@@ -97,7 +97,7 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 
 			compilation_unit& u = get_or_create_unit(path);
 			clang::compile_command command = cc.get_command(0);
-			u.set_compilation_commands(clang::get_sanitized_flags(command, path));
+			u.set_compilation_flags(clang::get_sanitized_flags(command, path));
 
 			// schedule file parsing
 			event_dispatcher_.schedule_job([this, path]() { scheduled_parse_file(path); });
@@ -108,22 +108,113 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 void project::scheduled_parse_file(const boost::filesystem::path& path)
 {
 	compilation_unit* unit = get_unit(path);
-	if (unit && !unit->is_parsed())
+	if (unit && !unit->needs_parsing())
 	{
 		LOG("Scheduled parsing of " << path);
 		unit->parse(get_unsaved_data());
 	}
 }
 
-compilation_unit*project::get_unit_for_file(const boost::filesystem::path& path) const
+template<typename Container, typename Value>
+static bool contains(const Container& c, const Value& v)
 {
-	// check if the file is actually a compilation unit itself
+	return std::find(std::begin(c), std::end(c), v) != std::end(c);
+}
+
+project::file_type project::get_type_by_extensions(const boost::filesystem::path& path)
+{
+	// known cpp extensions
+	static const char* cpp_ext[] = {".cc", ".cpp", ".cxx", ".C"};
+	static const char* c_ext[] = {".c"};
+	static const char* h_ext[] = {".h", ".hh", ".H", ".hxx", ".hpp", ".ipp", ".ixx", ""};
+
+	if (contains(cpp_ext, path.extension()))
+		return file_type::cpp;
+	else if (contains(c_ext, path.extension()))
+		return file_type::c;
+	else if (contains(h_ext, path.extension()))
+		return file_type::header;
+	else
+		return file_type::other;
+}
+
+std::vector<std::string> project::get_default_flags(const boost::filesystem::path& path)
+{
+	std::vector<std::string> flags;
+	flags.reserve(3);
+	flags.push_back("-fdiagnostics-color=never");
+	flags.push_back("-x");
+
+	file_type type = get_type_by_extensions(path);
+	switch(type)
+	{
+		case file_type::c:
+			flags.push_back("c");
+			break;
+		case file_type::cpp:
+			flags.push_back("c++");
+			break;
+		case file_type::header:
+		case file_type::other:
+			flags.push_back("c++-header");
+			break;
+	};
+
+	return flags;
+}
+
+std::vector<std::string> project::get_flags_for_path(const boost::filesystem::path& path) const
+{
+	// the heuristics is the foolowing:
+	// if there is another CU in the same directory, use it's flags
+	// otherwise, use default set
+
+	auto it = std::find_if(units_.begin(), units_.end(),
+		[&](const auto& pair)
+		{
+			const auto& p = pair.first;
+			return path.parent_path() == p.parent_path();
+		});
+
+	if (it != units_.end())
+	{
+		assert(it->first != path);
+		LOG("For file " << path << " using the same flags as for " << it->first);
+		return it->second->get_compilation_flags();
+	}
+
+	LOG("For file " << path << " using the default flags");
+	return get_default_flags(path);
+}
+
+compilation_unit* project::get_or_create_unit_for_file(const boost::filesystem::path& path)
+{
+	// check if the file already has a compilation unit
 	auto it = units_.find(path);
 	if (it != units_.end())
 	{
+		LOG("Found already existing compiltion unit for " << path);
 		return it->second.get();
 	}
 
+	// check if the file is a C/C++ file, andf should have CU created
+	file_type type = get_type_by_extensions(path);
+	if (type == file_type::cpp || type == file_type::c)
+	{
+		LOG("File " << path << " idnetified as C++, creating compilation unit");
+		file_data& data = get_or_create_file_data(path);
+		data.type_ = file_type::cpp;
+
+		std::unique_ptr<compilation_unit> u = std::make_unique<compilation_unit>(path, index_);
+		std::vector<std::string> flags = get_flags_for_path(path);
+		u->set_compilation_flags(flags);
+
+		compilation_unit* ptr = u.get();
+		units_[path] = std::move(u);
+		return ptr;
+	}
+
+	LOG("Unable to create compilation unit for file " << path);
 	// TODO: look for included files
 	return nullptr;
 }
@@ -277,14 +368,13 @@ open_file& project::open(const boost::filesystem::path& path)
 	open_file* file = file_up.get();
 	open_files_[path] = std::move(file_up);
 
-	compilation_unit* cu = get_unit_for_file(path);
+	compilation_unit* cu = get_or_create_unit_for_file(path);
 	if (cu)
 	{
 		file->set_compilation_unit(cu);
 	}
 	else
 	{
-		// TODO what now?
 		// TODO create provisional compilation unit
 	}
 

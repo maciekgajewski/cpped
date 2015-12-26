@@ -24,7 +24,7 @@ std::vector<document::token> open_file::parse(const std::vector<CXUnsavedFile>& 
 	if (unit_)
 	{
 		LOG("File has compilation unit...");
-		if (unit_->is_parsed())
+		if (unit_->needs_parsing())
 		{
 			LOG("... that needs parsing");
 			unit_->parse(unsaved_data);

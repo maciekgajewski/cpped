@@ -12,16 +12,16 @@ compilation_unit::compilation_unit(const boost::filesystem::path& path, clang::i
 
 void compilation_unit::parse(const std::vector<CXUnsavedFile>& unsaved_data)
 {
-	assert(!is_parsed());
+	assert(needs_parsing());
 
 	LOG("Starting parsing file " << path_);
 
 	std::vector<const char*> cmdline;
-	cmdline.reserve(compilation_commands_.size()+1);
-	assert(compilation_commands_.size() > 1);
+	cmdline.reserve(compilation_flags_.size()+1);
+	assert(compilation_flags_.size() > 1);
 
 	std::transform(
-		compilation_commands_.begin(), compilation_commands_.end(),
+		compilation_flags_.begin(), compilation_flags_.end(),
 		std::back_inserter(cmdline),
 		[&](const std::string& c) { return c.c_str(); });
 
@@ -31,12 +31,16 @@ void compilation_unit::parse(const std::vector<CXUnsavedFile>& unsaved_data)
 		unsaved_data,
 		cmdline);
 
+	needs_parsing_ = false;
+
 	LOG("Finished parsing file " << path_);
 }
 
 void compilation_unit::reparse(const std::vector<CXUnsavedFile>& unsaved_data)
 {
-	// TODO
+	LOG("Starting reparsing file " << path_);
+	translation_unit_.reparse(unsaved_data);
+	LOG("Finished reparsing file " << path_);
 }
 
 std::vector<document::token> compilation_unit::get_tokens_for_file(const boost::filesystem::path& path, const std::vector<char>& data) const
