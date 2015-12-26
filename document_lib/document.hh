@@ -3,6 +3,7 @@
 #include "document_data.hh"
 
 #include <boost/filesystem.hpp>
+#include <boost/signals2.hpp>
 
 #include <vector>
 #include <string>
@@ -46,10 +47,13 @@ class document
 {
 public:
 
+	boost::signals2::signal<void()> document_changed_signal;
+
 	document();
 	~document();
 
 	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path);
+	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const std::vector<token>& tokens);
 	void load_from_file(const boost::filesystem::path& path);
 
 	unsigned get_line_count() const { return current_data_->data.get_line_count(); }
@@ -92,6 +96,7 @@ public:
 	std::string to_string() const; // mostly for testing
 
 	document_data& get_data() { return current_data_->data; } // for tests
+	std::uint64_t get_current_version() const { return current_data_->version; }
 
 	document_position get_last_position() const { return current_data_->data.get_last_position(); }
 

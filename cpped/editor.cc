@@ -7,9 +7,9 @@
 namespace cpped {
 
 editor::editor(editor_window& win, document::document& d)
-	: doc_(&d),
-	window_(win)
+	: window_(win)
 {
+	set_document(d);
 }
 
 editor::editor(editor_window& win)
@@ -61,6 +61,9 @@ bool editor::on_mouse(const MEVENT& event)
 void editor::set_document(document::document& doc)
 {
 	doc_ = &doc;
+
+	doc_->document_changed_signal.connect([this]() { on_document_updated(); });
+
 	unsaved_document_.reset();
 	update();
 }
@@ -274,7 +277,6 @@ void editor::backspace()
 		cursor_pos_ = doc_->remove_before(cursor_pos_, 1);
 		ensure_cursor_visible();
 	}
-	request_full_render();
 }
 
 void editor::del()
@@ -283,6 +285,10 @@ void editor::del()
 	{
 		doc_->remove_after(cursor_pos_, 1);
 	}
+}
+
+void editor::on_document_updated()
+{
 	request_full_render();
 }
 
@@ -329,11 +335,9 @@ unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 void editor::insert_at_cursor(const std::string& s)
 {
 	cursor_pos_ = doc_->insert(cursor_pos_, s);
-	doc_->parse_language();
 
 	desired_cursor_column_ = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 	ensure_cursor_visible();
-	request_full_render();
 }
 
 }

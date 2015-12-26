@@ -25,12 +25,14 @@ class event_dispatcher
 {
 public:
 
+	using polling_function = std::function<bool()>;
+
 	event_dispatcher() = default;
 	event_dispatcher(const event_dispatcher&) = delete;
 	void set_global_quit_key(const std::string& key_name) { quit_key_ = key_name; }
 
-	// called every spin of the loop
-	void set_poll_function(const std::function<void()>& pf) { poll_function_ = pf; }
+	// called every spin of the loop. Screen repainted if returns true
+	void set_poll_function(const polling_function& pf) { poll_function_ = pf; }
 
 	void exit();
 	void run();
@@ -58,7 +60,7 @@ private:
 	WINDOW* get_active_ncurses_window() const;
 
 	color_palette palette_;
-	std::function<void()> poll_function_;
+	polling_function poll_function_;
 
 	friend class event_window;
 };

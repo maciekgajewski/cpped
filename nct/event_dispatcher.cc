@@ -58,9 +58,9 @@ void event_dispatcher::run()
 			send_sequence(input_buffer);
 
 			// Finished processing keys, poll before going down
-			if (poll_function_)
+			if (poll_function_ && poll_function_())
 			{
-				poll_function_();
+				render_windows();
 			}
 
 			// no input, back off, wait for more
@@ -79,9 +79,9 @@ void event_dispatcher::run()
 				}
 				else
 				{
-					if (poll_function_)
+					if (poll_function_ && poll_function_())
 					{
-						poll_function_();
+						render_windows();
 					}
 				}
 			}

@@ -77,18 +77,21 @@ struct open_file_reply
 	fs::path file;
 	std::string error;
 	std::string data; // TODO be smarter about large buffers, use copy-less structures
+	std::vector<document::token> tokens;
 };
 template<typename Writer> void serialize(Writer& writer, const open_file_reply& m)
 {
 	serialize(writer, m.file);
 	serialize(writer, m.error);
 	serialize(writer, m.data);
+	serialize(writer, m.tokens);
 }
 template<typename Reader> void deserialize(Reader& reader, open_file_reply& m)
 {
 	deserialize(reader, m.file);
 	deserialize(reader, m.error);
 	deserialize(reader, m.data);
+	deserialize(reader, m.tokens);
 }
 
 // B->F
@@ -110,6 +113,27 @@ template<typename Reader> void deserialize(Reader& reader, file_tokens_feed& m)
 	deserialize(reader, m.file);
 	deserialize(reader, m.version);
 	deserialize(reader, m.tokens);
+}
+
+// F->B
+struct document_changed_feed
+{
+	static const std::uint64_t ID = 6;
+	fs::path file;
+	std::uint64_t version;
+	std::string data;
+};
+template<typename Writer> void serialize(Writer& writer, const document_changed_feed& m)
+{
+	serialize(writer, m.file);
+	serialize(writer, m.version);
+	serialize(writer, m.data);
+}
+template<typename Reader> void deserialize(Reader& reader, document_changed_feed& m)
+{
+	deserialize(reader, m.file);
+	deserialize(reader, m.version);
+	deserialize(reader, m.data);
 }
 
 }}}

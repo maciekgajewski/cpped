@@ -31,8 +31,15 @@ public:
 
 private:
 
+	struct open_file_data
+	{
+		std::unique_ptr<document::document> document;
+		std::uint64_t last_version_parsed = 0;
+	};
 
+	void on_document_changed(const document::document& doc);
 	void on_file_tokens(const backend::messages::file_tokens_feed& token_feed);
+	void request_parsing(const document::document& doc);
 
 	backend::endpoint& endpoint_;
 
@@ -40,7 +47,10 @@ private:
 	std::vector<boost::filesystem::path> files_;
 
 	// Currently open files
-	std::map<boost::filesystem::path, std::unique_ptr<document::document>> open_files_;
+	std::map<boost::filesystem::path, open_file_data> open_files_;
+
+	// asynchjronous parsing state
+	bool parsing_in_progress_ = false;
 };
 
 project load_cmake_project(const std::string& build_directory);

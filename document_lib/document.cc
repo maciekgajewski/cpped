@@ -21,6 +21,8 @@ document::~document()
 
 void document::load_from_raw_data(const std::string& data, const fs::path& path)
 {
+	assert(path.is_absolute());
+
 	file_name_ = path;
 
 	data_.clear();
@@ -29,6 +31,12 @@ void document::load_from_raw_data(const std::string& data, const fs::path& path)
 	data_.back().version = 0;
 	current_data_ = data_.begin();
 	last_version_ = 0;
+}
+
+void document::load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const std::vector<token>& tokens)
+{
+	load_from_raw_data(data, path);
+	current_data_->data.set_tokens(tokens);
 }
 
 void document::load_from_file(const boost::filesystem::path& path)
@@ -57,6 +65,8 @@ document_position document::insert(document_position pos, const std::string& tex
 
 	_has_unsaved_changes = true;
 
+	document_changed_signal();
+
 	return final_pos;
 }
 
@@ -72,6 +82,8 @@ void document::remove(document_range r)
 	_has_unsaved_changes = true;
 
 	crop_history();
+
+	document_changed_signal();
 }
 
 document_position document::remove_before(document_position pos, unsigned count)
@@ -101,7 +113,10 @@ std::string document::to_string() const
 void document::set_tokens(std::uint64_t version, const std::vector<token>& tokens)
 {
 	if (current_data_->version == version)
+	{
 		current_data_->data.set_tokens(tokens);
+		document_changed_signal();
+	}
 }
 
 void document::erase_redo()

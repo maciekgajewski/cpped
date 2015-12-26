@@ -35,6 +35,8 @@ public:
 
 	std::vector<document::token> get_tokens_for_file(const boost::filesystem::path& path, const std::vector<char>& data) const;
 
+	boost::filesystem::path get_path() const { return path_; }
+
 private:
 
 	boost::filesystem::path path_;

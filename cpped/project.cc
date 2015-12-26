@@ -45,15 +45,18 @@ document::document& project::open_file(const fs::path& file)
 		endpoint_.send_sync_request(request, reply);
 
 		auto doc_ptr = std::make_unique<document::document>();
-		doc_ptr->load_from_raw_data(reply.data, file);
+		doc_ptr->load_from_raw_data(reply.data, absolute, reply.tokens);
 
-		auto p = open_files_.insert(std::make_pair(absolute, std::move(doc_ptr)));
+		doc_ptr->document_changed_signal.connect(
+			[this, d=doc_ptr.get()] () { on_document_changed(*d); });
+
+		auto p = open_files_.insert(std::make_pair(absolute, open_file_data{std::move(doc_ptr), 0} ));
 		assert(p.second);
-		return *p.first->second;
+		return *p.first->second.document;
 	}
 	else
 	{
-		return *it->second;
+		return *it->second.document;
 	}
 }
 
@@ -65,7 +68,26 @@ document::document& project::get_open_file(const boost::filesystem::path& file)
 	{
 		throw std::runtime_error("No such file");
 	}
-	return *it->second;
+	return *it->second.document;
+}
+
+void project::request_parsing(const document::document& doc)
+{
+	backend::messages::document_changed_feed feed;
+	feed.file = doc.get_file_name();
+	feed.version = doc.get_current_version();
+	feed.data.assign(doc.get_raw_data().begin(), doc.get_raw_data().end());
+
+	endpoint_.send_message(feed);
+}
+
+void project::on_document_changed(const document::document& doc)
+{
+	if (!parsing_in_progress_)
+	{
+		request_parsing(doc);
+		parsing_in_progress_ = true;
+	}
 }
 
 void project::on_file_tokens(const backend::messages::file_tokens_feed& token_feed)
@@ -73,7 +95,20 @@ void project::on_file_tokens(const backend::messages::file_tokens_feed& token_fe
 	auto it = open_files_.find(token_feed.file);
 	if (it != open_files_.end())
 	{
-		it->second->set_tokens(token_feed.version, token_feed.tokens);
+		it->second.document->set_tokens(token_feed.version, token_feed.tokens);
+		it->second.last_version_parsed = token_feed.version;
+	}
+	parsing_in_progress_ = false;
+	// look for documents needing parsing
+	auto needs_parsing = std::find_if(open_files_.begin(), open_files_.end(),
+		[&](const auto& pair)
+		{
+			return pair.second.last_version_parsed < pair.second.document->get_current_version();
+		});
+	if (needs_parsing != open_files_.end())
+	{
+		request_parsing(*needs_parsing->second.document);
+		parsing_in_progress_ = true;
 	}
 }
 

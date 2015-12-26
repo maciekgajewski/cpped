@@ -65,10 +65,13 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 
 	dispatcher.set_poll_function([&]()
 		{
+			bool received = false;
 			while(endpoint.has_message())
 			{
 				endpoint.receive_message();
+				received = true;
 			}
+			return received;
 		});
 	dispatcher.set_global_quit_key("^X");
 	dispatcher.run();

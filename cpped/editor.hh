@@ -43,6 +43,8 @@ private:
 	void backspace();
 	void del();
 
+	void on_document_updated();
+
 	// workspace/doc coordinates
 	int column_to_workspace_x(unsigned column) const;
 	int documet_to_workspace_y(unsigned docy) const;

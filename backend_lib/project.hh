@@ -51,7 +51,11 @@ private:
 	void scheduled_parse_file(const boost::filesystem::path& path);
 
 	// Looks for compilation unit containing the file
-	compilation_unit* get_or_create_unit_for_file(const boost::filesystem::path& path);
+	void get_or_create_unit_for_file(open_file& file);
+
+	compilation_unit* find_unit_for_header(const boost::filesystem::path& path) const;
+
+	std::unique_ptr<compilation_unit> make_compilation_unit(const boost::filesystem::path& path);
 
 	// Uses heuristics to figure-out the best set of flags for the file
 	std::vector<std::string> get_flags_for_path(const boost::filesystem::path& path) const;

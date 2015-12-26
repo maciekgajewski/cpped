@@ -1,5 +1,7 @@
 #include "cpp_tokens.hh"
 
+#include "log.hh"
+
 #include <algorithm>
 
 namespace cpped { namespace backend {
@@ -55,6 +57,8 @@ std::vector<document::token> get_cpp_tokens(
 	clang::source_range range(file_begin, file_end);
 	clang::token_list tokens = tu.tokenize(range);
 	tokens.annotate_tokens();
+
+	LOG("got " << tokens.size() << " tokens for " << file_name);
 
 	document_tokens.reserve(tokens.size());
 

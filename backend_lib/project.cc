@@ -43,21 +43,39 @@ project::project(event_dispatcher& ed)
 				messages::open_file_reply reply;
 				reply.file = request.file;
 				reply.data.assign(file.get_data().begin(), file.get_data().end());
+				reply.tokens = file.parse(get_unsaved_data());
 				event_dispatcher_.send_message(reply);
-
-				// get tokens now
+			}
+			catch(const std::exception& e)
+			{
+				event_dispatcher_.send_message(messages::open_file_reply{request.file, e.what()});
+			}
+		});
+	event_dispatcher_.register_message_handler<messages::document_changed_feed>(
+		[this](const messages::document_changed_feed& feed)
+		{
+			LOG("Data feed recevied for file " << feed.file << ", version " << feed.version);
+			auto it = open_files_.find(feed.file);
+			if (it != open_files_.end())
+			{
+				open_file& file = *it->second;
+				file.set_data(feed.data);
+				// reparse
 				messages::file_tokens_feed tokens_feed;
-				tokens_feed.file = request.file;
-				tokens_feed.version = 0;
+				tokens_feed.file = feed.file;
+				tokens_feed.version = feed.version;
 				tokens_feed.tokens = file.parse(get_unsaved_data());
 				if (!tokens_feed.tokens.empty())
 				{
 					event_dispatcher_.send_message(tokens_feed);
 				}
+				LOG("Data feed processed");
 			}
-			catch(const std::exception& e)
+			else
 			{
-				event_dispatcher_.send_message(messages::open_file_reply{request.file, e.what(), {}});
+				LOG("FATAL: Data feed recevied for unknown file: " << feed.file);
+				// inconsistent data
+				std::terminate();
 			}
 		});
 }
@@ -187,36 +205,67 @@ std::vector<std::string> project::get_flags_for_path(const boost::filesystem::pa
 	return get_default_flags(path);
 }
 
-compilation_unit* project::get_or_create_unit_for_file(const boost::filesystem::path& path)
+std::unique_ptr<compilation_unit> project::make_compilation_unit(const fs::path& path)
+{
+	std::unique_ptr<compilation_unit> u = std::make_unique<compilation_unit>(path, index_);
+	std::vector<std::string> flags = get_flags_for_path(path);
+	u->set_compilation_flags(flags);
+
+	return u;
+}
+
+compilation_unit* project::find_unit_for_header(const fs::path& path) const
+{
+	// TODO
+	return nullptr;
+}
+
+void project::get_or_create_unit_for_file(open_file& file)
 {
 	// check if the file already has a compilation unit
-	auto it = units_.find(path);
+	auto it = units_.find(file.get_path());
 	if (it != units_.end())
 	{
-		LOG("Found already existing compiltion unit for " << path);
-		return it->second.get();
+		LOG("Found already existing compiltion unit for " << file.get_path());
+		file.set_compilation_unit(it->second.get());
+		return;
 	}
 
 	// check if the file is a C/C++ file, andf should have CU created
-	file_type type = get_type_by_extensions(path);
+	file_type type = get_type_by_extensions(file.get_path());
 	if (type == file_type::cpp || type == file_type::c)
 	{
-		LOG("File " << path << " idnetified as C++, creating compilation unit");
-		file_data& data = get_or_create_file_data(path);
+		LOG("File " << file.get_path() << " idnetified as C++, creating compilation unit");
+		file_data& data = get_or_create_file_data(file.get_path());
 		data.type_ = file_type::cpp;
 
-		std::unique_ptr<compilation_unit> u = std::make_unique<compilation_unit>(path, index_);
-		std::vector<std::string> flags = get_flags_for_path(path);
-		u->set_compilation_flags(flags);
-
-		compilation_unit* ptr = u.get();
-		units_[path] = std::move(u);
-		return ptr;
+		std::unique_ptr<compilation_unit> u = make_compilation_unit(file.get_path());
+		file.set_compilation_unit(u.get());
+		units_[file.get_path()] = std::move(u);
 	}
+	else if (type == file_type::header)
+	{
+		file_data& data = get_or_create_file_data(file.get_path());
+		data.type_ = file_type::header;
 
-	LOG("Unable to create compilation unit for file " << path);
-	// TODO: look for included files
-	return nullptr;
+		compilation_unit* unit = find_unit_for_header(file.get_path());
+		if (unit)
+		{
+			LOG("File " << file.get_path() << " idnetified as C++ header, using unit for " << unit->get_path());
+			file.set_compilation_unit(unit);
+		}
+		else
+		{
+			LOG("File " << file.get_path() << " idnetified as C++ header, creating provisional compilation unit");
+
+			std::unique_ptr<compilation_unit> u = make_compilation_unit(file.get_path());
+			file.set_provisional_compilation_unit(std::move(u));
+		}
+	}
+	else
+	{
+		LOG("Unable to create compilation unit for file " << file.get_path());
+	}
 }
 
 std::vector<CXUnsavedFile> project::get_unsaved_data()
@@ -368,15 +417,7 @@ open_file& project::open(const boost::filesystem::path& path)
 	open_file* file = file_up.get();
 	open_files_[path] = std::move(file_up);
 
-	compilation_unit* cu = get_or_create_unit_for_file(path);
-	if (cu)
-	{
-		file->set_compilation_unit(cu);
-	}
-	else
-	{
-		// TODO create provisional compilation unit
-	}
+	get_or_create_unit_for_file(*file);
 
 	return *file;
 }
