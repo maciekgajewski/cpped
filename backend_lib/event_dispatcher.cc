@@ -11,6 +11,8 @@ event_dispatcher::event_dispatcher(endpoint& ep)
 
 void event_dispatcher::run()
 {
+	using namespace  std::literals::chrono_literals;
+
 	bool run = true;
 	endpoint_.register_message_handler<messages::stop>(
 		[&](const messages::stop&) { run = false; });
@@ -24,7 +26,7 @@ void event_dispatcher::run()
 		}
 		else
 		{
-			if (endpoint_.has_message())
+			if (endpoint_.wait_for_message(1s))
 			{
 				endpoint_.receive_message();
 			}

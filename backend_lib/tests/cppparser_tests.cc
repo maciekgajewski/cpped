@@ -137,14 +137,18 @@ BOOST_AUTO_TEST_CASE(completion_test)
 R"(#include <string>
 void fun() {
 	std::string s;
-	s.
-*/)";
+	auto text="aaa bb
+)";
 
 	document::document_data d;
 	d.load_from_raw_data(code);
 
-	// TODO
+	clang::index idx(0, 0);
+	clang::translation_unit tu;
+	tu.parse(idx, "code.cc", d.get_raw_data().data(), d.get_raw_data().size(), {});
 
+	auto tokens =  get_cpp_tokens(tu, "code.cc", d.get_raw_data());
+	d.set_tokens(tokens);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

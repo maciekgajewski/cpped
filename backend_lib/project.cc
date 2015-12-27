@@ -350,7 +350,7 @@ void project::on_includes_updated(compilation_unit& cu)
 	}
 }
 
-project::file_data&project::get_or_create_file_data(const boost::filesystem::path& path)
+project::file_data& project::get_or_create_file_data(const boost::filesystem::path& path)
 {
 	assert(path.is_absolute());
 	std::unique_ptr<file_data>& p = file_data_[path];
