@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cstdint>
+#include <chrono>
 
 namespace cpped { namespace backend {
 
@@ -42,6 +43,9 @@ public:
 	// Checks if there is a massage awaiting.
 	// If returns 'false', the next call to receive_message() is likely to block
 	bool has_message();
+
+	// Waits for message. Returns 'false' if no message recevied in specified period
+	bool wait_for_message(std::chrono::duration<double> timeout);
 
 	// Sends the request, and spins waiting for reply
 	template<typename Request, typename Reply>

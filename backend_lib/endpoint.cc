@@ -4,6 +4,7 @@
 #include <sys/select.h>
 
 #include <utility>
+#include <chrono>
 
 namespace cpped { namespace backend {
 
@@ -28,17 +29,31 @@ void endpoint::set_fd(int fd)
 	fd_ = fd;
 }
 
-bool endpoint::has_message()
+static bool select_socket(int fd, ::timeval* to)
 {
 	::fd_set set;
 	FD_ZERO(&set);
-	FD_SET(fd_, &set);
+	FD_SET(fd, &set);
 
-	::timeval to{0, 0};
-
-	int result = ::select(fd_+1, &set, nullptr, nullptr, &to);
+	int result = ::select(fd+1, &set, nullptr, nullptr, to);
 
 	return result == 1;
+}
+
+bool endpoint::has_message()
+{
+	::timeval to{0, 0};
+	return select_socket(fd_, &to);
+}
+
+bool endpoint::wait_for_message(std::chrono::duration<double> timeout)
+{
+	using namespace  std::literals::chrono_literals;
+	int seconds = int(std::floor(timeout/1s));
+	int useconds = int((timeout - seconds*1s)/1us);
+
+	::timeval to{seconds, useconds};
+	return select_socket(fd_, &to);
 }
 
 void endpoint::close()
