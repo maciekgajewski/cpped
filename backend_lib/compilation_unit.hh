@@ -32,14 +32,15 @@ public:
 	}
 
 	std::vector<std::string> get_compilation_flags() const { return compilation_flags_; }
-
 	std::vector<document::token> get_tokens_for_file(const boost::filesystem::path& path, const std::vector<char>& data) const;
-
 	boost::filesystem::path get_path() const { return path_; }
 
 private:
 
+	void update_includes();
+
 	boost::filesystem::path path_;
+	std::vector<boost::filesystem::path> included_files_;
 	clang::index& index_;
 	clang::translation_unit translation_unit_;
 	std::vector<std::string> compilation_flags_;

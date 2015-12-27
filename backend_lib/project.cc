@@ -126,7 +126,7 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 void project::scheduled_parse_file(const boost::filesystem::path& path)
 {
 	compilation_unit* unit = get_unit(path);
-	if (unit && !unit->needs_parsing())
+	if (unit && unit->needs_parsing())
 	{
 		LOG("Scheduled parsing of " << path);
 		unit->parse(get_unsaved_data());

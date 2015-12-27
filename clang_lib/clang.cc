@@ -105,7 +105,7 @@ std::string token::get_kind_name() const
 source_location::info source_location::get_location_info() const
 {
 	info l;
-	clang_getFileLocation(clang_location, &l.file.clang_file, &l.line, &l.column, &l.offset);
+	clang_getFileLocation(clang_location, &l.file.file_, &l.line, &l.column, &l.offset);
 	return l;
 }
 

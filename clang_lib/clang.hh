@@ -15,6 +15,24 @@ namespace cpped { namespace clang {
 
 // thin C++ bindings for libclang
 
+class string
+{
+public:
+	~string() { clang_disposeString(clang_string); }
+
+	const char* c_str() const { return clang_getCString(clang_string); }
+
+private:
+	string(const CXString s) : clang_string(s) {}
+	CXString clang_string;
+
+	friend class cursor;
+	friend class completion_string;
+	friend class code_completion_result;
+	friend class compile_command;
+	friend class source_file;
+};
+
 class index
 {
 public:
@@ -41,13 +59,16 @@ private:
 class source_file
 {
 public:
-	source_file() : clang_file(nullptr) {}
+	source_file() = default;
+	string get_name() const { return clang_getFileName(file_); }
+	bool is_null() const { return file_ == nullptr; }
 private:
-	source_file(CXFile f) : clang_file(f) {}
-	CXFile clang_file;
+	source_file(CXFile f) : file_(f) {}
+	CXFile file_ = nullptr;
 
 	friend class translation_unit;
 	friend class source_location;
+	friend class cursor;
 };
 
 class source_location
@@ -96,23 +117,6 @@ private:
 	friend class token_list;
 };
 
-class string
-{
-public:
-	~string() { clang_disposeString(clang_string); }
-
-	const char* c_str() const { return clang_getCString(clang_string); }
-
-private:
-	string(const CXString s) : clang_string(s) {}
-	CXString clang_string;
-
-	friend class cursor;
-	friend class completion_string;
-	friend class code_completion_result;
-	friend class compile_command;
-};
-
 inline std::ostream& operator<<(std::ostream& s, const string& cs)
 {
 	if (cs.c_str())
@@ -127,6 +131,7 @@ public:
 	CXCursorKind get_kind() const { return clang_getCursorKind(clang_cursor); }
 	string get_kind_as_string() const { return clang_getCursorKindSpelling(clang_getCursorKind(clang_cursor)); }
 
+	using visitor_return_type =  CXChildVisitResult;
 	// function_t: CXChildVisitResult(const cursor& visited_cursor, const cursor& parent)
 	template<typename function_t>
 	void visit_children(function_t fun) const
@@ -143,12 +148,14 @@ public:
 
 	cursor get_lexical_parent() const { return clang_getCursorLexicalParent(clang_cursor); }
 	cursor get_semantic_parent() const { return clang_getCursorSemanticParent(clang_cursor); }
+	source_file get_included_file() const { return clang_getIncludedFile(clang_cursor); }
 
 private:
 	cursor(const CXCursor& c) : clang_cursor(c) {}
 	CXCursor clang_cursor;
 
 	friend class token;
+	friend class translation_unit;
 };
 
 class token
@@ -365,7 +372,7 @@ public:
 	source_file get_file(const std::string& file_name) const { return get_file(file_name.c_str()); }
 	source_location get_location(const source_file& file, unsigned line, unsigned column) const
 	{
-		source_location location(clang_getLocation(clang_tu, file.clang_file, line, column));
+		source_location location(clang_getLocation(clang_tu, file.file_, line, column));
 		if (location.is_null())
 		{
 			throw std::runtime_error("no such location");
@@ -375,7 +382,7 @@ public:
 
 	source_location get_location_for_offset(const source_file& file, unsigned offset) const
 	{
-		source_location location(clang_getLocationForOffset(clang_tu, file.clang_file, offset));
+		source_location location(clang_getLocationForOffset(clang_tu, file.file_, offset));
 		if (location.is_null())
 		{
 			throw std::runtime_error("no such location");
@@ -395,6 +402,8 @@ public:
 
 	bool is_null() const { return clang_tu == nullptr; }
 	void dispose();
+
+	cursor get_cursor() const { return clang_getTranslationUnitCursor(clang_tu); }
 
 private:
 
