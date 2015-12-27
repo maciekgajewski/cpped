@@ -48,6 +48,7 @@ class document
 public:
 
 	boost::signals2::signal<void()> document_changed_signal;
+	boost::signals2::signal<void()> tokens_updated_signal;
 
 	document();
 	~document();

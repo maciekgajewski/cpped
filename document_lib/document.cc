@@ -115,7 +115,7 @@ void document::set_tokens(std::uint64_t version, const std::vector<token>& token
 	if (current_data_->version == version)
 	{
 		current_data_->data.set_tokens(tokens);
-		document_changed_signal();
+		tokens_updated_signal();
 	}
 }
 

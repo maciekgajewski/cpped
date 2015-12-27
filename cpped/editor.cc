@@ -62,7 +62,7 @@ void editor::set_document(document::document& doc)
 {
 	doc_ = &doc;
 
-	doc_->document_changed_signal.connect([this]() { on_document_updated(); });
+	doc_->tokens_updated_signal.connect([this]() { on_document_tokens_updated(); });
 
 	unsaved_document_.reset();
 	update();
@@ -287,7 +287,7 @@ void editor::del()
 	}
 }
 
-void editor::on_document_updated()
+void editor::on_document_tokens_updated()
 {
 	request_full_render();
 }

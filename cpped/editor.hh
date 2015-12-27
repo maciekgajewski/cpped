@@ -43,7 +43,7 @@ private:
 	void backspace();
 	void del();
 
-	void on_document_updated();
+	void on_document_tokens_updated();
 
 	// workspace/doc coordinates
 	int column_to_workspace_x(unsigned column) const;
