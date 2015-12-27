@@ -281,6 +281,25 @@ void document_data::set_tokens(const std::vector<token>& tokens)
 	}
 }
 
+const line_token* document_data::get_token_at(const document_position& pos) const
+{
+	assert(pos.line < lines_.size());
+	const line_data& line = lines_[pos.line];
+
+	return line.get_token_at(pos.column);
+}
+
+std::pair<unsigned, const line_token*> document_data::get_token_before(const document_position& pos) const
+{
+	assert(pos.line < lines_.size());
+	const line_data& line = lines_[pos.line];
+
+	const line_token* tok = line.get_token_before(pos.column);
+	// TODO move line up if nothing
+	return {pos.line, tok};
+}
+
+
 data_type::const_iterator document_data::positon_to_offset(document_position pos) const
 {
 	assert(pos.line < lines_.size());

@@ -70,8 +70,9 @@ code_completion_results translation_unit::code_complete_at(const char* filename,
 		uf_ptr = &unsaved_file;
 	}
 
-	CXCodeCompleteResults* results =  clang_codeCompleteAt(clang_tu, filename, line, column, uf_ptr, uf_ptr ? 1 : 0,
-			clang_defaultCodeCompleteOptions()|CXCodeComplete_IncludeBriefComments);
+
+	CXCodeCompleteResults* results = clang_codeCompleteAt(clang_tu, filename, line, column, uf_ptr, uf_ptr ? 1 : 0,
+			/*clang_defaultCodeCompleteOptions()|CXCodeComplete_IncludeBriefComments*/CXCodeComplete_IncludeMacros|CXCodeComplete_IncludeCodePatterns);
 	if (!results)
 		throw std::runtime_error("Code completion failed");
 

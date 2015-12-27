@@ -166,5 +166,45 @@ void line_data::push_back_token(const line_token& t)
 	tokens_.push_back(t);
 }
 
+const line_token* line_data::get_token_at(unsigned col) const
+{
+	assert(col <= get_length());
+
+	// find first token ending past the point
+	auto it = std::find_if(tokens_.begin(), tokens_.end(),
+		[&](const line_token& token) { return token.end > col; });
+
+	if (it == tokens_.end() || it->begin > col)
+	{
+		return nullptr;
+	}
+	else
+	{
+		return &*it;
+	}
+
+}
+
+const line_token* line_data::get_token_before(unsigned col) const
+{
+	assert(col <= get_length());
+
+	if (tokens_.empty())
+		return nullptr;
+
+	auto it = std::find_if(tokens_.begin(), tokens_.end(),
+		[&](const line_token& token) { return token.end > col; });
+
+	if (it == tokens_.begin())
+	{
+		return nullptr;
+	}
+	else
+	{
+		--it;
+		return &*it;
+	}
+}
+
 
 }}

@@ -43,6 +43,7 @@ int main(int argc, char** argv)
 		// print source lines if unprinted
 		for (;token_end.line > line_no; line_no++)
 		{
+			std::cout << std::endl;
 			std::cout << doc.get_line(line_no).to_string() << std::endl;
 		}
 

@@ -57,6 +57,11 @@ public:
 	// replaces all the existing tokens
 	void set_tokens(const std::vector<token>& tokens);
 
+	const line_token* get_token_at(const document_position& pos) const;
+
+	// returns token immediately before the position (pair: line, token)
+	std::pair<unsigned, const line_token*> get_token_before(const document_position& pos) const;
+
 private:
 
 	data_type::const_iterator positon_to_offset(document_position pos) const;

@@ -336,6 +336,7 @@ public:
 
 	iterator begin() const { return iterator(results->Results); }
 	iterator end() const { return iterator(results->Results + results->NumResults); }
+	std::size_t size() const { return results->NumResults; }
 
 private:
 

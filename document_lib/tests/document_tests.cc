@@ -466,8 +466,9 @@ BOOST_AUTO_TEST_CASE(set_tokens)
 	const auto& tokens4 = data.get_line(4).get_tokens();
 	BOOST_REQUIRE_EQUAL(tokens4.size(), 1);
 	BOOST_CHECK_EQUAL(tokens4[0], (line_token{0, 3, token_type::preprocessor})); // xxx
-
 }
+
+
 
 BOOST_AUTO_TEST_SUITE_END()
 

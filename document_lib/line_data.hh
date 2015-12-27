@@ -46,6 +46,9 @@ public:
 	template<typename FUN>
 	void for_each_token(FUN fun) const;
 
+	const line_token* get_token_at(unsigned col) const;
+	const line_token* get_token_before(unsigned col) const;
+
 private:
 	data_type::const_iterator start_;
 	unsigned length_;
