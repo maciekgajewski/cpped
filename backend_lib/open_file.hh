@@ -27,18 +27,21 @@ public:
 		provisional_unit_ = std::move(u);
 		unit_ = provisional_unit_.get();
 	}
+	bool uses_provisional_unit() const { return !!provisional_unit_; }
 
 	const std::vector<char>& get_data() const { return data_; }
 
-	void set_data(const std::vector<char>& d)
+	void set_data(const std::vector<char>& d, std::uint64_t version)
 	{
 		data_ = d;
+		version_ = version;
 		has_unsaved_data_ = true;
 	}
 
-	void set_data(const std::string& d)
+	void set_data(const std::string& d, std::uint64_t version)
 	{
 		data_.assign(d.begin(), d.end());
+		version_ = version;
 		has_unsaved_data_ = true;
 	}
 
@@ -47,6 +50,7 @@ public:
 	bool has_unsaved_data() const { return has_unsaved_data_; }
 
 	const boost::filesystem::path& get_path() const{ return path_; }
+	std::uint64_t get_version() const { return version_; }
 
 private:
 
@@ -58,6 +62,7 @@ private:
 	compilation_unit* unit_ = nullptr;
 	std::unique_ptr<compilation_unit> provisional_unit_;
 	bool has_unsaved_data_ = false;
+	std::uint64_t version_ = 0;
 
 };
 

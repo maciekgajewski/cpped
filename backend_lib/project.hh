@@ -65,6 +65,12 @@ private:
 
 	std::vector<CXUnsavedFile> get_unsaved_data();
 
+	// Called when one of the compilation units updates includes
+	void on_includes_updated(compilation_unit& cu);
+
+	// touich all CUs containing the file
+	void touch_units(const boost::filesystem::path& changed_file);
+
 	// Database of all information about a file that we know
 	std::map<boost::filesystem::path, std::unique_ptr<file_data>> file_data_;
 

@@ -59,7 +59,8 @@ project::project(event_dispatcher& ed)
 			if (it != open_files_.end())
 			{
 				open_file& file = *it->second;
-				file.set_data(feed.data);
+				file.set_data(feed.data, feed.version);
+				touch_units(feed.file);
 				// reparse
 				messages::file_tokens_feed tokens_feed;
 				tokens_feed.file = feed.file;
@@ -80,7 +81,29 @@ project::project(event_dispatcher& ed)
 		});
 }
 
-void project::add_directory(const boost::filesystem::path& dir_path)
+void project::touch_units(const fs::path& changed_file)
+{
+	assert(changed_file.is_absolute());
+
+	auto it = units_.find(changed_file);
+	if (it != units_.end())
+	{
+		// the file is a CU, mark it as dirty
+		it->second->mark_dirty();
+	}
+	else
+	{
+		for(const auto& pair : units_)
+		{
+			if (pair.second->includes(changed_file))
+			{
+				pair.second->mark_dirty();
+			}
+		}
+	}
+}
+
+void project::add_directory(const fs::path& dir_path)
 {
 	for(fs::recursive_directory_iterator it(dir_path); it != fs::recursive_directory_iterator(); ++it)
 	{
@@ -216,8 +239,22 @@ std::unique_ptr<compilation_unit> project::make_compilation_unit(const fs::path&
 
 compilation_unit* project::find_unit_for_header(const fs::path& path) const
 {
-	// TODO
-	return nullptr;
+	auto it = std::find_if(units_.begin(), units_.end(),
+		[&](const auto& pair)
+		{
+			return pair.second->includes(path);
+		});
+
+	if (it != units_.end())
+	{
+		LOG("Found compilation unit for include " << path << " : " << it->first);
+		return it->second.get();
+	}
+	else
+	{
+		LOG("Failed to find compilation unit including " << path);
+		return nullptr;
+	}
 }
 
 void project::get_or_create_unit_for_file(open_file& file)
@@ -241,6 +278,7 @@ void project::get_or_create_unit_for_file(open_file& file)
 
 		std::unique_ptr<compilation_unit> u = make_compilation_unit(file.get_path());
 		file.set_compilation_unit(u.get());
+		u->includes_changed_signal.connect([this, uptr=u.get()]() { on_includes_updated(*uptr); });
 		units_[file.get_path()] = std::move(u);
 	}
 	else if (type == file_type::header)
@@ -290,6 +328,28 @@ std::vector<CXUnsavedFile> project::get_unsaved_data()
 	return unsaved_data;
 }
 
+void project::on_includes_updated(compilation_unit& cu)
+{
+	// go trough open files, and if any of them is using provisional CU, try replacing it with the new one
+
+	LOG("Includes for unit " << cu.get_path() << " changed");
+
+	for(const auto& pair : open_files_)
+	{
+		if (pair.second->uses_provisional_unit() && cu.includes(pair.first))
+		{
+			pair.second->set_compilation_unit(&cu);
+			LOG("Replacing provisional cu on " << pair.first << " with " << cu.get_path());
+			messages::file_tokens_feed feed;
+			feed.file = pair.first;
+			feed.tokens = pair.second->parse(get_unsaved_data());
+			feed.version = pair.second->get_version();
+
+			event_dispatcher_.send_message(feed);
+		}
+	}
+}
+
 project::file_data&project::get_or_create_file_data(const boost::filesystem::path& path)
 {
 	assert(path.is_absolute());
@@ -309,6 +369,7 @@ compilation_unit& project::get_or_create_unit(const boost::filesystem::path& pat
 	if (!p)
 	{
 		p = std::make_unique<compilation_unit>(path, index_);
+		p->includes_changed_signal.connect([this, uptr=p.get()]() { on_includes_updated(*uptr); });
 	}
 
 	return *p;

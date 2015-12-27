@@ -276,6 +276,7 @@ void editor::backspace()
 	{
 		cursor_pos_ = doc_->remove_before(cursor_pos_, 1);
 		ensure_cursor_visible();
+		request_full_render();
 	}
 }
 
@@ -284,6 +285,7 @@ void editor::del()
 	if (cursor_pos_ < doc_->get_last_position())
 	{
 		doc_->remove_after(cursor_pos_, 1);
+		request_full_render();
 	}
 }
 
@@ -338,6 +340,7 @@ void editor::insert_at_cursor(const std::string& s)
 
 	desired_cursor_column_ = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 	ensure_cursor_visible();
+	request_full_render();
 }
 
 }

@@ -3,8 +3,6 @@
 #include "log.hh"
 #include "cpp_tokens.hh"
 
-#include <boost/container/flat_set.hpp>
-
 namespace cpped { namespace backend {
 
 namespace fs = boost::filesystem;
@@ -36,6 +34,7 @@ void compilation_unit::parse(const std::vector<CXUnsavedFile>& unsaved_data)
 		cmdline);
 
 	needs_parsing_ = false;
+	needs_reparsing_ = false;
 
 	update_includes();
 
@@ -44,10 +43,18 @@ void compilation_unit::parse(const std::vector<CXUnsavedFile>& unsaved_data)
 
 void compilation_unit::reparse(const std::vector<CXUnsavedFile>& unsaved_data)
 {
-	LOG("Starting reparsing file " << path_);
-	translation_unit_.reparse(unsaved_data);
-	update_includes();
-	LOG("Finished reparsing file " << path_);
+	if (needs_reparsing_)
+	{
+		LOG("Starting reparsing file " << path_);
+		translation_unit_.reparse(unsaved_data);
+		update_includes();
+		LOG("Finished reparsing file " << path_);
+		needs_reparsing_ = false;
+	}
+	else
+	{
+		LOG("No need to reparse " << path_);
+	}
 }
 
 std::vector<document::token> compilation_unit::get_tokens_for_file(const boost::filesystem::path& path, const std::vector<char>& data) const
@@ -56,13 +63,19 @@ std::vector<document::token> compilation_unit::get_tokens_for_file(const boost::
 				translation_unit_, path, data);
 }
 
+void compilation_unit::mark_dirty()
+{
+	needs_reparsing_ = true;
+	LOG("Marked as dirty: " << path_);
+}
+
 void compilation_unit::update_includes()
 {
 	assert(!translation_unit_.is_null());
 	LOG("looking for includes");
 
 	boost::container::flat_set<fs::path> includes;
-	includes.reserve(32);
+	includes.reserve(std::max<std::size_t>(32, included_files_.size()));
 
 	clang::cursor cursor = translation_unit_.get_cursor();
 	cursor.visit_children(
@@ -81,6 +94,12 @@ void compilation_unit::update_includes()
 		});
 
 	LOG("finished looking for includes, includes found=" << includes.size());
+
+	if (includes != included_files_)
+	{
+		included_files_	.swap(includes);
+		includes_changed_signal();
+	}
 }
 
 }}

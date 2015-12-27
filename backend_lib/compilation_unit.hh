@@ -4,7 +4,9 @@
 
 #include "document_lib/document_data.hh"
 
+#include <boost/container/flat_set.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/signals2.hpp>
 
 namespace cpped { namespace backend {
 
@@ -12,6 +14,8 @@ namespace cpped { namespace backend {
 class compilation_unit
 {
 public:
+
+	boost::signals2::signal<void()> includes_changed_signal;
 
 	compilation_unit(const boost::filesystem::path& path, clang::index& idx);
 
@@ -35,16 +39,24 @@ public:
 	std::vector<document::token> get_tokens_for_file(const boost::filesystem::path& path, const std::vector<char>& data) const;
 	boost::filesystem::path get_path() const { return path_; }
 
+	bool includes(const boost::filesystem::path& file) const
+	{
+		return included_files_.find(file) != included_files_.end();
+	}
+
+	void mark_dirty();
+
 private:
 
 	void update_includes();
 
 	boost::filesystem::path path_;
-	std::vector<boost::filesystem::path> included_files_;
+	boost::container::flat_set<boost::filesystem::path> included_files_;
 	clang::index& index_;
 	clang::translation_unit translation_unit_;
 	std::vector<std::string> compilation_flags_;
 	bool needs_parsing_ = true;
+	bool needs_reparsing_ = false;
 };
 
 }}
