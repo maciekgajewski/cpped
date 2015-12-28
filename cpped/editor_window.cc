@@ -12,8 +12,8 @@ namespace cpped {
 
 namespace fs = boost::filesystem;
 
-editor_window::editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm)
-	: event_window(ed, nullptr), project_(pr), styles_(sm), editor_(*this)
+editor_window::editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm, event_window* parent)
+	: event_window(ed, parent), project_(pr), styles_(sm), editor_(*this)
 	, navigator_(pr, ed, this)
 {
 	navigator_.file_selected_signal.connect(
@@ -55,6 +55,7 @@ void editor_window::on_shown()
 void editor_window::on_resized()
 {
 	navigator_.move(nct::position{1, 5}, nct::size{1, get_size().w - 7});
+	editor_.update();
 }
 
 void editor_window::render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width)

@@ -2,10 +2,19 @@
 
 #include "ncurses_env.hh"
 
+#include <stdexcept>
+
 namespace nct {
+
+ncurses_env* ncurses_env::current_ = nullptr;
 
 ncurses_env::ncurses_env()
 {
+	if (current_)
+		throw std::logic_error("There can be only one!");
+
+	current_ = this;
+
 	::initscr();
 	::raw();
 	::noecho();
@@ -17,6 +26,7 @@ ncurses_env::ncurses_env()
 ncurses_env::~ncurses_env()
 {
 	::endwin();
+	current_ = nullptr;
 }
 
 ncurses_window ncurses_env::get_stdscr()

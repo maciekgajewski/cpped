@@ -11,6 +11,12 @@ public:
 	~ncurses_env();
 
 	ncurses_window get_stdscr();
+
+	static ncurses_env* get_current() { return current_; }
+
+private:
+
+	static ncurses_env* current_;
 };
 
 }

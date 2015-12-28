@@ -95,6 +95,8 @@ public:
 	void do_show_cursor();
 	void do_refresh();
 
+	void set_fullscreen(bool fs);
+
 protected:
 
 	virtual void on_resized() {}
@@ -120,6 +122,7 @@ private:
 	window_set children_;
 	boost::optional<position> requested_cursor_position_;
 	bool refresh_requested_ = false; // TODO this is ignored now, remove if not used
+	bool fullscreen_ = false;
 };
 
 

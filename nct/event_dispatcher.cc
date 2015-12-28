@@ -3,6 +3,7 @@
 #include "event_dispatcher.hh"
 
 #include "event_window.hh"
+#include "ncurses_env.hh"
 
 #include <algorithm>
 #include <stdexcept>
@@ -42,6 +43,7 @@ void event_dispatcher::exit()
 void event_dispatcher::run()
 {
 	run_ = true;
+	screen_size_ = nct::ncurses_env::get_current()->get_stdscr().get_size();
 	std::string input_buffer;
 	MEVENT mouse_event;
 
@@ -63,14 +65,14 @@ void event_dispatcher::run()
 				render_windows();
 			}
 
+			check_for_terminal_resize();
+
 			// no input, back off, wait for more
 			::wtimeout(active_window, 10); // pool every 10ms
 
 			while(true)
 			{
 				c = ::wgetch(get_active_ncurses_window());
-
-				// TODO poll for events here
 
 				if (c != ERR)
 				{
@@ -196,6 +198,16 @@ void event_dispatcher::render_windows()
 		active_window_->do_show_cursor();
 	::doupdate();
 
+}
+
+void event_dispatcher::check_for_terminal_resize()
+{
+	nct::size sz = nct::ncurses_env::get_current()->get_stdscr().get_size();
+	if (sz != screen_size_)
+	{
+		screen_size_ = sz;
+		render_windows();
+	}
 }
 
 WINDOW* event_dispatcher::get_active_ncurses_window() const

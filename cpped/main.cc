@@ -1,4 +1,5 @@
 #include "editor_window.hh"
+#include "main_window.hh"
 #include "styles.hh"
 #include "project.hh"
 
@@ -48,20 +49,21 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 
 	::setlocale(LC_ALL, "en_EN.utf-8");
 	nct::ncurses_env env;
-	auto scr = env.get_stdscr();
 
 	nct::event_dispatcher dispatcher;
 	cpped::style_manager styles(dispatcher.get_palette());
-	cpped::editor_window editor(project, dispatcher, styles);
+	cpped::main_window main_window(project, dispatcher, styles);
+	cpped::editor_window& editor = main_window.get_current_editor();
+
 
 	if (file_to_open)
 	{
 		editor.open_file(*file_to_open);
 	}
 
-	editor.set_size(scr.get_size());
-	editor.set_active(); // so it recevies input
-	editor.show();
+	main_window.set_fullscreen(true);
+	main_window.set_active(); // so it recevies input
+	main_window.show();
 
 	dispatcher.set_poll_function([&]()
 		{

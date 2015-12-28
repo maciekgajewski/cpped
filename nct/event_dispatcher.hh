@@ -52,6 +52,7 @@ private:
 	void send_sequence(std::string& seq);
 
 	void render_windows();
+	void check_for_terminal_resize();
 
 	window_set windows_;
 	event_window* active_window_ = nullptr;
@@ -61,6 +62,7 @@ private:
 
 	color_palette palette_;
 	polling_function poll_function_;
+	nct::size screen_size_;
 
 	friend class event_window;
 };

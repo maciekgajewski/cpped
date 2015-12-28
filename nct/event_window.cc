@@ -2,6 +2,7 @@
 
 #include "event_window.hh"
 
+#include "ncurses_env.hh"
 #include "event_dispatcher.hh"
 
 namespace nct {
@@ -111,6 +112,11 @@ void event_window::do_show_cursor()
 
 void event_window::do_refresh()
 {
+	if (fullscreen_)
+	{
+		set_size(nct::ncurses_env::get_current()->get_stdscr().get_size());
+	}
+
 	if (window_)
 	{
 //		if (refresh_requested_)
@@ -125,6 +131,18 @@ void event_window::do_refresh()
 //		}
 	}
 
+}
+
+void event_window::set_fullscreen(bool fs)
+{
+	if (fs != fullscreen_)
+	{
+		fullscreen_ = fs;
+		if (fullscreen_)
+		{
+			set_size(nct::ncurses_env::get_current()->get_stdscr().get_size());
+		}
+	}
 }
 
 position event_window::to_global(const position& pos)

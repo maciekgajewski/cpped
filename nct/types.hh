@@ -15,7 +15,7 @@ struct position
 
 	position operator+(const position& o) const
 	{
-		return position{x + o.x, y + o.y};
+		return position{y + o.y, x + o.x};
 	}
 };
 

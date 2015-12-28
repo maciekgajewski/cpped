@@ -5,6 +5,7 @@ add_executable(cpped
 	editor_window.cc editor_window.hh
 	project.hh project.cc
 	navigator_widget.cc navigator_widget.hh
+	main_window.cc main_window.hh
 )
 
 target_link_libraries(cpped
