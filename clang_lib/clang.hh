@@ -362,7 +362,8 @@ public:
 
 	~diagnostic() { dispose(); }
 
-	string format(CXDiagnosticDisplayOptions opts = CXDiagnosticDisplayOptions(0)) const { return clang_formatDiagnostic(diag_, opts); }
+	// options: CXDiagnosticDisplayOptions
+	string format(unsigned opts = 0) const { return clang_formatDiagnostic(diag_, opts); }
 
 	CXDiagnosticSeverity get_severity() const { return clang_getDiagnosticSeverity(diag_); }
 

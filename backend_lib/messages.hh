@@ -1,6 +1,7 @@
 #pragma once
 
 #include "serialize.hh"
+#include "cpp_tokens.hh"
 
 #include "document_lib/document_data.hh"
 
@@ -77,7 +78,7 @@ struct open_file_reply
 	fs::path file;
 	std::string error;
 	std::string data; // TODO be smarter about large buffers, use copy-less structures
-	std::vector<document::token> tokens;
+	token_data tokens;
 };
 template<typename Writer> void serialize(Writer& writer, const open_file_reply& m)
 {
@@ -100,7 +101,7 @@ struct file_tokens_feed
 	static const std::uint64_t ID = 5;
 	fs::path file;
 	std::uint64_t version;
-	std::vector<document::token> tokens;
+	token_data tokens;
 };
 template<typename Writer> void serialize(Writer& writer, const file_tokens_feed& m)
 {

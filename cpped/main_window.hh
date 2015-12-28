@@ -25,6 +25,8 @@ private:
 
 	void update();
 
+	std::string status_;
+
 	project& project_;
 	style_manager& style_;
 	std::unique_ptr<editor_window> editor_;

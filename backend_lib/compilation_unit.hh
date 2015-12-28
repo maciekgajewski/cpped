@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cpp_tokens.hh"
+
 #include "clang_lib/clang.hh"
 
 #include "document_lib/document_data.hh"
@@ -37,6 +39,7 @@ public:
 
 	std::vector<std::string> get_compilation_flags() const { return compilation_flags_; }
 	std::vector<document::token> get_tokens_for_file(const boost::filesystem::path& path, const std::vector<char>& data) const;
+	token_data get_tokens_with_diagnostics(const boost::filesystem::path& path, const std::vector<char>& data) const;
 	boost::filesystem::path get_path() const { return path_; }
 
 	bool includes(const boost::filesystem::path& file) const

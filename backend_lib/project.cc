@@ -43,7 +43,8 @@ project::project(event_dispatcher& ed)
 				messages::open_file_reply reply;
 				reply.file = request.file;
 				reply.data.assign(file.get_data().begin(), file.get_data().end());
-				reply.tokens = file.parse(get_unsaved_data());
+				auto state = file.parse(get_unsaved_data());
+				reply.tokens = std::move(state);
 				event_dispatcher_.send_message(reply);
 			}
 			catch(const std::exception& e)
@@ -65,8 +66,9 @@ project::project(event_dispatcher& ed)
 				messages::file_tokens_feed tokens_feed;
 				tokens_feed.file = feed.file;
 				tokens_feed.version = feed.version;
-				tokens_feed.tokens = file.parse(get_unsaved_data());
-				if (!tokens_feed.tokens.empty())
+				auto state = file.parse(get_unsaved_data());
+				tokens_feed.tokens = std::move(state);
+				if (!tokens_feed.tokens.tokens.empty())
 				{
 					event_dispatcher_.send_message(tokens_feed);
 				}
@@ -342,7 +344,8 @@ void project::on_includes_updated(compilation_unit& cu)
 			LOG("Replacing provisional cu on " << pair.first << " with " << cu.get_path());
 			messages::file_tokens_feed feed;
 			feed.file = pair.first;
-			feed.tokens = pair.second->parse(get_unsaved_data());
+			auto state = pair.second->parse(get_unsaved_data());
+			feed.tokens = std::move(state);
 			feed.version = pair.second->get_version();
 
 			event_dispatcher_.send_message(feed);

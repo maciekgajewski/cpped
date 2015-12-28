@@ -7,6 +7,7 @@
 
 #include <stdexcept>
 #include <tuple>
+#include <sstream>
 
 namespace cpped {
 
@@ -45,7 +46,9 @@ document::document& project::open_file(const fs::path& file)
 		endpoint_.send_sync_request(request, reply);
 
 		auto doc_ptr = std::make_unique<document::document>();
-		doc_ptr->load_from_raw_data(reply.data, absolute, reply.tokens);
+		doc_ptr->load_from_raw_data(reply.data, absolute, reply.tokens.tokens);
+
+		emit_parsing_status(reply.tokens);
 
 		doc_ptr->document_changed_signal.connect(
 			[this, d=doc_ptr.get()] () { on_document_changed(*d); });
@@ -90,13 +93,23 @@ void project::on_document_changed(const document::document& doc)
 	}
 }
 
+void project::emit_parsing_status(const backend::token_data& data) const
+{
+	// send signal status
+	std::ostringstream ss;
+	ss << "File parsed, errors: " << data.errors << ", warnings: " << data.warnings;
+	status_signal(ss.str());
+}
+
 void project::on_file_tokens(const backend::messages::file_tokens_feed& token_feed)
 {
 	auto it = open_files_.find(token_feed.file);
 	if (it != open_files_.end())
 	{
-		it->second.document->set_tokens(token_feed.version, token_feed.tokens);
+		it->second.document->set_tokens(token_feed.version, token_feed.tokens.tokens);
 		it->second.last_version_parsed = token_feed.version;
+
+		emit_parsing_status(token_feed.tokens);
 	}
 	parsing_in_progress_ = false;
 	// look for documents needing parsing

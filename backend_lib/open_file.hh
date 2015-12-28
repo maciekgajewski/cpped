@@ -1,5 +1,7 @@
 #pragma once
 
+#include "compilation_unit.hh"
+
 #include "document_lib/document_data.hh"
 
 #include "clang_lib/clang.hh"
@@ -9,8 +11,6 @@
 #include <memory>
 
 namespace cpped { namespace backend {
-
-class compilation_unit;
 
 // Holds data of an open file, responsible for loading, saving and re-parsing
 class open_file
@@ -45,7 +45,7 @@ public:
 		has_unsaved_data_ = true;
 	}
 
-	std::vector<document::token> parse(const std::vector<CXUnsavedFile>& unsaved_data);
+	token_data parse(const std::vector<CXUnsavedFile>& unsaved_data);
 
 	bool has_unsaved_data() const { return has_unsaved_data_; }
 

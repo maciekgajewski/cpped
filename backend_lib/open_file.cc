@@ -15,9 +15,9 @@ open_file::open_file(const fs::path& path)
 	load_from_disk();
 }
 
-std::vector<document::token> open_file::parse(const std::vector<CXUnsavedFile>& unsaved_data)
+token_data open_file::parse(const std::vector<CXUnsavedFile>& unsaved_data)
 {
-	std::vector<document::token> tokens;
+	token_data status;
 
 	LOG("Reparsing file " << path_);
 
@@ -34,10 +34,10 @@ std::vector<document::token> open_file::parse(const std::vector<CXUnsavedFile>& 
 			LOG("... that may need reparsing");
 			unit_->reparse(unsaved_data);
 		}
-		tokens = unit_->get_tokens_for_file(path_, data_);
+		status = unit_->get_tokens_with_diagnostics(path_, data_);
 	}
 
-	return tokens;
+	return status;
 }
 
 void open_file::load_from_disk()

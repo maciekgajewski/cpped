@@ -10,6 +10,15 @@ main_window::main_window(project& pr, nct::event_dispatcher& ed, style_manager& 
 	project_(pr), style_(sm),
 	editor_(std::make_unique<editor_window>(pr, ed, sm, this))
 {
+	project_.status_signal.connect(
+		[this](const std::string st)
+		{
+			if (st != status_)
+			{
+				status_ = st;
+				update();
+			}
+		});
 }
 
 void main_window::on_shown()
@@ -36,7 +45,10 @@ void main_window::update()
 	nct::ncurses_window& window = get_ncurses_window();
 
 	int pair = style_.palette.get_pair_for_colors(COLOR_CYAN, COLOR_BLACK);
-	window.horizontal_line(window.get_height()-1, 0, ' ' | COLOR_PAIR(pair), window.get_width());
+	int attr = COLOR_PAIR(pair);
+	window.horizontal_line(window.get_height()-1, 0, ' ' | attr, window.get_width());
+	window.move(window.get_height()-1, 0);
+	window.attr_print(attr, status_);
 }
 
 }

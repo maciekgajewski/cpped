@@ -5,6 +5,7 @@
 #include "backend_lib/messages.hh"
 
 #include <boost/filesystem.hpp>
+#include <boost/signals2.hpp>
 
 #include <vector>
 #include <string>
@@ -18,6 +19,9 @@ namespace backend { class endpoint; }
 class project
 {
 public:
+
+	boost::signals2::signal<void(const std::string&)> status_signal;
+
 	project(backend::endpoint& ep);
 
 	void open_cmake_project(const boost::filesystem::path& build_dir);
@@ -40,6 +44,8 @@ private:
 	void on_document_changed(const document::document& doc);
 	void on_file_tokens(const backend::messages::file_tokens_feed& token_feed);
 	void request_parsing(const document::document& doc);
+
+	void emit_parsing_status(const backend::token_data& data) const;
 
 	backend::endpoint& endpoint_;
 

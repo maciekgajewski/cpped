@@ -1,7 +1,6 @@
 #include "compilation_unit.hh"
 
 #include "log.hh"
-#include "cpp_tokens.hh"
 
 namespace cpped { namespace backend {
 
@@ -60,7 +59,13 @@ void compilation_unit::reparse(const std::vector<CXUnsavedFile>& unsaved_data)
 std::vector<document::token> compilation_unit::get_tokens_for_file(const boost::filesystem::path& path, const std::vector<char>& data) const
 {
 	return get_cpp_tokens(
-				translation_unit_, path, data);
+		translation_unit_, path, data);
+}
+
+token_data compilation_unit::get_tokens_with_diagnostics(const boost::filesystem::path& path, const std::vector<char>& data) const
+{
+	return get_cpp_tokens_with_diagnostics(
+		translation_unit_, path, data);
 }
 
 void compilation_unit::mark_dirty()
