@@ -21,6 +21,15 @@ enum class token_type
 	max_tokens
 };
 
+enum class problem_severity
+{
+	none,
+
+	note,
+	warning,
+	error
+};
+
 std::ostream& operator << (std::ostream& s, token_type tt);
 
 // Token that's lmimted to one line
@@ -29,6 +38,10 @@ struct line_token
 	unsigned begin; // index of the fist character of the token
 	unsigned end; // index _past_ the last character of the token (end-begin = length)
 	token_type type;
+
+	// diagnositcs
+	problem_severity serverity_;
+	std::string message_;
 
 	bool operator==(const line_token& o) const { return begin == o.begin  && end == o.end && type == o.type; }
 };
@@ -90,16 +103,22 @@ struct token
 {
 	token_type type;
 	document_range range;
+	problem_severity serverity;
+	std::string message;
 };
 template<typename Writer> void serialize(Writer& writer, const token& m)
 {
 	serialize(writer, m.type);
 	serialize(writer, m.range);
+	serialize(writer, m.serverity);
+	serialize(writer, m.message);
 }
 template<typename Reader> void deserialize(Reader& reader, token& m)
 {
 	deserialize(reader, m.type);
 	deserialize(reader, m.range);
+	deserialize(reader, m.serverity);
+	deserialize(reader, m.message);
 }
 
 

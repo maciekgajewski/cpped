@@ -21,9 +21,7 @@ document::~document()
 
 void document::load_from_raw_data(const std::string& data, const fs::path& path)
 {
-	assert(path.is_absolute());
-
-	file_name_ = path;
+	file_name_ = fs::absolute(path);
 
 	data_.clear();
 	data_.emplace_back();

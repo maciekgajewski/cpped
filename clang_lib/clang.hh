@@ -31,6 +31,7 @@ private:
 	friend class code_completion_result;
 	friend class compile_command;
 	friend class source_file;
+	friend class diagnostic;
 };
 
 class index
@@ -115,6 +116,7 @@ private:
 
 	friend class translation_unit;
 	friend class token_list;
+	friend class diagnostic;
 };
 
 inline std::ostream& operator<<(std::ostream& s, const string& cs)
@@ -354,6 +356,62 @@ private:
 	friend class translation_unit;
 };
 
+class diagnostic
+{
+public:
+
+	~diagnostic() { dispose(); }
+
+	string format(CXDiagnosticDisplayOptions opts = CXDiagnosticDisplayOptions(0)) const { return clang_formatDiagnostic(diag_, opts); }
+
+	CXDiagnosticSeverity get_severity() const { return clang_getDiagnosticSeverity(diag_); }
+
+	std::size_t get_num_ranges() const { return clang_getDiagnosticNumRanges(diag_); }
+	source_range get_range(unsigned idx) { return clang_getDiagnosticRange(diag_, idx); }
+
+private:
+
+	diagnostic(CXDiagnostic d) : diag_(d) {}
+
+	void dispose()
+	{
+		if (diag_)
+		{
+			clang_disposeDiagnostic(diag_);
+			diag_ = nullptr;
+		}
+	}
+
+	CXDiagnostic diag_ = nullptr;
+
+	friend class diagnostic_set;
+};
+
+class diagnostic_set
+{
+public:
+	~diagnostic_set() { dispose(); }
+
+	std::size_t size() const { return clang_getNumDiagnosticsInSet(diag_set_); }
+
+	diagnostic operator[](unsigned i) const { return clang_getDiagnosticInSet(diag_set_, i); }
+private:
+
+	diagnostic_set(CXDiagnosticSet s) : diag_set_(s) {}
+
+	void dispose()
+	{
+		if (diag_set_)
+		{
+			clang_disposeDiagnosticSet(diag_set_);
+			diag_set_ = nullptr;
+		}
+	}
+	CXDiagnosticSet diag_set_ = nullptr;
+
+	friend class translation_unit;
+};
+
 class translation_unit
 {
 public:
@@ -405,6 +463,8 @@ public:
 	void dispose();
 
 	cursor get_cursor() const { return clang_getTranslationUnitCursor(clang_tu); }
+
+	diagnostic_set get_diagnostics() const { return clang_getDiagnosticSetFromTU(clang_tu); }
 
 private:
 
