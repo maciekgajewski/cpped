@@ -55,9 +55,6 @@ document::document& project::open_file(const fs::path& file)
 
 		emit_parsing_status(reply.tokens);
 
-		doc_ptr->document_changed_signal.connect(
-			[this, d=doc_ptr.get()] () { on_document_changed(*d); });
-
 		auto p = open_files_.insert(std::make_pair(absolute, open_file_data{std::move(doc_ptr), 0} ));
 		assert(p.second);
 		return *p.first->second.document;
@@ -79,22 +76,31 @@ document::document& project::get_open_file(const boost::filesystem::path& file)
 	return *it->second.document;
 }
 
-void project::request_parsing(const document::document& doc)
+void project::send_parse_request(
+	const document::document& doc,
+	const boost::optional<document::document_position>& cursor_pos)
 {
-	backend::messages::document_changed_feed feed;
-	feed.file = doc.get_file_name();
-	feed.version = doc.get_current_version();
-	feed.data.assign(doc.get_raw_data().begin(), doc.get_raw_data().end());
+		backend::messages::document_changed_feed feed;
+		feed.file = doc.get_file_name();
+		feed.version = doc.get_current_version();
+		feed.data.assign(doc.get_raw_data().begin(), doc.get_raw_data().end());
+		feed.cursor_position = cursor_pos;
 
-	endpoint_.send_message(feed);
+		endpoint_.send_message(feed);
 }
 
-void project::on_document_changed(const document::document& doc)
+void project::request_parsing(
+	const document::document& doc,
+	const boost::optional<document::document_position>& cursor_pos)
 {
 	if (!parsing_in_progress_)
 	{
-		request_parsing(doc);
+		send_parse_request(doc, cursor_pos);
 		parsing_in_progress_ = true;
+	}
+	else
+	{
+		outstanding_parsing_requests_[doc.get_file_name()] = cursor_pos;
 	}
 }
 
@@ -117,16 +123,24 @@ void project::on_file_tokens(const backend::messages::file_tokens_feed& token_fe
 		emit_parsing_status(token_feed.tokens);
 	}
 	parsing_in_progress_ = false;
+
 	// look for documents needing parsing
-	auto needs_parsing = std::find_if(open_files_.begin(), open_files_.end(),
-		[&](const auto& pair)
-		{
-			return pair.second.last_version_parsed < pair.second.document->get_current_version();
-		});
-	if (needs_parsing != open_files_.end())
+	while(!outstanding_parsing_requests_.empty())
 	{
-		request_parsing(*needs_parsing->second.document);
-		parsing_in_progress_ = true;
+		auto it = outstanding_parsing_requests_.begin();
+		const fs::path& path = it->first;
+		auto open_it = open_files_.find(path);
+		if (open_it != open_files_.end())
+		{
+			const document::document& doc = *open_it->second.document;
+			send_parse_request(doc, it->second);
+			outstanding_parsing_requests_.erase(it);
+			break;
+		}
+		else
+		{
+			outstanding_parsing_requests_.erase(it);
+		}
 	}
 }
 

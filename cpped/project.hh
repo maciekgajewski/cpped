@@ -33,6 +33,10 @@ public:
 	template<typename OutIt>
 	void get_all_open_files(OutIt out) const;
 
+	void request_parsing(
+		const document::document& doc,
+		const boost::optional<document::document_position>& cursor_pos);
+
 private:
 
 	struct open_file_data
@@ -41,11 +45,12 @@ private:
 		std::uint64_t last_version_parsed = 0;
 	};
 
-	void on_document_changed(const document::document& doc);
 	void on_file_tokens(const backend::messages::file_tokens_feed& token_feed);
-	void request_parsing(const document::document& doc);
 
 	void emit_parsing_status(const backend::token_data& data) const;
+	void send_parse_request(
+		const document::document& doc,
+		const boost::optional<document::document_position>& cursor_pos);
 
 	backend::endpoint& endpoint_;
 
@@ -57,6 +62,9 @@ private:
 
 	// asynchjronous parsing state
 	bool parsing_in_progress_ = false;
+
+	// outstanding parsing requests
+	std::map<boost::filesystem::path, boost::optional<document::document_position>> outstanding_parsing_requests_;
 };
 
 project load_cmake_project(const std::string& build_directory);

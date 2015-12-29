@@ -51,6 +51,8 @@ public:
 
 	void open_file(const boost::filesystem::path& file);
 
+	project& get_project() const { return project_; }
+
 private:
 
 	// rendering

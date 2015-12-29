@@ -275,6 +275,7 @@ void editor::backspace()
 	if (cursor_pos_ > document::document_position{0, 0})
 	{
 		cursor_pos_ = doc_->remove_before(cursor_pos_, 1);
+		window_.get_project().request_parsing(*doc_, boost::none);
 		ensure_cursor_visible();
 		request_full_render();
 	}
@@ -285,6 +286,7 @@ void editor::del()
 	if (cursor_pos_ < doc_->get_last_position())
 	{
 		doc_->remove_after(cursor_pos_, 1);
+		window_.get_project().request_parsing(*doc_, boost::none);
 		request_full_render();
 	}
 }
@@ -337,6 +339,9 @@ unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 void editor::insert_at_cursor(const std::string& s)
 {
 	cursor_pos_ = doc_->insert(cursor_pos_, s);
+
+	// TODO check if can complete here
+	window_.get_project().request_parsing(*doc_, boost::none);
 
 	desired_cursor_column_ = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 	ensure_cursor_visible();

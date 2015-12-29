@@ -3,6 +3,7 @@
 // Very fast, non-portable serialization for inter-process communication
 
 #include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
 
 #include <cstddef>
 #include <type_traits>
@@ -90,6 +91,38 @@ void deserialize(Reader& reader, std::vector<T>& vec)
 	for(T& v : vec)
 	{
 		deserialize(reader, v);
+	}
+}
+
+// optional
+template<typename Writer, typename T>
+void serialize(Writer& writer, const boost::optional<T>& opt)
+{
+	if (opt)
+	{
+		serialize(writer, true);
+		serialize(writer, *opt);
+	}
+	else
+	{
+		serialize(writer, false);
+	}
+
+}
+
+template<typename Reader, typename T>
+void deserialize(Reader& reader, boost::optional<T>& opt)
+{
+	bool initialized;
+	deserialize(reader, initialized);
+	if (initialized)
+	{
+		opt.emplace();
+		deserialize(reader, *opt);
+	}
+	else
+	{
+		opt.reset();
 	}
 }
 

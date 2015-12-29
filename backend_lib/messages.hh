@@ -123,18 +123,21 @@ struct document_changed_feed
 	fs::path file;
 	std::uint64_t version;
 	std::string data;
+	boost::optional<document::document_position> cursor_position;
 };
 template<typename Writer> void serialize(Writer& writer, const document_changed_feed& m)
 {
 	serialize(writer, m.file);
 	serialize(writer, m.version);
 	serialize(writer, m.data);
+	serialize(writer, m.cursor_position);
 }
 template<typename Reader> void deserialize(Reader& reader, document_changed_feed& m)
 {
 	deserialize(reader, m.file);
 	deserialize(reader, m.version);
 	deserialize(reader, m.data);
+	deserialize(reader, m.cursor_position);
 }
 
 }}}
