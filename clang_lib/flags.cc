@@ -1,7 +1,5 @@
 #include "flags.hh"
 
-#include "../backend_lib/log.hh"
-
 #include <stdio.h>
 #include <iostream>
 
@@ -25,13 +23,9 @@ static std::vector<fs::path> get_paths_for_compiler(const std::string& compiler)
 	// the following command works on both gcc and clang, and porduces compatible output
 	std::string command = compiler + " -xc++ -E -v /dev/null 2>&1 > /dev/null";
 
-	LOG("Trying to get built-in paths for compiler " << compiler << " using the following command: " << command);
-
-
 	FILE_ptr p(::popen(command.c_str(), "r"), FILE_pcloser{});
 	if (!p)
 	{
-		LOG(".. failed");
 		std::cerr << "failed to execute: " << command << std::endl;
 		std::terminate();
 	}
@@ -46,7 +40,6 @@ static std::vector<fs::path> get_paths_for_compiler(const std::string& compiler)
 	bool begin_marker_found = false;
 	while(::fgets(buffer, BUFSIZE, p.get()))
 	{
-		LOG("read: " << buffer);
 		if (begin_marker_found)
 		{
 			// check for end marker
@@ -65,8 +58,6 @@ static std::vector<fs::path> get_paths_for_compiler(const std::string& compiler)
 					s.assign(s.begin() + pos, s.end()-1);
 				}
 
-				LOG(" path found: '" << buffer << "', stripped=" << s);
-
 				fs::path p = fs::canonical(s);
 				paths.push_back(p);
 			}
@@ -77,7 +68,6 @@ static std::vector<fs::path> get_paths_for_compiler(const std::string& compiler)
 		}
 	}
 
-	LOG(" ... finished");
 	return paths;
 }
 

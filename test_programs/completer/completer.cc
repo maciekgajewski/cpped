@@ -2,6 +2,8 @@
 #include <stdexcept>
 
 #include "clang_lib/clang.hh"
+#include "clang_lib/flags.hh"
+
 #include "document_lib/document.hh"
 
 using namespace cpped;
@@ -19,10 +21,15 @@ int main(int argc, char** argv)
 
 	clang::translation_unit tu;
 
+	std::vector<std::string> args;
+	clang::get_common_flags(args);
+
 	std::vector<const char*> cmdline;
-	cmdline.reserve(argc-2);
+	cmdline.reserve(argc-2 + args.size());
 	for(int i = 2; i < argc; i++)
 		cmdline.push_back(argv[i]);
+	for(const std::string& a : args)
+		cmdline.push_back(a.c_str());
 
 	tu.parse(idx, filename, doc.get_raw_data().data(), doc.get_raw_data().size(), cmdline);
 
