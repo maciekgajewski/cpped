@@ -36,6 +36,7 @@ project::project(event_dispatcher& ed)
 	event_dispatcher_.register_message_handler<messages::open_file_request>(
 		[this](const messages::open_file_request& request)
 		{
+			LOG("Recevied file open request: " << request.file);
 			try
 			{
 				open_file& file = this->open(request.file);
@@ -45,10 +46,12 @@ project::project(event_dispatcher& ed)
 				reply.data.assign(file.get_data().begin(), file.get_data().end());
 				auto state = file.parse(get_unsaved_data());
 				reply.tokens = std::move(state);
+				LOG("Sending back file data");
 				event_dispatcher_.send_message(reply);
 			}
 			catch(const std::exception& e)
 			{
+				LOG("sending back an error: " << e.what());
 				event_dispatcher_.send_message(messages::open_file_reply{request.file, e.what()});
 			}
 		});
@@ -184,8 +187,9 @@ project::file_type project::get_type_by_extensions(const boost::filesystem::path
 std::vector<std::string> project::get_default_flags(const boost::filesystem::path& path)
 {
 	std::vector<std::string> flags;
-	flags.reserve(3);
-	flags.push_back("-fdiagnostics-color=never");
+
+	clang::get_common_flags("g++", flags);
+
 	flags.push_back("-x");
 
 	file_type type = get_type_by_extensions(path);

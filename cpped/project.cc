@@ -45,6 +45,11 @@ document::document& project::open_file(const fs::path& file)
 		backend::messages::open_file_reply reply;
 		endpoint_.send_sync_request(request, reply);
 
+		if (!reply.error.empty())
+		{
+			throw std::runtime_error("Failed to open file: " + reply.error);
+		}
+
 		auto doc_ptr = std::make_unique<document::document>();
 		doc_ptr->load_from_raw_data(reply.data, absolute, reply.tokens.tokens);
 
