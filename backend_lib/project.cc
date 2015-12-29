@@ -55,6 +55,7 @@ project::project(event_dispatcher& ed)
 				event_dispatcher_.send_message(messages::open_file_reply{request.file, e.what()});
 			}
 		});
+
 	event_dispatcher_.register_message_handler<messages::document_changed_feed>(
 		[this](const messages::document_changed_feed& feed)
 		{
@@ -83,6 +84,21 @@ project::project(event_dispatcher& ed)
 				// inconsistent data
 				std::terminate();
 			}
+		});
+
+	event_dispatcher_.register_message_handler<messages::complete_at_request>(
+		[this](const messages::complete_at_request& request)
+		{
+			messages::complete_at_reply reply;
+
+			auto it = open_files_.find(request.file);
+			if (it != open_files_.end())
+			{
+				open_file& file = *it->second;
+				reply.result = file.complete_at(request.cursor_position);
+			}
+
+			event_dispatcher_.send_message(reply);
 		});
 }
 

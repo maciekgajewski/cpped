@@ -14,6 +14,7 @@ add_library(backend_lib
 	log.cc log.hh
 	compilation_unit.hh compilation_unit.cc
 	open_file.cc open_file.hh
+	completion.cc completion.hh
 )
 
 target_include_directories(backend_lib INTERFACE ..)

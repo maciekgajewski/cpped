@@ -40,6 +40,20 @@ token_data open_file::parse(const std::vector<CXUnsavedFile>& unsaved_data)
 	return status;
 }
 
+std::vector<messages::completion_record> open_file::complete_at(
+	const std::vector<CXUnsavedFile>& unsaved_data,
+	const document::document_position& pos)
+{
+	std::vector<messages::completion_record> result;
+
+	if (unit_)
+	{
+		result = unit_->complete_at(unsaved_data, path_, pos);
+	}
+
+	return result;
+}
+
 void open_file::load_from_disk()
 {
 	assert(data_.empty());

@@ -37,6 +37,10 @@ public:
 		const document::document& doc,
 		const boost::optional<document::document_position>& cursor_pos);
 
+	std::vector<backend::messages::completion_record> get_completion(
+		const document::document& doc,
+		const document::document_position& cursor_pos);
+
 private:
 
 	struct open_file_data

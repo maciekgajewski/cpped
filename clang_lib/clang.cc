@@ -60,19 +60,24 @@ void translation_unit::reparse(const std::vector<CXUnsavedFile>& unsaved_data)
 
 code_completion_results translation_unit::code_complete_at(const char* filename, unsigned line, unsigned column, const char* unsaved_data, std::size_t unsaved_data_size)
 {
-	CXUnsavedFile* uf_ptr = nullptr;
+	std::vector<CXUnsavedFile> unsaved_data_vec;
 	CXUnsavedFile unsaved_file;
 	if (unsaved_data)
 	{
-		unsaved_file.Contents = unsaved_data;
-		unsaved_file.Length = unsaved_data_size;
-		unsaved_file.Filename = filename;
-		uf_ptr = &unsaved_file;
+		unsaved_data_vec.push_back(
+			CXUnsavedFile{filename, unsaved_data, unsaved_data_size});
 	}
 
+	return code_complete_at(filename, line, column, unsaved_data_vec);
+}
 
-	CXCodeCompleteResults* results = clang_codeCompleteAt(clang_tu, filename, line, column, uf_ptr, uf_ptr ? 1 : 0,
-			/*clang_defaultCodeCompleteOptions()|CXCodeComplete_IncludeBriefComments*/CXCodeComplete_IncludeMacros|CXCodeComplete_IncludeCodePatterns);
+code_completion_results translation_unit::code_complete_at(const char* filename, unsigned line, unsigned column, const std::vector<CXUnsavedFile>& unsaved_data)
+{
+	unsigned options =
+		clang_defaultCodeCompleteOptions()|CXCodeComplete_IncludeMacros|CXCodeComplete_IncludeCodePatterns;
+
+	CXCodeCompleteResults* results = clang_codeCompleteAt(
+		clang_tu, filename, line, column, unsaved_data.data(), unsaved_data.size(), options);
 	if (!results)
 		throw std::runtime_error("Code completion failed");
 

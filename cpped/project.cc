@@ -40,6 +40,8 @@ document::document& project::open_file(const fs::path& file)
 	auto it = open_files_.find(absolute);
 	if (it == open_files_.end())
 	{
+		status_signal("Opening file...");
+
 		// request file from backend
 		backend::messages::open_file_request request{absolute};
 		backend::messages::open_file_reply reply;
@@ -102,6 +104,23 @@ void project::request_parsing(
 	{
 		outstanding_parsing_requests_[doc.get_file_name()] = cursor_pos;
 	}
+}
+
+std::vector<backend::messages::completion_record> project::get_completion(const document::document& doc, const document::document_position& cursor_pos)
+{
+	status_signal("Getting completion...");
+
+	backend::messages::complete_at_request request;
+	request.file = doc.get_file_name();
+	request.cursor_position = cursor_pos;
+
+	backend::messages::complete_at_reply reply;
+
+	endpoint_.send_sync_request(request, reply);
+
+	status_signal("");
+
+	return reply.results;
 }
 
 void project::emit_parsing_status(const backend::token_data& data) const

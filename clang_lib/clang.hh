@@ -459,6 +459,7 @@ public:
 	}
 
 	code_completion_results code_complete_at(const char* filename, unsigned line, unsigned column, const char* unsaved_data, std::size_t unsaved_data_size);
+	code_completion_results code_complete_at(const char* filename, unsigned line, unsigned column, const std::vector<CXUnsavedFile>& unsaved_data);
 
 	bool is_null() const { return clang_tu == nullptr; }
 	void dispose();

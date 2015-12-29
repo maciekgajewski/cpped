@@ -1,6 +1,7 @@
 #include "editor.hh"
 
 #include "editor_window.hh"
+#include "completer.hh"
 
 #include "document_lib/document.hh"
 
@@ -19,7 +20,7 @@ editor::editor(editor_window& win)
 	doc_ = unsaved_document_.get();
 }
 
-bool editor::on_special_key(int key_code, const char* /*key_name*/)
+bool editor::on_special_key(int key_code, const char* key_name)
 {
 
 	// hard-coded actions

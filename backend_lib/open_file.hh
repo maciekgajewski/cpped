@@ -1,6 +1,7 @@
 #pragma once
 
 #include "compilation_unit.hh"
+#include "messages.hh"
 
 #include "document_lib/document_data.hh"
 
@@ -46,6 +47,9 @@ public:
 	}
 
 	token_data parse(const std::vector<CXUnsavedFile>& unsaved_data);
+	std::vector<messages::completion_record> complete_at(
+		const std::vector<CXUnsavedFile>& unsaved_data,
+		const document::document_position& pos);
 
 	bool has_unsaved_data() const { return has_unsaved_data_; }
 

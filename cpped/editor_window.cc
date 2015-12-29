@@ -29,6 +29,7 @@ unsigned editor_window::on_sequence(const std::string& s)
 bool editor_window::on_special_key(int key_code, const char* key_name)
 {
 	static const std::string navigation = "^K";
+	static const std::string complete = "^@";
 
 	if (key_name == navigation)
 	{
@@ -36,6 +37,11 @@ bool editor_window::on_special_key(int key_code, const char* key_name)
 		return true;
 	}
 
+	if (key_name == complete)
+	{
+		completer_.activate(editor_.get_document(), editor_.get_cursor_position());
+		return true;
+	}
 
 
 	return editor_.on_special_key(key_code, key_name);

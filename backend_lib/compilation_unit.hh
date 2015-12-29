@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cpp_tokens.hh"
+#include "messages.hh"
 
 #include "clang_lib/clang.hh"
 
@@ -41,6 +42,10 @@ public:
 	std::vector<document::token> get_tokens_for_file(const boost::filesystem::path& path, const std::vector<char>& data) const;
 	token_data get_tokens_with_diagnostics(const boost::filesystem::path& path, const std::vector<char>& data) const;
 	boost::filesystem::path get_path() const { return path_; }
+	std::vector<messages::completion_record> complete_at(
+		const std::vector<CXUnsavedFile>& unsaved_data,
+		const boost::filesystem::path& path,
+		const document::document_position& pos);
 
 	bool includes(const boost::filesystem::path& file) const
 	{

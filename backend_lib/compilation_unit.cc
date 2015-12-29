@@ -1,6 +1,7 @@
 #include "compilation_unit.hh"
 
 #include "log.hh"
+#include "completion.hh"
 
 namespace cpped { namespace backend {
 
@@ -65,7 +66,20 @@ std::vector<document::token> compilation_unit::get_tokens_for_file(const boost::
 token_data compilation_unit::get_tokens_with_diagnostics(const boost::filesystem::path& path, const std::vector<char>& data) const
 {
 	return get_cpp_tokens_with_diagnostics(
-		translation_unit_, path, data);
+				translation_unit_, path, data);
+}
+
+std::vector<messages::completion_record> compilation_unit::complete_at(
+	const std::vector<CXUnsavedFile>& unsaved_data,
+	const boost::filesystem::path& path,
+	const document::document_position& pos)
+{
+	assert(!translation_unit_.is_null());
+
+	clang::code_completion_results results = translation_unit_.code_complete_at(
+		path.c_str(), pos.line+1, pos.column+1, unsaved_data);
+
+	return process_completion_results(results);
 }
 
 void compilation_unit::mark_dirty()

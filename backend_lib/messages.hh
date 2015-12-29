@@ -13,6 +13,23 @@ namespace cpped { namespace backend { namespace messages {
 
 namespace fs = boost::filesystem;
 
+//single completion entry. Used in few messages
+struct completion_record
+{
+	std::string text;
+	std::string hint;
+};
+template<typename Writer> void serialize(Writer&, const completion_record& m)
+{
+	serialize(writer, m.text);
+	serialize(writer, m.hint);
+}
+template<typename Reader> void deserialize(Reader&, completion_record& m)
+{
+	deserialize(reader, m.text);
+	deserialize(reader, m.hint);
+}
+
 // F->B reuest to stop
 struct stop
 {
@@ -138,6 +155,39 @@ template<typename Reader> void deserialize(Reader& reader, document_changed_feed
 	deserialize(reader, m.version);
 	deserialize(reader, m.data);
 	deserialize(reader, m.cursor_position);
+}
+
+// F->B
+struct complete_at_request
+{
+	static const std::uint64_t ID = 7;
+	fs::path file;
+	document::document_position cursor_position;
+};
+template<typename Writer> void serialize(Writer& writer, const complete_at_request& m)
+{
+	serialize(writer, m.file);
+	serialize(writer, m.cursor_position);
+}
+template<typename Reader> void deserialize(Reader& reader, complete_at_request& m)
+{
+	deserialize(reader, m.file);
+	deserialize(reader, m.cursor_position);
+}
+
+// B->F
+struct complete_at_reply
+{
+	static const std::uint64_t ID = 8;
+	std::vector<completion_record> results;
+};
+template<typename Writer> void serialize(Writer& writer, const completion_record& m)
+{
+	serialize(writer, m.results);
+}
+template<typename Reader> void deserialize(Reader& reader, completion_record& m)
+{
+	deserialize(reader, m.results);
 }
 
 }}}
