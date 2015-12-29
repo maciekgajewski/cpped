@@ -188,7 +188,7 @@ std::vector<std::string> project::get_default_flags(const boost::filesystem::pat
 {
 	std::vector<std::string> flags;
 
-	clang::get_common_flags("g++", flags);
+	clang::get_common_flags(flags);
 
 	flags.push_back("-x");
 

@@ -2,9 +2,8 @@
 
 #include "../backend_lib/log.hh"
 
-#include <map>
-
 #include <stdio.h>
+#include <iostream>
 
 // What I'm doing here is (mostly) based on what YCMD is doing
 
@@ -33,7 +32,8 @@ static std::vector<fs::path> get_paths_for_compiler(const std::string& compiler)
 	if (!p)
 	{
 		LOG(".. failed");
-		return paths;
+		std::cerr << "failed to execute: " << command << std::endl;
+		std::terminate();
 	}
 
 	// reading operation
@@ -81,40 +81,24 @@ static std::vector<fs::path> get_paths_for_compiler(const std::string& compiler)
 	return paths;
 }
 
-void get_common_flags(const std::string& compiler, std::vector<std::string>& out)
+void get_common_flags(std::vector<std::string>& out)
 {
 	// inicolude paths per compiler
-	static std::map<std::string, std::vector<fs::path>> include_paths_cache;
+	static std::vector<fs::path> include_paths_cache;
 
-	auto it = include_paths_cache.find(compiler);
-	if (it == include_paths_cache.end())
+	if (include_paths_cache.empty())
 	{
-		std::vector<fs::path> paths = get_paths_for_compiler(compiler);
-		if (!paths.empty())
-		{
-			// store in cache
-			auto p = include_paths_cache.insert({compiler, paths});
-			it = p.first;
-		}
-		else
-		{
-			// try using whatever we've got
-			it = include_paths_cache.begin();
-		}
+		include_paths_cache = get_paths_for_compiler("clang++-3.7");
 	}
 
 	// common required flags
 	out.push_back("-fdiagnostics-color=never");
 
 	// system includes
-	if (it != include_paths_cache.end())
+	for(const fs::path& path : include_paths_cache)
 	{
-		LOG("Requested common flags for compiler " << compiler << ", will use flags for " << it->first);
-		for(const fs::path& path : it->second)
-		{
-			out.push_back("-isystem");
-			out.push_back(path.string());
-		}
+		out.push_back("-isystem");
+		out.push_back(path.string());
 	}
 }
 
@@ -154,15 +138,11 @@ std::vector<std::string> get_sanitized_flags(const compile_command& command, con
 	if (first_flag_it != in.begin())
 	{
 		auto compiler = *(first_flag_it - 1);
-		get_common_flags(compiler, out);
 		compiler_to_language_flag(compiler, out);
 	}
-	else
-	{
-		// assume another compiler
-		LOG("Unable to identify compiler, trying g++");
-		get_common_flags("g++", out);
-	}
+
+	// common flags
+	get_common_flags(out);
 
 	// sanitize
 	static const char* STATE_FLGAS_TO_SKIP[] = {
