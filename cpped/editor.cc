@@ -1,7 +1,6 @@
 #include "editor.hh"
 
 #include "editor_window.hh"
-#include "completer.hh"
 
 #include "document_lib/document.hh"
 

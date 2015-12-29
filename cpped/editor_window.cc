@@ -15,6 +15,7 @@ namespace fs = boost::filesystem;
 editor_window::editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm, event_window* parent)
 	: event_window(ed, parent), project_(pr), styles_(sm), editor_(*this)
 	, navigator_(pr, ed, this)
+	, completer_(pr, ed, this)
 {
 	navigator_.file_selected_signal.connect(
 		[this](const fs::path& p) { open_file(p); set_active(); });
@@ -39,8 +40,15 @@ bool editor_window::on_special_key(int key_code, const char* key_name)
 
 	if (key_name == complete)
 	{
-		completer_.activate(editor_.get_document(), editor_.get_cursor_position());
-		return true;
+		const document::document* doc = editor_.get_document();
+		if (doc)
+		{
+			document::document_position cursor_pos = editor_.get_cursor_position();
+			completer_.activate(
+				*doc, cursor_pos, nct::position{top_margin_ + cursor_pos.l
+					);
+			return true;
+		}
 	}
 
 

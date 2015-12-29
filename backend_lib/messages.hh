@@ -19,12 +19,12 @@ struct completion_record
 	std::string text;
 	std::string hint;
 };
-template<typename Writer> void serialize(Writer&, const completion_record& m)
+template<typename Writer> void serialize(Writer& writer, const completion_record& m)
 {
 	serialize(writer, m.text);
 	serialize(writer, m.hint);
 }
-template<typename Reader> void deserialize(Reader&, completion_record& m)
+template<typename Reader> void deserialize(Reader& reader, completion_record& m)
 {
 	deserialize(reader, m.text);
 	deserialize(reader, m.hint);
@@ -181,11 +181,11 @@ struct complete_at_reply
 	static const std::uint64_t ID = 8;
 	std::vector<completion_record> results;
 };
-template<typename Writer> void serialize(Writer& writer, const completion_record& m)
+template<typename Writer> void serialize(Writer& writer, const complete_at_reply& m)
 {
 	serialize(writer, m.results);
 }
-template<typename Reader> void deserialize(Reader& reader, completion_record& m)
+template<typename Reader> void deserialize(Reader& reader, complete_at_reply& m)
 {
 	deserialize(reader, m.results);
 }

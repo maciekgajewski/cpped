@@ -3,14 +3,17 @@
 namespace cpped {
 
 completer::completer(project& pr, nct::event_dispatcher& ed, nct::event_window* parent)
-	: nct::event_window(ed, parent), project_(pr)
+	: nct::event_window(ed, parent), project_(pr) , list_(ed, this)
 {
 }
 
-void completer::activate(const document::document& doc, const document::document_position& cursor_pos)
+void completer::activate(
+	const document::document& doc,
+	const document::document_position& cursor_pos,
+	const nct::position& screen_pos)
 {
 	// start with current cursor position, and move back until it's no longer a valid identifier
-	document::document_line& line = doc_->get_line(cursor_pos.line);
+	const document::document_line& line = doc.get_line(cursor_pos.line);
 
 	unsigned token_end = cursor_pos.column;
 	unsigned token_start = cursor_pos.column;
@@ -21,7 +24,25 @@ void completer::activate(const document::document& doc, const document::document
 
 	auto result = project_.get_completion(doc, {cursor_pos.line, token_start});
 
-	// TODO filter, show
+	if (result.empty())
+	{
+		return;
+	}
+
+	filter_.assign(line.get_data() + token_start, line.get_data() + token_end);
+	set_position(screen_pos);
+
+	std::vector<nct::list_widget::list_item> items;
+	items.reserve(result.size());
+
+	for(backend::messages::completion_record& record : result)
+	{
+		items.push_back({std::move(record.text), std::move(record.hint)});
+	}
+	list_.set_items(items);
+	list_.set_size({10, list_.get_content_size().w});
+	list_.show();
+	list_.set_active();
 }
 
 static bool is_valid_first(char c)

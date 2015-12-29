@@ -1,7 +1,7 @@
 #pragma once
 
 #include "editor.hh"
-
+#include "completer.hh"
 #include "navigator_widget.hh"
 
 #include "nct/event_window.hh"
@@ -70,6 +70,7 @@ private:
 	style_manager& styles_;
 	editor editor_;
 	navigator_widget navigator_;
+	completer completer_;
 };
 
 }

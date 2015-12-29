@@ -61,7 +61,6 @@ void translation_unit::reparse(const std::vector<CXUnsavedFile>& unsaved_data)
 code_completion_results translation_unit::code_complete_at(const char* filename, unsigned line, unsigned column, const char* unsaved_data, std::size_t unsaved_data_size)
 {
 	std::vector<CXUnsavedFile> unsaved_data_vec;
-	CXUnsavedFile unsaved_file;
 	if (unsaved_data)
 	{
 		unsaved_data_vec.push_back(
@@ -77,7 +76,7 @@ code_completion_results translation_unit::code_complete_at(const char* filename,
 		clang_defaultCodeCompleteOptions()|CXCodeComplete_IncludeMacros|CXCodeComplete_IncludeCodePatterns;
 
 	CXCodeCompleteResults* results = clang_codeCompleteAt(
-		clang_tu, filename, line, column, unsaved_data.data(), unsaved_data.size(), options);
+		clang_tu, filename, line, column,  const_cast<CXUnsavedFile*>(unsaved_data.data()), unsaved_data.size(), options);
 	if (!results)
 		throw std::runtime_error("Code completion failed");
 

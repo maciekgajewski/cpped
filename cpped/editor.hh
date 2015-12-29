@@ -24,6 +24,9 @@ public:
 
 	void set_document(document::document& doc);
 
+	const document::document* get_document() const { return doc_; }
+	document::document_position get_cursor_position() const { return cursor_pos_; }
+
 private:
 
 	// action handlers

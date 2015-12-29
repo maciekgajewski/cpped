@@ -95,7 +95,7 @@ project::project(event_dispatcher& ed)
 			if (it != open_files_.end())
 			{
 				open_file& file = *it->second;
-				reply.result = file.complete_at(request.cursor_position);
+				reply.results = file.complete_at(get_unsaved_data(), request.cursor_position);
 			}
 
 			event_dispatcher_.send_message(reply);

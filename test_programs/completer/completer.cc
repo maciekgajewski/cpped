@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 //		}
 	}
 
-	std::sort(results.begin(), results.end(), [](const result_record& a, const result_record& b) { return a.prio < b.prio; });
+	//std::sort(results.begin(), results.end(), [](const result_record& a, const result_record& b) { return a.prio < b.prio; });
 
 ///	unsigned n = std::min<unsigned>(30, results.size());
 	for(unsigned i = 0; i < results.size(); i++)
