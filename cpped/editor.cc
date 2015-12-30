@@ -41,6 +41,10 @@ bool editor::on_special_key(int key_code, const char* key_name)
 			backspace(); return true;
 		case KEY_DC:
 			del(); return true;
+		case KEY_HOME:
+			home(); return true;
+		case KEY_END:
+			end(); return true;
 	}
 
 	return false;
@@ -267,26 +271,6 @@ void editor::pg_down()
 	request_full_render();
 }
 
-void editor::scroll_down()
-{
-	// TODO
-}
-
-void editor::scroll_up()
-{
-	// TODO
-}
-
-void editor::scroll_left()
-{
-	// TODO
-}
-
-void editor::scroll_right()
-{
-	// TODO
-}
-
 void editor::backspace()
 {
 	// TODO any smart-unindenting goes here
@@ -307,6 +291,23 @@ void editor::del()
 		request_parsing();
 		request_full_render();
 	}
+}
+
+void editor::home()
+{
+	cursor_pos_.column = 0;
+	desired_cursor_column_ = 0;
+	ensure_cursor_visible();
+	request_full_render();
+}
+
+void editor::end()
+{
+	const document::document_line& line = doc_->get_line(cursor_pos_.line);
+	cursor_pos_.column = line.get_length();
+	desired_cursor_column_ = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
+	ensure_cursor_visible();
+	request_full_render();
 }
 
 void editor::on_document_tokens_updated()

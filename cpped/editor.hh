@@ -43,13 +43,11 @@ private:
 	void pg_up();
 	void pg_down();
 
-	void scroll_down();
-	void scroll_up();
-	void scroll_left();
-	void scroll_right();
-
 	void backspace();
 	void del();
+
+	void home();
+	void end();
 
 	void on_document_tokens_updated();
 
