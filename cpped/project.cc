@@ -106,21 +106,29 @@ void project::request_parsing(
 	}
 }
 
-std::vector<backend::messages::completion_record> project::get_completion(const document::document& doc, const document::document_position& cursor_pos)
+std::vector<backend::messages::completion_record> project::get_completion(const boost::filesystem::path& file, const document::document_position& cursor_pos)
 {
 	status_signal("Getting completion...");
 
-	backend::messages::complete_at_request request;
-	request.file = doc.get_file_name();
-	request.cursor_position = cursor_pos;
+	auto it = open_files_.find(file);
+	if (it->second.last_version_parsed < it->second.document->get_current_version())
+	{
+		// TODO send full data
+		assert(false);
+	}
+	else
+	{
+		backend::messages::complete_at_request request;
+		request.file = file;
+		request.cursor_position = cursor_pos;
 
-	backend::messages::complete_at_reply reply;
+		backend::messages::complete_at_reply reply;
 
-	endpoint_.send_sync_request(request, reply);
+		endpoint_.send_sync_request(request, reply);
 
-	status_signal("");
-
-	return reply.results;
+		status_signal("");
+		return reply.results;
+	}
 }
 
 void project::emit_parsing_status(const backend::token_data& data) const

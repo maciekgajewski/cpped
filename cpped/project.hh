@@ -38,7 +38,7 @@ public:
 		const boost::optional<document::document_position>& cursor_pos);
 
 	std::vector<backend::messages::completion_record> get_completion(
-		const document::document& doc,
+		const boost::filesystem::path& file,
 		const document::document_position& cursor_pos);
 
 private:
