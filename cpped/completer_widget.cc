@@ -38,7 +38,7 @@ void completer_widget::activate(
 		token_start--;
 	}
 
-	auto result = project_.get_completion(doc, {cursor_pos.line, token_start});
+	auto result = project_.get_completion(doc.get_file_name(), {cursor_pos.line, token_start});
 
 	if (result.empty())
 	{

@@ -70,7 +70,10 @@ void editor::set_document(document::document& doc)
 
 void editor::replace(const document::document_position& pos, unsigned len, const std::string& replacement)
 {
-	doc_->remove_after(pos, len);
+	if (len > 0)
+	{
+		doc_->remove_after(pos, len);
+	}
 	cursor_pos_ = doc_->insert(pos, replacement);
 	request_parsing();
 }

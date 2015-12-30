@@ -82,13 +82,15 @@ void project::send_parse_request(
 	const document::document& doc,
 	const boost::optional<document::document_position>& cursor_pos)
 {
-		backend::messages::document_changed_feed feed;
-		feed.file = doc.get_file_name();
-		feed.version = doc.get_current_version();
-		feed.data.assign(doc.get_raw_data().begin(), doc.get_raw_data().end());
-		feed.cursor_position = cursor_pos;
+	backend::messages::document_changed_feed feed;
+	feed.file = doc.get_file_name();
+	feed.version = doc.get_current_version();
+	feed.data.assign(doc.get_raw_data().begin(), doc.get_raw_data().end());
+	feed.cursor_position = cursor_pos;
 
-		endpoint_.send_message(feed);
+	endpoint_.send_message(feed);
+
+	open_files_[doc.get_file_name()].last_version_send = doc.get_current_version();
 }
 
 void project::request_parsing(
@@ -109,12 +111,21 @@ void project::request_parsing(
 std::vector<backend::messages::completion_record> project::get_completion(const boost::filesystem::path& file, const document::document_position& cursor_pos)
 {
 	status_signal("Getting completion...");
+	backend::messages::complete_at_reply reply;
 
 	auto it = open_files_.find(file);
-	if (it->second.last_version_parsed < it->second.document->get_current_version())
+	if (it->second.last_version_send < it->second.document->get_current_version())
 	{
-		// TODO send full data
-		assert(false);
+		document::document& doc = *it->second.document;
+		backend::messages::document_changed_feed request;
+		request.file = file;
+		request.version = doc.get_current_version();
+		request.data.assign(doc.get_raw_data().begin(), doc.get_raw_data().end());
+		request.cursor_position = cursor_pos;
+
+		endpoint_.send_sync_request(request, reply);
+		it->second.last_version_send = doc.get_current_version();
+		parsing_in_progress_ = true;
 	}
 	else
 	{
@@ -122,13 +133,13 @@ std::vector<backend::messages::completion_record> project::get_completion(const 
 		request.file = file;
 		request.cursor_position = cursor_pos;
 
-		backend::messages::complete_at_reply reply;
 
 		endpoint_.send_sync_request(request, reply);
 
-		status_signal("");
-		return reply.results;
 	}
+
+	status_signal("");
+	return reply.results;
 }
 
 void project::emit_parsing_status(const backend::token_data& data) const

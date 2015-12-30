@@ -78,7 +78,7 @@ std::vector<messages::completion_record> compilation_unit::complete_at(
 
 	clang::code_completion_results results = translation_unit_.code_complete_at(
 		path.c_str(), pos.line+1, pos.column+1, unsaved_data);
-
+	needs_reparsing_ = false;
 	return process_completion_results(results);
 }
 

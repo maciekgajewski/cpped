@@ -47,6 +47,7 @@ private:
 	{
 		std::unique_ptr<document::document> document;
 		std::uint64_t last_version_parsed = 0;
+		std::uint64_t last_version_send = 0;
 	};
 
 	void on_file_tokens(const backend::messages::file_tokens_feed& token_feed);

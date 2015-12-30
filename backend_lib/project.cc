@@ -66,6 +66,14 @@ project::project(event_dispatcher& ed)
 				open_file& file = *it->second;
 				file.set_data(feed.data, feed.version);
 				touch_units(feed.file);
+				// get completion (if requested)
+				if (feed.cursor_position)
+				{
+					LOG("Data feed requests completion, obtaining");
+					messages::complete_at_reply reply;
+					reply.results = file.complete_at(get_unsaved_data(), *feed.cursor_position);
+					event_dispatcher_.send_message(reply);
+				}
 				// reparse
 				messages::file_tokens_feed tokens_feed;
 				tokens_feed.file = feed.file;
