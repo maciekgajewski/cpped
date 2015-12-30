@@ -21,6 +21,8 @@ std::vector<messages::completion_record> process_completion_results(const clang:
 			{
 				text = s.c_str();
 			}
+			if (i > 0)
+				hint += ' ';
 			hint += s.c_str();
 		}
 

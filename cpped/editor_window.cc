@@ -19,6 +19,16 @@ editor_window::editor_window(project& pr, nct::event_dispatcher& ed, style_manag
 {
 	navigator_.file_selected_signal.connect(
 		[this](const fs::path& p) { open_file(p); set_active(); });
+
+	completer_.completion_cancelled_signal.connect(
+		[this]() { editor_.enable_parsing(); set_active(); });
+	completer_.completion_signal.connect(
+		[this](const document::document_position& pos, unsigned len, const std::string& text)
+		{
+			editor_.enable_parsing();
+			editor_.replace(pos, len, text);
+			set_active();
+		});
 }
 
 unsigned editor_window::on_sequence(const std::string& s)
@@ -43,6 +53,7 @@ bool editor_window::on_special_key(int key_code, const char* key_name)
 		const document::document* doc = editor_.get_document();
 		if (doc)
 		{
+			editor_.disable_parsing();
 			document::document_position cursor_pos = editor_.get_cursor_position();
 			completer_.activate(*doc, cursor_pos, cursor_pos_);
 			return true;

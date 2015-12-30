@@ -27,6 +27,11 @@ public:
 	const document::document* get_document() const { return doc_; }
 	document::document_position get_cursor_position() const { return cursor_pos_; }
 
+	void disable_parsing() { parsing_disabled_ = true; }
+	void enable_parsing() { parsing_disabled_ = false; }
+
+	void replace(const document::document_position& pos, unsigned len, const std::string& replacement);
+
 private:
 
 	// action handlers
@@ -59,6 +64,7 @@ private:
 
 	void request_full_render();
 	void request_cursor_update();
+	void request_parsing();
 
 	// converts document x (character in line) into column, taking all tabs into account
 	unsigned document_x_to_column(unsigned docy, unsigned docx) const;
@@ -79,6 +85,7 @@ private:
 	document::document* doc_;
 	editor_window& window_;
 	std::unique_ptr<document::document> unsaved_document_;
+	bool parsing_disabled_ = false;
 };
 
 }

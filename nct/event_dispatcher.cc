@@ -176,7 +176,7 @@ void event_dispatcher::send_sequence(std::string& seq)
 			if (consumed > remaining_chars)
 				throw std::logic_error("on_sequence returned more than sequnece length");
 
-			seq.erase(0, seq.length() - consumed);
+			seq.erase(0, consumed);
 			remaining_chars = seq.length();
 			win = win->get_parent();
 		}

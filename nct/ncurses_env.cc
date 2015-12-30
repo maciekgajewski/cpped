@@ -20,6 +20,7 @@ ncurses_env::ncurses_env()
 	::noecho();
 	::keypad(::stdscr, TRUE);
 	::start_color();
+	::set_escdelay(25);
 	::mousemask(ALL_MOUSE_EVENTS|REPORT_MOUSE_POSITION, nullptr);
 }
 

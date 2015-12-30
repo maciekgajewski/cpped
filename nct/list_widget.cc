@@ -49,12 +49,17 @@ list_widget::list_item* list_widget::get_current_item()
 	}
 }
 
+unsigned list_widget::get_filtered_count() const
+{
+	return items_displayed_;
+}
+
 void list_widget::select_next()
 {
 	if (current_item_ < items_displayed_ - 1)
 	{
 		current_item_ ++;
-		while (current_item_ > get_workspace_height() + first_line_)
+		while (current_item_ >= get_workspace_height() + first_line_)
 		{
 			first_line_++;
 		}

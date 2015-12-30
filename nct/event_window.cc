@@ -56,8 +56,11 @@ void event_window::show()
 {
 	if (!window_)
 	{
-		position global_pos = to_global({0 ,0});
-		window_.emplace(size_.h, size_.w, global_pos.y, global_pos.x);
+		if (size_.h > 0 && size_.w > 0)
+		{
+			position global_pos = to_global({0 ,0});
+			window_.emplace(size_.h, size_.w, global_pos.y, global_pos.x);
+		}
 		on_shown();
 		for(event_window* child : children_)
 			child->show();
@@ -117,12 +120,15 @@ void event_window::do_refresh()
 		set_size(nct::ncurses_env::get_current()->get_stdscr().get_size());
 	}
 
-	if (window_)
+	if (window_ || size_ == nct::size{0, 0})
 	{
 //		if (refresh_requested_)
 //		{
-			window_->redraw();
-			window_->no_out_refresh();
+			if (window_)
+			{
+				window_->redraw();
+				window_->no_out_refresh();
+			}
 
 			for(event_window* child : children_)
 				child->do_refresh();

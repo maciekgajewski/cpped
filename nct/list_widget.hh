@@ -32,6 +32,8 @@ public:
 
 	list_item* get_current_item(); // return null if no currently selected item
 
+	unsigned get_filtered_count() const;
+
 	// actions
 
 	void select_next();
