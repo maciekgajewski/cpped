@@ -3,8 +3,9 @@
 namespace cpped {
 
 completer::completer(project& pr, nct::event_dispatcher& ed, nct::event_window* parent)
-	: nct::event_window(ed, parent), project_(pr) , list_(ed, this)
+	: nct::event_window(ed, parent), project_(pr)
 {
+	move({0, 0}, {1, 1}); // TODO ugly hack, fix
 }
 
 void completer::activate(
@@ -39,10 +40,12 @@ void completer::activate(
 	{
 		items.push_back({std::move(record.text), std::move(record.hint)});
 	}
-	list_.set_items(items);
-	list_.set_size({10, list_.get_content_size().w});
-	list_.show();
-	list_.set_active();
+	list_.emplace(get_event_dispatcher(), this);
+	list_->set_items(items);
+	list_->set_size({10, list_->get_content_size().w});
+	list_->set_position(screen_pos);
+	list_->show();
+	list_->set_active();
 }
 
 static bool is_valid_first(char c)

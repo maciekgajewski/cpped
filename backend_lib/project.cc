@@ -222,6 +222,7 @@ std::vector<std::string> project::get_default_flags(const boost::filesystem::pat
 			flags.push_back("c++-header");
 			break;
 	};
+	flags.push_back("-std=c++14");
 
 	return flags;
 }

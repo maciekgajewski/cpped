@@ -71,6 +71,7 @@ private:
 	editor editor_;
 	navigator_widget navigator_;
 	completer completer_;
+	nct::position cursor_pos_;
 };
 
 }

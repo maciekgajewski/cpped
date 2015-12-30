@@ -44,9 +44,7 @@ bool editor_window::on_special_key(int key_code, const char* key_name)
 		if (doc)
 		{
 			document::document_position cursor_pos = editor_.get_cursor_position();
-			completer_.activate(
-				*doc, cursor_pos, nct::position{top_margin_ + cursor_pos.l
-					);
+			completer_.activate(*doc, cursor_pos, cursor_pos_);
 			return true;
 		}
 	}
@@ -129,7 +127,8 @@ void editor_window::refresh_cursor(int wy, int wx)
 	{
 		int x = wx + left_margin_width_;
 		int y = wy + top_margin_;
-		show_cursor({y,x});
+		cursor_pos_ = {y, x};
+		show_cursor(cursor_pos_);
 	}
 	else
 	{

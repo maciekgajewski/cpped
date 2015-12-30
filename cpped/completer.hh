@@ -27,7 +27,7 @@ private:
 
 	project& project_;
 	std::string filter_;
-	nct::list_widget list_;
+	boost::optional<nct::list_widget> list_;
 };
 
 }
