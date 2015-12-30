@@ -237,7 +237,7 @@ void editor::cursor_right()
 		if(workspace_x >= window_.get_workspace_width())
 		{
 			// scroll right
-			first_column_ += (window_.get_workspace_width() - workspace_x);
+			first_column_ += (workspace_x - window_.get_workspace_width());
 			request_full_render();
 		}
 		else

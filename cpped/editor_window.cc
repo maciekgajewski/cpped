@@ -81,7 +81,11 @@ void editor_window::on_resized()
 	editor_.update();
 }
 
-void editor_window::render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width)
+void editor_window::render(
+		document::document& doc,
+		unsigned first_column,
+		unsigned first_line,
+		unsigned tab_width)
 {
 	if (!is_visible()) return;
 	nct::ncurses_window& window = get_ncurses_window();
@@ -118,12 +122,15 @@ void editor_window::render(document::document& doc, unsigned first_column, unsig
 		unsigned column = 0;
 		line.for_each_token([&](const document::line_token& token)
 		{
-			unsigned begin = std::max(token.begin, first_column);
-			unsigned end = std::min(get_workspace_width(), token.end-first_column);
+			if (token.end > first_column)
+			{
+				unsigned begin = std::max(token.begin, first_column);
+				unsigned end = std::min(get_workspace_width(), token.end-first_column);
 
-			int attr = styles_.get_attr_for_token(token.type);
+				int attr = styles_.get_attr_for_token(token.type);
 
-			column = render_text(window, attr, tab_width, first_column, column, line.get_data() + begin, line.get_data() + end);
+				column = render_text(window, attr, tab_width, first_column, column, line.get_data() + begin, line.get_data() + end);
+			}
 		});
 	});
 
