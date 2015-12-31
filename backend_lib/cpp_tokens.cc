@@ -33,7 +33,7 @@ static document::token_type determine_token_type(const clang::token& token)
 	}
 	else if (token_kind == CXToken_Identifier)
 	{
-		if (cursor_kind == CXCursor_NamespaceRef || cursor_kind == CXCursor_TypeRef)
+		if (cursor_kind == CXCursor_NamespaceRef || cursor_kind == CXCursor_TypeRef || cursor_kind == CXCursor_TemplateRef)
 			return token_type::type;
 	}
 
