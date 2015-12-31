@@ -67,7 +67,6 @@ private:
 	std::unique_ptr<compilation_unit> provisional_unit_;
 	bool has_unsaved_data_ = false;
 	std::uint64_t version_ = 0;
-
 };
 
 }}

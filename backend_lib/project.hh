@@ -90,6 +90,11 @@ private:
 
 	event_dispatcher& event_dispatcher_;
 	clang::index index_;
+
+	// parsing status
+	unsigned files_to_parse_ = 0;
+	unsigned files_parsed_ = 0;
+
 };
 
 }}

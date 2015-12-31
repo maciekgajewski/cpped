@@ -190,4 +190,19 @@ template<typename Reader> void deserialize(Reader& reader, complete_at_reply& m)
 	deserialize(reader, m.results);
 }
 
+// B->F
+struct status_feed
+{
+	static const std::uint64_t ID = 9;
+	std::string message;
+};
+template<typename Writer> void serialize(Writer& writer, const status_feed& m)
+{
+	serialize(writer, m.message);
+}
+template<typename Reader> void deserialize(Reader& reader, status_feed& m)
+{
+	deserialize(reader, m.message);
+}
+
 }}}

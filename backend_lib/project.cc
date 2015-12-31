@@ -156,6 +156,8 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 	fs::path directory = fs::absolute(comp_database_path).parent_path();
 	clang::compilation_database db(directory);
 
+	files_to_parse_ = 0;
+	files_parsed_ = 0;
 	for(const fs::path& path : files_)
 	{
 		clang::compile_commands cc = db.get_compile_commands_for_file(path);
@@ -171,6 +173,7 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 
 			// schedule file parsing
 			event_dispatcher_.schedule_job([this, path]() { scheduled_parse_file(path); });
+			files_to_parse_++;
 		}
 	}
 }
@@ -182,6 +185,17 @@ void project::scheduled_parse_file(const boost::filesystem::path& path)
 	{
 		LOG("Scheduled parsing of " << path);
 		unit->parse(get_unsaved_data());
+		files_parsed_++;
+
+		if (files_parsed_ < files_to_parse_)
+		{
+			event_dispatcher_.send_message(messages::status_feed{
+				"Parsing files: " + std::to_string(files_parsed_) + "/" + std::to_string(files_to_parse_)});
+		}
+		else
+		{
+			event_dispatcher_.send_message(messages::status_feed{});
+		}
 	}
 }
 

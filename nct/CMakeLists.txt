@@ -7,6 +7,7 @@ add_library(nct
 	ncurses_inc.hh
 	line_edit.cc line_edit.hh
 	list_widget.cc list_widget.hh
+	status_message.cc status_message.hh
 )
 
 target_include_directories(nct INTERFACE ..)

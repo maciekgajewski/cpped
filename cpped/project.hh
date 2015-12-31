@@ -52,7 +52,6 @@ private:
 
 	void on_file_tokens(const backend::messages::file_tokens_feed& token_feed);
 
-	void emit_parsing_status(const backend::token_data& data) const;
 	void send_parse_request(
 		const document::document& doc,
 		const boost::optional<document::document_position>& cursor_pos);

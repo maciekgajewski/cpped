@@ -3,6 +3,8 @@
 #include "backend_lib/endpoint.hh"
 #include "backend_lib/messages.hh"
 
+#include "nct/status_message.hh"
+
 #include <boost/filesystem.hpp>
 
 #include <stdexcept>
@@ -18,6 +20,9 @@ project::project(backend::endpoint& ep)
 {
 	endpoint_.register_message_handler<backend::messages::file_tokens_feed>(
 		[this](const backend::messages::file_tokens_feed& tf) { on_file_tokens(tf); });
+
+	endpoint_.register_message_handler<backend::messages::status_feed>(
+		[this](const backend::messages::status_feed& sf) { status_signal(sf.message); });
 }
 
 
@@ -40,7 +45,7 @@ document::document& project::open_file(const fs::path& file)
 	auto it = open_files_.find(absolute);
 	if (it == open_files_.end())
 	{
-		status_signal("Opening file...");
+		nct::status_provider sp("Opening file...");
 
 		// request file from backend
 		backend::messages::open_file_request request{absolute};
@@ -54,8 +59,6 @@ document::document& project::open_file(const fs::path& file)
 
 		auto doc_ptr = std::make_unique<document::document>();
 		doc_ptr->load_from_raw_data(reply.data, absolute, reply.tokens.tokens);
-
-		emit_parsing_status(reply.tokens);
 
 		auto p = open_files_.insert(std::make_pair(absolute, open_file_data{std::move(doc_ptr), 0} ));
 		assert(p.second);
@@ -110,7 +113,8 @@ void project::request_parsing(
 
 std::vector<backend::messages::completion_record> project::get_completion(const boost::filesystem::path& file, const document::document_position& cursor_pos)
 {
-	status_signal("Getting completion...");
+	nct::status_provider sp("Getting completion...");
+
 	backend::messages::complete_at_reply reply;
 
 	auto it = open_files_.find(file);
@@ -133,21 +137,11 @@ std::vector<backend::messages::completion_record> project::get_completion(const 
 		request.file = file;
 		request.cursor_position = cursor_pos;
 
-
 		endpoint_.send_sync_request(request, reply);
 
 	}
 
-	status_signal("");
 	return reply.results;
-}
-
-void project::emit_parsing_status(const backend::token_data& data) const
-{
-	// send signal status
-	std::ostringstream ss;
-	ss << "File parsed, errors: " << data.errors << ", warnings: " << data.warnings;
-	status_signal(ss.str());
 }
 
 void project::on_file_tokens(const backend::messages::file_tokens_feed& token_feed)
@@ -157,8 +151,6 @@ void project::on_file_tokens(const backend::messages::file_tokens_feed& token_fe
 	{
 		it->second.document->set_tokens(token_feed.version, token_feed.tokens.tokens);
 		it->second.last_version_parsed = token_feed.version;
-
-		emit_parsing_status(token_feed.tokens);
 	}
 	parsing_in_progress_ = false;
 

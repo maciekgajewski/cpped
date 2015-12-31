@@ -1,7 +1,7 @@
 #pragma once
 
 #include "nct/event_window.hh"
-
+#include "nct/status_message.hh"
 #include <memory>
 
 namespace cpped {
@@ -24,12 +24,16 @@ public:
 private:
 
 	void update();
+	void set_status_message(const std::string& st);
 
+	std::string project_status_;
 	std::string status_;
 
 	project& project_;
 	style_manager& style_;
 	std::unique_ptr<editor_window> editor_;
+	nct::status_message_receiver status_message_receiver_;
+
 };
 
 }
