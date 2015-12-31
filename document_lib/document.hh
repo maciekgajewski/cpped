@@ -54,7 +54,7 @@ public:
 	~document();
 
 	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path);
-	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const std::vector<token>& tokens);
+	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const token_data& tokens);
 	void load_from_file(const boost::filesystem::path& path);
 
 	unsigned get_line_count() const { return current_data_->data.get_line_count(); }
@@ -103,7 +103,7 @@ public:
 
 	bool has_unsaved_changed() const { return _has_unsaved_changes; }
 
-	void set_tokens(std::uint64_t version, const std::vector<token>& tokens);
+	void set_tokens(std::uint64_t version, const token_data& tokens);
 
 private:
 

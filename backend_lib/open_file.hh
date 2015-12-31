@@ -46,7 +46,7 @@ public:
 		has_unsaved_data_ = true;
 	}
 
-	token_data parse(const std::vector<CXUnsavedFile>& unsaved_data);
+	document::token_data parse(const std::vector<CXUnsavedFile>& unsaved_data);
 	std::vector<messages::completion_record> complete_at(
 		const std::vector<CXUnsavedFile>& unsaved_data,
 		const document::document_position& pos);

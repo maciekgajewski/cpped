@@ -63,7 +63,7 @@ std::vector<document::token> compilation_unit::get_tokens_for_file(const boost::
 		translation_unit_, path, data);
 }
 
-token_data compilation_unit::get_tokens_with_diagnostics(const boost::filesystem::path& path, const std::vector<char>& data) const
+document::token_data compilation_unit::get_tokens_with_diagnostics(const boost::filesystem::path& path, const std::vector<char>& data) const
 {
 	return get_cpp_tokens_with_diagnostics(
 				translation_unit_, path, data);

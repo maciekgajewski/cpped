@@ -10,12 +10,16 @@
 
 namespace cpped { namespace backend { namespace test {
 
-std::vector<document::token> parse_document_data(const document::document_data& d)
+document::token_data parse_document_data(const document::document_data& d)
 {
 	clang::index idx(0, 0);
 	clang::translation_unit tu;
 	tu.parse(idx, "code.cc", d.get_raw_data().data(), d.get_raw_data().size(), {});
-	return get_cpp_tokens(tu, "code.cc", d.get_raw_data());
+
+	document::token_data dt;
+	dt.tokens = get_cpp_tokens(tu, "code.cc", d.get_raw_data());
+
+	return dt;
 }
 
 BOOST_AUTO_TEST_SUITE(cpp_parser_tests)
@@ -147,8 +151,9 @@ void fun() {
 	clang::translation_unit tu;
 	tu.parse(idx, "code.cc", d.get_raw_data().data(), d.get_raw_data().size(), {});
 
-	auto tokens =  get_cpp_tokens(tu, "code.cc", d.get_raw_data());
-	d.set_tokens(tokens);
+	document::token_data dt;
+	dt.tokens =  get_cpp_tokens(tu, "code.cc", d.get_raw_data());
+	d.set_tokens(dt);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

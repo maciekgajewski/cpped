@@ -55,7 +55,7 @@ public:
 	document_position get_last_position() const { return document_position{unsigned(lines_.size()-1), unsigned(lines_.back().get_length())}; }
 
 	// replaces all the existing tokens
-	void set_tokens(const std::vector<token>& tokens);
+	void set_tokens(const token_data& tokens);
 
 	const line_token* get_token_at(const document_position& pos) const;
 
@@ -72,6 +72,7 @@ private:
 	// It must be continous, char*, utf-8 data, so it can be directly consumed bu libclang
 	data_type raw_data_;
 	std::vector<line_data> lines_;
+	std::vector<diagnostic_message> diagnostics_;
 };
 
 }}

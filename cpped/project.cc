@@ -58,7 +58,7 @@ document::document& project::open_file(const fs::path& file)
 		}
 
 		auto doc_ptr = std::make_unique<document::document>();
-		doc_ptr->load_from_raw_data(reply.data, absolute, reply.tokens.tokens);
+		doc_ptr->load_from_raw_data(reply.data, absolute, reply.tokens);
 
 		auto p = open_files_.insert(std::make_pair(absolute, open_file_data{std::move(doc_ptr), 0} ));
 		assert(p.second);
@@ -149,7 +149,7 @@ void project::on_file_tokens(const backend::messages::file_tokens_feed& token_fe
 	auto it = open_files_.find(token_feed.file);
 	if (it != open_files_.end())
 	{
-		it->second.document->set_tokens(token_feed.version, token_feed.tokens.tokens);
+		it->second.document->set_tokens(token_feed.version, token_feed.tokens);
 		it->second.last_version_parsed = token_feed.version;
 	}
 	parsing_in_progress_ = false;

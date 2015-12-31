@@ -441,8 +441,10 @@ BOOST_AUTO_TEST_CASE(set_tokens)
 		token{token_type::literal, {{2,1}, {2,4}}}, // 333
 		token{token_type::preprocessor, {{4,0}, {4,3}}}, // xxx
 	};
+	token_data dt;
+	dt.tokens = tokens;
 
-	data.set_tokens(tokens);
+	data.set_tokens(dt);
 
 	BOOST_REQUIRE_EQUAL(data.get_line_count(), 5);
 

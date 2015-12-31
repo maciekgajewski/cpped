@@ -40,8 +40,7 @@ struct line_token
 	token_type type;
 
 	// diagnositcs
-	problem_severity serverity_;
-	std::string message_;
+	std::uint32_t diagnositc_index;
 
 	bool operator==(const line_token& o) const { return begin == o.begin  && end == o.end && type == o.type; }
 };
@@ -98,29 +97,58 @@ template<typename Reader> void deserialize(Reader& reader, document_range& m)
 	deserialize(reader, m.end);
 }
 
+struct diagnostic_message
+{
+	std::string message;
+	problem_severity severity;
+	// TODO range and fixi-it goes here
+};
+template<typename Writer> void serialize(Writer& writer, const diagnostic_message& m)
+{
+	serialize(writer, m.message);
+	serialize(writer, m.severity);
+}
+template<typename Reader> void deserialize(Reader& reader, diagnostic_message& m)
+{
+	deserialize(reader, m.message);
+	deserialize(reader, m.severity);
+}
+
 // Token that can spawn multiple lines
 struct token
 {
 	token_type type;
 	document_range range;
-	problem_severity serverity;
-	std::string message;
+	std::uint32_t diagnostic_index;
 };
 template<typename Writer> void serialize(Writer& writer, const token& m)
 {
 	serialize(writer, m.type);
 	serialize(writer, m.range);
-	serialize(writer, m.serverity);
-	serialize(writer, m.message);
+	serialize(writer, m.diagnostic_index);
 }
 template<typename Reader> void deserialize(Reader& reader, token& m)
 {
 	deserialize(reader, m.type);
 	deserialize(reader, m.range);
-	deserialize(reader, m.serverity);
-	deserialize(reader, m.message);
+	deserialize(reader, m.diagnostic_index);
 }
 
+struct token_data
+{
+	std::vector<token> tokens;
+	std::vector<diagnostic_message> diagnostics;
+};
+template<typename Writer> void serialize(Writer& writer, const token_data& m)
+{
+	serialize(writer, m.tokens);
+	serialize(writer, m.diagnostics);
+}
+template<typename Reader> void deserialize(Reader& reader, token_data& m)
+{
+	deserialize(reader, m.tokens);
+	deserialize(reader, m.diagnostics);
+}
 
 
 

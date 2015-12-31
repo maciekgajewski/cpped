@@ -31,7 +31,7 @@ void document::load_from_raw_data(const std::string& data, const fs::path& path)
 	last_version_ = 0;
 }
 
-void document::load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const std::vector<token>& tokens)
+void document::load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const token_data& tokens)
 {
 	load_from_raw_data(data, path);
 	current_data_->data.set_tokens(tokens);
@@ -108,7 +108,7 @@ std::string document::to_string() const
 	return current_data_->data.to_string();
 }
 
-void document::set_tokens(std::uint64_t version, const std::vector<token>& tokens)
+void document::set_tokens(std::uint64_t version, const token_data& tokens)
 {
 	if (current_data_->version == version)
 	{

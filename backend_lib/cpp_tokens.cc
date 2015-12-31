@@ -83,11 +83,11 @@ std::vector<document::token> get_cpp_tokens(
 	return document_tokens;
 }
 
-token_data get_cpp_tokens_with_diagnostics(const clang::translation_unit& tu,
+document::token_data get_cpp_tokens_with_diagnostics(const clang::translation_unit& tu,
 	const boost::filesystem::path& file_name,
 	const std::vector<char>& raw_data)
 {
-	token_data data;
+	document::token_data data;
 
 	// start by just getting tokens
 	data.tokens = get_cpp_tokens(tu, file_name, raw_data);
@@ -98,7 +98,8 @@ token_data get_cpp_tokens_with_diagnostics(const clang::translation_unit& tu,
 	for(auto i = 0u; i < diags.size(); i++)
 	{
 		clang::diagnostic diag = diags[i];
-		LOG(" * " << diag.format(CXDiagnostic_DisplaySourceLocation|CXDiagnostic_DisplaySourceRanges));
+		std::string message = diag.format(CXDiagnostic_DisplaySourceLocation|CXDiagnostic_DisplaySourceRanges).c_str();
+		LOG(" * " << message);
 		for(auto r = 0u; r < diag.get_num_ranges(); r++)
 		{
 			clang::source_range rng = diag.get_range(r);
@@ -107,17 +108,18 @@ token_data get_cpp_tokens_with_diagnostics(const clang::translation_unit& tu,
 			LOG("    " << start.line << ":" << start.column << " - " << end.line << ":" << end.column);
 		}
 
+
 		switch(diag.get_severity())
 		{
 			case CXDiagnostic_Ignored:
 			case CXDiagnostic_Note:
 				break;
 			case CXDiagnostic_Warning:
-				data.warnings++;
+				data.diagnostics.push_back({message, document::problem_severity::warning});
 				break;
 			case CXDiagnostic_Error:
 			case CXDiagnostic_Fatal:
-				data.errors++;
+				data.diagnostics.push_back({message, document::problem_severity::error});
 				break;
 		}
 	}
