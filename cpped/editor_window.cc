@@ -122,15 +122,9 @@ void editor_window::render(
 		unsigned column = 0;
 		line.for_each_token([&](const document::line_token& token)
 		{
-			if (token.end > first_column)
-			{
-				unsigned begin = std::max(token.begin, first_column);
-				unsigned end = std::min(get_workspace_width(), token.end-first_column);
-
-				int attr = styles_.get_attr_for_token(token.type);
-
-				column = render_text(window, attr, tab_width, first_column, column, line.get_data() + begin, line.get_data() + end);
-			}
+			int attr = styles_.get_attr_for_token(token.type);
+			column = render_text(window, attr, tab_width, first_column, column,
+				line.get_data() + token.begin, line.get_data() + token.end);
 		});
 	});
 
@@ -156,7 +150,13 @@ void editor_window::refresh_cursor(int wy, int wx)
 	refresh_window();
 }
 
-unsigned editor_window::render_text(nct::ncurses_window& window, attr_t attr, unsigned tab_width, unsigned first_column, unsigned phys_column, const char* begin, const char* end)
+unsigned editor_window::render_text(
+	nct::ncurses_window& window,
+	attr_t attr,
+	unsigned tab_width,
+	unsigned first_column,
+	unsigned phys_column,
+	const char* begin, const char* end)
 {
 	unsigned last_column = get_workspace_width() + first_column;
 
@@ -179,7 +179,7 @@ unsigned editor_window::render_text(nct::ncurses_window& window, attr_t attr, un
 		}
 		else
 		{
-			if (phys_column >= first_column)
+			if (phys_column >= first_column && phys_column < last_column)
 				window.put_char(*begin | attr);
 			phys_column++;
 		}
