@@ -31,9 +31,8 @@ private:
 
 	project& project_;
 	style_manager& style_;
-	std::unique_ptr<editor_window> editor_;
 	nct::status_message_receiver status_message_receiver_;
-
+	std::unique_ptr<editor_window> editor_;
 };
 
 }

@@ -105,6 +105,8 @@ public:
 
 	void set_tokens(std::uint64_t version, const token_data& tokens);
 
+	const std::vector<diagnostic_message>& get_diagnostics() const { return current_data_->data.get_diagnostics(); }
+
 private:
 
 	struct versioned_data

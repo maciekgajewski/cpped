@@ -62,6 +62,8 @@ public:
 	// returns token immediately before the position (pair: line, token)
 	std::pair<unsigned, const line_token*> get_token_before(const document_position& pos) const;
 
+	const std::vector<diagnostic_message>& get_diagnostics() const { return diagnostics_; }
+
 private:
 
 	data_type::const_iterator positon_to_offset(document_position pos) const;

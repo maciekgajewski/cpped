@@ -5,6 +5,7 @@
 #include "navigator_widget.hh"
 
 #include "nct/event_window.hh"
+#include "nct/status_message.hh"
 
 #include <boost/filesystem.hpp>
 
@@ -42,6 +43,10 @@ public:
 	void on_shown() override;
 	void on_resized() override;
 
+	void open_file(const boost::filesystem::path& file);
+
+	// inward-facing API, used by editor
+
 	void render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width);
 	void update_status_info(const status_info& info);
 	void refresh_cursor(int wy, int wx);
@@ -49,9 +54,8 @@ public:
 	unsigned get_workspace_width() const;
 	unsigned get_workspace_height() const;
 
-	void open_file(const boost::filesystem::path& file);
-
 	project& get_project() const { return project_; }
+	void set_status(const std::string& s) { status_provider_.set_status(s); }
 
 private:
 
@@ -72,6 +76,7 @@ private:
 	navigator_widget navigator_;
 	completer_widget completer_;
 	nct::position cursor_pos_;
+	nct::status_provider status_provider_;
 };
 
 }

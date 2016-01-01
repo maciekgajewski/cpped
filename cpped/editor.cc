@@ -312,6 +312,19 @@ void editor::end()
 
 void editor::on_document_tokens_updated()
 {
+	unsigned errors = 0;
+	unsigned warnings = 0;
+	for(const document::diagnostic_message& d : doc_->get_diagnostics())
+	{
+		if (d.severity == document::problem_severity::error)
+			errors++;
+		if (d.severity == document::problem_severity::warning)
+			warnings++;
+	}
+
+	std::string s = "Document parsed. Erros: " + std::to_string(errors) + ", warnings: " + std::to_string(warnings);
+	window_.set_status(s);
+
 	request_full_render();
 }
 
@@ -354,8 +367,6 @@ unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 	}
 	return x;
 }
-
-
 
 void editor::insert_at_cursor(const std::string& s)
 {

@@ -255,6 +255,7 @@ void editor_window::open_file(const boost::filesystem::path& file)
 
 	document::document& doc = project_.open_file(file);
 	editor_.set_document(doc);
+	set_status("Document loaded");
 }
 
 }

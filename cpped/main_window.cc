@@ -8,8 +8,8 @@ namespace cpped {
 main_window::main_window(project& pr, nct::event_dispatcher& ed, style_manager& sm)
 	: nct::event_window(ed, nullptr),
 	project_(pr), style_(sm),
-	editor_(std::make_unique<editor_window>(pr, ed, sm, this)),
-	status_message_receiver_([this](const std::string& s) { set_status_message(s); })
+	status_message_receiver_([this](const std::string& s) { set_status_message(s); }),
+	editor_(std::make_unique<editor_window>(pr, ed, sm, this))
 {
 	project_.status_signal.connect(
 		[this](const std::string st)
