@@ -15,6 +15,7 @@ namespace fs = boost::filesystem;
 
 struct text_renderer
 {
+	// fixed
 	unsigned first_column_;
 	const editor_settings& settings_;
 	nct::ncurses_window& window_;
@@ -22,11 +23,13 @@ struct text_renderer
 	const boost::optional<document::document_range>& selection_;
 	style_manager& styles_;
 
+	// volatile
 	unsigned phys_column_ = 0;
+	document::document_position position_;
 
 	void render_text(const nct::style& style, const char* begin, const char* end);
 	void put_visual_tab();
-
+	void put_char(const nct::style& style, char c);
 };
 
 void text_renderer::render_text(
@@ -48,16 +51,17 @@ void text_renderer::render_text(
 					if (w == settings_.tab_width && c == 0) // first char of full tab
 						put_visual_tab();
 					else
-						window_.put_char(style, ' ');
+						put_char(style, ' ');
 				}
 			}
 		}
 		else
 		{
 			if (phys_column_ >= first_column_ && phys_column_ < last_column)
-				window_.put_char(style, *begin);
+				put_char(style, *begin);
 			phys_column_++;
 		}
+		position_.column++;
 		begin++;
 	}
 }
@@ -66,14 +70,26 @@ void text_renderer::put_visual_tab()
 {
 	if (settings_.visualize_tab)
 	{
-		window_.put_char(styles_.visual_tab, '|'); // TODO maybe use some cool unicode char?
+		put_char(styles_.visual_tab, '|'); // TODO maybe use some cool unicode char?
 	}
 	else
 	{
-		window_.put_char(' ');
+		put_char(styles_.plain, ' ');
 	}
 }
 
+void text_renderer::put_char(const nct::style& style, char c)
+{
+	if (selection_ && position_ < selection_->end && position_ >= selection_->start)
+	{
+		// TODO invert style
+		window_.put_char(nct::style{COLOR_WHITE, COLOR_BLACK}, c);
+	}
+	else
+	{
+		window_.put_char(style, c);
+	}
+}
 
 
 editor_window::editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm, event_window* parent)
@@ -169,23 +185,23 @@ void editor_window::render(document::document& doc,
 	left_margin_width_ = line_count_digits + 2;
 	char fmt[32];
 	std::snprintf(fmt, 32, " %%%dd ", line_count_digits);
-	char lineno[32];
+	char lineno_buf[32];
 
 	text_renderer renderer{first_column, settings, window, get_workspace_width(), selection, styles_};
 
 	// iterate over lines
-	int line_no = 0;
+	unsigned line_no = 0;
 	doc.for_lines(first_line, get_workspace_height(), [&](const document::document_line& line)
 	{
 		window.move_cursor(line_no + top_margin_, 0);
-		line_no++;
 
 		// print line number
-		std::snprintf(lineno, 32, fmt, first_line+line_no);
-		window.style_print(styles_.line_numbers, lineno, left_margin_width_);
+		std::snprintf(lineno_buf, 32, fmt, first_line+line_no+1);
+		window.style_print(styles_.line_numbers, lineno_buf, left_margin_width_);
 
 		// print line
 		renderer.phys_column_ = 0;
+		renderer.position_ = {line_no, 0};
 		line.for_each_token([&](const document::line_token& token)
 		{
 			nct::style style = styles_.get_style_for_token(token.type);
@@ -194,6 +210,8 @@ void editor_window::render(document::document& doc,
 				line.get_data() + token.begin,
 				line.get_data() + token.end);
 		});
+
+		line_no++;
 	});
 
 	refresh_window();

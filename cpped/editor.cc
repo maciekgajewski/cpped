@@ -25,22 +25,39 @@ bool editor::on_special_key(int key_code, const char* key_name)
 	// hard-coded actions
 	switch(key_code)
 	{
+		// arrows
 		case KEY_UP:
-			cursor_up(); return true;
+			arrow_up(); return true;
 		case KEY_DOWN:
-			cursor_down(); return true;
+			arrow_down(); return true;
 		case KEY_LEFT:
-			cursor_left(); return true;
+			arrow_left(); return true;
 		case KEY_RIGHT:
-			cursor_right(); return true;
+			arrow_right(); return true;
+
+		// arrows w/shift
+		case KEY_SR:
+			shift_arrow_up(); return true;
+		case KEY_SF:
+			shift_arrow_down(); return true;
+		case KEY_SLEFT:
+			shift_arrow_left(); return true;
+		case KEY_SRIGHT:
+			shift_arrow_right(); return true;
+
+		// pgup/pgdown
 		case KEY_PPAGE:
 			pg_up(); return true;
 		case KEY_NPAGE:
 			pg_down(); return true;
+
+		// baclspace/del
 		case KEY_BACKSPACE:
 			backspace(); return true;
 		case KEY_DC:
 			del(); return true;
+
+		// home/end
 		case KEY_HOME:
 			home(); return true;
 		case KEY_END:
@@ -194,12 +211,6 @@ void editor::cursor_down()
 		{
 			// scroll one line down
 			first_line_ ++;
-			request_full_render();
-		}
-		else
-		{
-			// just move cursor
-			request_cursor_update();
 		}
 	}
 }
@@ -216,11 +227,6 @@ void editor::cursor_left()
 		{
 			// scroll left
 			first_column_ += workspace_x;
-			request_full_render();
-		}
-		else
-		{
-			request_cursor_update();
 		}
 	}
 }
@@ -238,14 +244,86 @@ void editor::cursor_right()
 		{
 			// scroll right
 			first_column_ += (workspace_x - window_.get_workspace_width());
-			request_full_render();
+		}
+	}
+}
+
+void editor::arrow_up()
+{
+	cursor_up();
+	selection_.reset();
+	request_full_render();
+}
+
+void editor::arrow_down()
+{
+	cursor_down();
+	selection_.reset();
+	request_full_render();
+}
+
+void editor::arrow_left()
+{
+	cursor_left();
+	selection_.reset();
+	request_full_render();
+}
+
+void editor::arrow_right()
+{
+	cursor_right();
+	selection_.reset();
+	request_full_render();
+}
+
+template<typename Action>
+void editor::shift_arrow(Action action)
+{
+	auto cursor_before = cursor_pos_;
+	action();
+	auto cursor_after = cursor_pos_;
+
+	if (cursor_before == cursor_after)
+	{
+		selection_.reset();
+	}
+	else
+	{
+		if (selection_)
+		{
+			if (cursor_before == selection_->end)
+				selection_->end = cursor_after;
+			else
+				selection_->start = cursor_after;
 		}
 		else
 		{
-			// just move cursor
-			request_cursor_update();
+			selection_ = document::document_range{
+				std::min(cursor_before, cursor_after),
+				std::max(cursor_before, cursor_after)};
 		}
 	}
+	request_full_render();
+}
+
+void editor::shift_arrow_up()
+{
+	shift_arrow([this]() { cursor_up(); });
+}
+
+void editor::shift_arrow_down()
+{
+	shift_arrow([this]() { cursor_down(); });
+}
+
+void editor::shift_arrow_left()
+{
+	shift_arrow([this]() { cursor_left(); });
+}
+
+void editor::shift_arrow_right()
+{
+	shift_arrow([this]() { cursor_right(); });
 }
 
 void editor::pg_up()

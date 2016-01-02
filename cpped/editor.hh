@@ -41,10 +41,15 @@ public:
 private:
 
 	// action handlers
-	void cursor_up();
-	void cursor_down();
-	void cursor_left();
-	void cursor_right();
+	void arrow_up();
+	void arrow_down();
+	void arrow_left();
+	void arrow_right();
+
+	void shift_arrow_up();
+	void shift_arrow_down();
+	void shift_arrow_left();
+	void shift_arrow_right();
 
 	void pg_up();
 	void pg_down();
@@ -54,6 +59,14 @@ private:
 
 	void home();
 	void end();
+
+	void cursor_up();
+	void cursor_down();
+	void cursor_left();
+	void cursor_right();
+
+	template<typename Action>
+	void shift_arrow(Action action);
 
 	void on_document_tokens_updated();
 
@@ -91,6 +104,7 @@ private:
 	std::unique_ptr<document::document> unsaved_document_;
 	bool parsing_disabled_ = false;
 	boost::optional<document::document_range> selection_;
+	bool extending_selection_ = false;
 };
 
 }

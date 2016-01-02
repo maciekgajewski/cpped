@@ -16,6 +16,7 @@ style_manager::style_manager()
 	style_for_token[int(document::token_type::type)]			= nct::style{bg, COLOR_GREEN};
 	style_for_token[int(document::token_type::comment)]		= nct::style{bg, COLOR_BLUE};
 
+	plain = nct::style{bg, COLOR_WHITE};
 	line_numbers = nct::style{COLOR_BLACK, COLOR_RED};
 	visual_tab = nct::style{bg, COLOR_CYAN};
 	status = nct::style{bg, COLOR_WHITE};

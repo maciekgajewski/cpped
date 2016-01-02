@@ -16,6 +16,7 @@ public:
 
 	nct::style get_style_for_token(document::token_type tt) { return style_for_token[int(tt)]; }
 
+	nct::style plain;
 	nct::style line_numbers;
 	nct::style visual_tab;
 	nct::style status;
