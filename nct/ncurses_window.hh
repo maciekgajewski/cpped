@@ -2,6 +2,7 @@
 #include "ncurses_inc.hh"
 
 #include "types.hh"
+#include "style.hh"
 
 #include <string>
 
@@ -25,7 +26,12 @@ public:
 	void attr_print(attr_t attr, const char* text, unsigned length);
 	void attr_print(attr_t attr, const std::string& s) { attr_print(attr, s.c_str(), s.length()); }
 	void put_char(chtype c) { ::waddch(win_, c); }
+	void put_char(const style& s, chtype c) { ::waddch(win_, c | s.to_attr()); }
 	void attr_fill_line(attr_t attr, chtype c, int line);
+
+	void style_print(const style& s, const std::string& text) { style_print(s, text.c_str(), text.size()); }
+	void style_print(const style& s, const char* text, unsigned length);
+	void style_fill_line(const style& s, chtype c, int line) { attr_fill_line(s.to_attr(), c, line); }
 
 	void clear() { ::wclear(win_); }
 	void clear_to_eol() { ::wclrtoeol(win_); }
@@ -47,6 +53,9 @@ public:
 	void set_attr_on(attr_t a) { ::wattron(win_, a); }
 	void set_attr_off(attr_t a) { ::wattroff(win_, a); }
 	void set_background(const chtype ch) { ::wbkgd(win_, ch); }
+	void set_background(const style& s, const chtype ch) { ::wbkgd(win_, s.to_attr() | ch); }
+	void set_style_on(const style& s) { ::wattron(win_, s.to_attr()); }
+	void set_style_off(const style& s) { ::wattroff(win_, s.to_attr()); }
 
 	// windows position/size
 
@@ -61,6 +70,7 @@ public:
 	// lines and borders
 
 	void horizontal_line(int y, int x, chtype c, int len) { mvwhline(win_, y, x, c, len); }
+	void horizontal_line(int y, int x, style& s, chtype c, int len) { mvwhline(win_, y, x, s.to_attr() | c, len); }
 	void horizontal_line(int y, int x, const cchar_t* c, int len) { mvwhline_set(win_, y, x, c, len); }
 
 private:

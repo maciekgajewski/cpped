@@ -42,4 +42,12 @@ void ncurses_window::attr_fill_line(attr_t attr, chtype c, int line)
 	::wattron(win_, attr);
 }
 
+void ncurses_window::style_print(const style& s,  const char* text, unsigned length)
+{
+	int attr = s.to_attr();
+	::wattron(win_, attr);
+	::waddnstr(win_, text, length);
+	::wattroff(win_, attr);
+}
+
 }

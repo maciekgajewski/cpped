@@ -116,14 +116,14 @@ void editor_window::render(
 
 		// print line number
 		std::snprintf(lineno, 32, fmt, first_line+line_no);
-		window.attr_print(styles_.line_numbers, lineno, left_margin_width_);
+		window.style_print(styles_.line_numbers, lineno, left_margin_width_);
 
 		// print line
 		unsigned column = 0;
 		line.for_each_token([&](const document::line_token& token)
 		{
-			int attr = styles_.get_attr_for_token(token.type);
-			column = render_text(window, attr, tab_width, first_column, column,
+			nct::style style = styles_.get_style_for_token(token.type);
+			column = render_text(window, style, tab_width, first_column, column,
 				line.get_data() + token.begin, line.get_data() + token.end);
 		});
 	});
@@ -152,7 +152,7 @@ void editor_window::refresh_cursor(int wy, int wx)
 
 unsigned editor_window::render_text(
 	nct::ncurses_window& window,
-	attr_t attr,
+	const nct::style& style,
 	unsigned tab_width,
 	unsigned first_column,
 	unsigned phys_column,
@@ -173,14 +173,14 @@ unsigned editor_window::render_text(
 					if (w == tab_width && c == 0) // first char of full tab
 						put_visual_tab(window);
 					else
-						window.put_char(' ' | attr);
+						window.put_char(style, ' ');
 				}
 			}
 		}
 		else
 		{
 			if (phys_column >= first_column && phys_column < last_column)
-				window.put_char(*begin | attr);
+				window.put_char(style, *begin);
 			phys_column++;
 		}
 		begin++;
@@ -193,7 +193,7 @@ void editor_window::put_visual_tab(nct::ncurses_window& window)
 {
 	if (visualise_tabs_)
 	{
-		window.put_char('|' | styles_.visual_tab); // TODO maybe use some cool unicode char?
+		window.put_char(styles_.visual_tab, '|'); // TODO maybe use some cool unicode char?
 	}
 	else
 	{
@@ -206,7 +206,7 @@ void editor_window::update_status_info(const status_info& info)
 	if (!is_visible()) return;
 	nct::ncurses_window& window = get_ncurses_window();
 
-	window.set_attr_on(styles_.status);
+	window.set_style_on(styles_.status);
 
 	// top line
 	// window.horizontal_line(0,0, WACS_D_HLINE, window.get_width()); doesn't work on xfce (?)

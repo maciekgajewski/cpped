@@ -35,4 +35,10 @@ ncurses_window ncurses_env::get_stdscr()
 	return stdscr;
 }
 
+int ncurses_env::style_to_attr(const style& s)
+{
+	int pair = palette_.get_pair_for_colors(s.bgcolor, s.fgcolor);
+	return COLOR_PAIR(pair) | s.flags;
+}
+
 }

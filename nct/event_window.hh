@@ -108,7 +108,6 @@ protected:
 	// converts local to global (screen) coordinates
 	position to_global(const position& pos);
 
-	color_palette& get_palette();
 	event_dispatcher& get_event_dispatcher() const { return event_dispatcher_; }
 
 private:

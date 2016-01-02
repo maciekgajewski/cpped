@@ -22,7 +22,7 @@ int color_palette::get_pair_for_colors(int bg, int fg)
 			throw std::runtime_error("All color pairs used");
 		}
 
-		int pair = color_pairs.size();
+		int pair = color_pairs.size() + 1; // pair can't be 0
 		::init_pair(pair, fg, bg);
 
 		color_pairs.insert(std::make_pair(key, pair));

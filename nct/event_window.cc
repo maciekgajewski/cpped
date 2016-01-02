@@ -163,9 +163,4 @@ position event_window::to_global(const position& pos)
 	}
 }
 
-color_palette& event_window::get_palette()
-{
-	return event_dispatcher_.get_palette();
-}
-
 }

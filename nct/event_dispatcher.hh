@@ -2,23 +2,12 @@
 #include "ncurses_inc.hh"
 #include "event_window.hh"
 
-#include <boost/container/flat_map.hpp>
-
 #include <vector>
 #include <string>
 
 
 namespace nct {
 
-class color_palette
-{
-public:
-
-	int get_pair_for_colors(int bg, int fg);
-
-private:
-	boost::container::flat_map<std::pair<int, int>, int> color_pairs;
-};
 
 
 class event_dispatcher
@@ -37,7 +26,6 @@ public:
 	void exit();
 	void run();
 
-	color_palette& get_palette() { return palette_; }
 	event_window* get_active_window() const { return active_window_; }
 
 private:
@@ -60,7 +48,6 @@ private:
 	std::string quit_key_;
 	WINDOW* get_active_ncurses_window() const;
 
-	color_palette palette_;
 	polling_function poll_function_;
 	nct::size screen_size_;
 

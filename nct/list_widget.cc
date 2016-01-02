@@ -105,14 +105,14 @@ void list_widget::update()
 	if (!is_visible()) return;
 	ncurses_window& window = get_ncurses_window();
 
-	int normal_attr = COLOR_PAIR(get_palette().get_pair_for_colors(COLOR_CYAN, COLOR_BLACK));
-	int help_attr = COLOR_PAIR(get_palette().get_pair_for_colors(COLOR_CYAN, COLOR_BLUE));
-	int selected_normal_attr = COLOR_PAIR(get_palette().get_pair_for_colors(COLOR_YELLOW, COLOR_BLACK));
-	int selected_help_attr = COLOR_PAIR(get_palette().get_pair_for_colors(COLOR_YELLOW, COLOR_BLUE));
+	nct::style normal_style = nct::style{COLOR_CYAN, COLOR_BLACK};
+	nct::style help_style = nct::style{COLOR_CYAN, COLOR_BLUE};
+	nct::style selected_normal_style = nct::style{COLOR_YELLOW, COLOR_BLACK};
+	nct::style selected_help_style = nct::style{COLOR_YELLOW, COLOR_BLUE};
 
 
 	window.clear();
-	window.set_background(normal_attr | ' ');
+	window.set_background(normal_style, ' ');
 
 	// predicate for selecting lines with filter
 	contains_filter_functor contains_filter_pred{filter_};
@@ -129,17 +129,17 @@ void list_widget::update()
 		window.move_cursor(position{int(line), 0});
 		if (line+first_line_ == current_item_)
 		{
-			window.attr_fill_line(selected_normal_attr, ' ', line);
+			window.style_fill_line(selected_normal_style, ' ', line);
 			window.move_cursor(position{int(line), 0});
-			window.attr_print(selected_normal_attr, item.text);
+			window.style_print(selected_normal_style, item.text);
 			window.move_cursor(position{int(line), int(longest_text_+1)});
-			window.attr_print(selected_help_attr, item.help_text);
+			window.style_print(selected_help_style, item.help_text);
 		}
 		else
 		{
-			window.attr_print(normal_attr, item.text);
+			window.style_print(normal_style, item.text);
 			window.move_cursor(position{int(line), int(longest_text_+1)});
-			window.attr_print(help_attr, item.help_text);
+			window.style_print(help_style, item.help_text);
 		}
 
 	}

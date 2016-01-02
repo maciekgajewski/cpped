@@ -8,6 +8,7 @@ add_library(nct
 	line_edit.cc line_edit.hh
 	list_widget.cc list_widget.hh
 	status_message.cc status_message.hh
+	style.cc style.hh
 )
 
 target_include_directories(nct INTERFACE ..)

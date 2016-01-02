@@ -60,7 +60,7 @@ public:
 private:
 
 	// rendering
-	unsigned render_text(nct::ncurses_window& window, attr_t attr, unsigned tab_width, unsigned first_column, unsigned phys_column, const char* begin, const char* end); // returns last physical column
+	unsigned render_text(nct::ncurses_window& window, const nct::style& style, unsigned tab_width, unsigned first_column, unsigned phys_column, const char* begin, const char* end); // returns last physical column
 	void put_visual_tab(nct::ncurses_window& window);
 
 	unsigned left_margin_width_ = 0; // calculated when rendering

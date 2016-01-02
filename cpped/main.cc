@@ -51,7 +51,7 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 	nct::ncurses_env env;
 
 	nct::event_dispatcher dispatcher;
-	cpped::style_manager styles(dispatcher.get_palette());
+	cpped::style_manager styles;
 	cpped::main_window main_window(project, dispatcher, styles);
 	cpped::editor_window& editor = main_window.get_current_editor();
 

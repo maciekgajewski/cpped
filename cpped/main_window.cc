@@ -45,17 +45,16 @@ void main_window::update()
 	if (!is_visible()) return;
 	nct::ncurses_window& window = get_ncurses_window();
 
-	int pair = style_.palette.get_pair_for_colors(COLOR_CYAN, COLOR_BLACK);
-	int attr = COLOR_PAIR(pair);
-	window.horizontal_line(window.get_height()-1, 0, ' ' | attr, window.get_width());
+	nct::style style{COLOR_CYAN, COLOR_BLACK};
+	window.horizontal_line(window.get_height()-1, 0, style, ' ', window.get_width());
 
 	// status - left aligned
 	window.move_cursor(window.get_height()-1, 0);
-	window.attr_print(attr, status_);
+	window.style_print(style, status_);
 
 	// project attaus - right aligned
 	window.move_cursor(window.get_height()-1, window.get_width()-project_status_.size());
-	window.attr_print(attr, project_status_);
+	window.style_print(style, project_status_);
 }
 
 void main_window::set_status_message(const std::string& st)

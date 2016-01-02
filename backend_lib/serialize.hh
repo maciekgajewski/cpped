@@ -20,6 +20,10 @@ void read(Reader& reader, void* buf, std::size_t sz)
 	while(completed < sz)
 	{
 		auto result = reader.read(static_cast<char*>(buf)+completed, sz-completed);
+		if (result <= 0)
+		{
+			throw std::runtime_error("Error reading from socket");
+		}
 		completed += result;
 	}
 }
