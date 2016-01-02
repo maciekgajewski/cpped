@@ -47,7 +47,11 @@ public:
 
 	// inward-facing API, used by editor
 
-	void render(document::document& doc, unsigned first_column, unsigned first_line, unsigned tab_width);
+	void render(
+		document::document& doc,
+		unsigned first_column, unsigned first_line,
+		const editor_settings& settings,
+		const boost::optional<document::document_range>& selection);
 	void update_status_info(const status_info& info);
 	void refresh_cursor(int wy, int wx);
 
@@ -59,16 +63,9 @@ public:
 
 private:
 
-	// rendering
-	unsigned render_text(nct::ncurses_window& window, const nct::style& style, unsigned tab_width, unsigned first_column, unsigned phys_column, const char* begin, const char* end); // returns last physical column
-	void put_visual_tab(nct::ncurses_window& window);
-
 	unsigned left_margin_width_ = 0; // calculated when rendering
 	unsigned top_margin_ = 2;
 	unsigned bottom_margin_ = 1;
-
-	// settings
-	bool visualise_tabs_ = true;
 
 	project& project_;
 	style_manager& styles_;

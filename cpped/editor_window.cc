@@ -12,6 +12,70 @@ namespace cpped {
 
 namespace fs = boost::filesystem;
 
+
+struct text_renderer
+{
+	unsigned first_column_;
+	const editor_settings& settings_;
+	nct::ncurses_window& window_;
+	unsigned workspace_width_;
+	const boost::optional<document::document_range>& selection_;
+	style_manager& styles_;
+
+	unsigned phys_column_ = 0;
+
+	void render_text(const nct::style& style, const char* begin, const char* end);
+	void put_visual_tab();
+
+};
+
+void text_renderer::render_text(
+	const nct::style& style,
+	const char* begin, const char* end)
+{
+	unsigned last_column = workspace_width_ + first_column_;
+
+	while(begin != end && phys_column_ != last_column)
+	{
+		if(*begin == '\t')
+		{
+			// render tab
+			unsigned w = settings_.tab_width - phys_column_%settings_.tab_width;
+			for(unsigned c = 0; c < w && phys_column_ != last_column; c++, phys_column_++)
+			{
+				if (phys_column_ >= first_column_)
+				{
+					if (w == settings_.tab_width && c == 0) // first char of full tab
+						put_visual_tab();
+					else
+						window_.put_char(style, ' ');
+				}
+			}
+		}
+		else
+		{
+			if (phys_column_ >= first_column_ && phys_column_ < last_column)
+				window_.put_char(style, *begin);
+			phys_column_++;
+		}
+		begin++;
+	}
+}
+
+void text_renderer::put_visual_tab()
+{
+	if (settings_.visualize_tab)
+	{
+		window_.put_char(styles_.visual_tab, '|'); // TODO maybe use some cool unicode char?
+	}
+	else
+	{
+		window_.put_char(' ');
+	}
+}
+
+
+
 editor_window::editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm, event_window* parent)
 	: event_window(ed, parent), project_(pr), styles_(sm), editor_(*this)
 	, navigator_(pr, ed, this)
@@ -81,11 +145,11 @@ void editor_window::on_resized()
 	editor_.update();
 }
 
-void editor_window::render(
-		document::document& doc,
+void editor_window::render(document::document& doc,
 		unsigned first_column,
 		unsigned first_line,
-		unsigned tab_width)
+		const editor_settings& settings,
+		const boost::optional<document::document_range>& selection)
 {
 	if (!is_visible()) return;
 	nct::ncurses_window& window = get_ncurses_window();
@@ -107,6 +171,8 @@ void editor_window::render(
 	std::snprintf(fmt, 32, " %%%dd ", line_count_digits);
 	char lineno[32];
 
+	text_renderer renderer{first_column, settings, window, get_workspace_width(), selection, styles_};
+
 	// iterate over lines
 	int line_no = 0;
 	doc.for_lines(first_line, get_workspace_height(), [&](const document::document_line& line)
@@ -119,12 +185,14 @@ void editor_window::render(
 		window.style_print(styles_.line_numbers, lineno, left_margin_width_);
 
 		// print line
-		unsigned column = 0;
+		renderer.phys_column_ = 0;
 		line.for_each_token([&](const document::line_token& token)
 		{
 			nct::style style = styles_.get_style_for_token(token.type);
-			column = render_text(window, style, tab_width, first_column, column,
-				line.get_data() + token.begin, line.get_data() + token.end);
+			renderer.render_text(
+				style,
+				line.get_data() + token.begin,
+				line.get_data() + token.end);
 		});
 	});
 
@@ -148,57 +216,6 @@ void editor_window::refresh_cursor(int wy, int wx)
 	}
 
 	refresh_window();
-}
-
-unsigned editor_window::render_text(
-	nct::ncurses_window& window,
-	const nct::style& style,
-	unsigned tab_width,
-	unsigned first_column,
-	unsigned phys_column,
-	const char* begin, const char* end)
-{
-	unsigned last_column = get_workspace_width() + first_column;
-
-	while(begin != end && phys_column != last_column)
-	{
-		if(*begin == '\t')
-		{
-			// render tab
-			unsigned w = tab_width - phys_column%tab_width;
-			for(unsigned c = 0; c < w && phys_column != last_column; c++, phys_column++)
-			{
-				if (phys_column >= first_column)
-				{
-					if (w == tab_width && c == 0) // first char of full tab
-						put_visual_tab(window);
-					else
-						window.put_char(style, ' ');
-				}
-			}
-		}
-		else
-		{
-			if (phys_column >= first_column && phys_column < last_column)
-				window.put_char(style, *begin);
-			phys_column++;
-		}
-		begin++;
-	}
-
-	return phys_column;
-}
-
-void editor_window::put_visual_tab(nct::ncurses_window& window)
-{
-	if (visualise_tabs_)
-	{
-		window.put_char(styles_.visual_tab, '|'); // TODO maybe use some cool unicode char?
-	}
-	else
-	{
-		window.put_char(' ');
-	}
 }
 
 void editor_window::update_status_info(const status_info& info)

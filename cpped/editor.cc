@@ -117,7 +117,7 @@ void editor::adjust_cursor_column_to_desired()
 		cursor_pos_.column++;
 		current_column = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 	}
-	while(current_column > desired_cursor_column_ + tab_width_ && cursor_pos_.column > 0)
+	while(current_column > desired_cursor_column_ + settings_.tab_width && cursor_pos_.column > 0)
 	{
 		cursor_pos_.column--;
 		current_column = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
@@ -149,7 +149,7 @@ void editor::ensure_cursor_visible()
 
 void editor::request_full_render()
 {
-	window_.render(*doc_, first_column_, first_line_, tab_width_);
+	window_.render(*doc_, first_column_, first_line_, settings_, selection_);
 	request_cursor_update();
 }
 
@@ -361,7 +361,7 @@ unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 	for(; docx > 0; docx--, text++)
 	{
 		if (*text == '\t')
-			x = (x+tab_width_) - (x+tab_width_)%tab_width_;
+			x = (x+settings_.tab_width) - (x+settings_.tab_width)%settings_.tab_width;
 		else
 			x++;
 	}

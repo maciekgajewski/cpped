@@ -10,6 +10,12 @@ namespace cpped {
 
 class editor_window;
 
+struct editor_settings
+{
+	bool visualize_tab = true;
+	unsigned tab_width = 4;
+};
+
 class editor
 {
 public:
@@ -78,12 +84,13 @@ private:
 	unsigned desired_cursor_column_ = 0;
 
 	// settings
-	unsigned tab_width_ = 4;
+	editor_settings settings_;
 
 	document::document* doc_;
 	editor_window& window_;
 	std::unique_ptr<document::document> unsaved_document_;
 	bool parsing_disabled_ = false;
+	boost::optional<document::document_range> selection_;
 };
 
 }
