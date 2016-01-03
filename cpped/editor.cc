@@ -353,29 +353,45 @@ void editor::pg_down()
 void editor::backspace()
 {
 	// TODO any smart-unindenting goes here
-	if (cursor_pos_ > document::document_position{0, 0})
+	if (selection_)
+	{
+		auto edit = doc_->edit();
+		edit.remove(*selection_);
+		cursor_pos_ = selection_->start;
+		edit.commit(cursor_pos_);
+		selection_.reset();
+	}
+	else if (cursor_pos_ > document::document_position{0, 0})
 	{
 		auto edit = doc_->edit();
 		cursor_pos_ = edit.remove_before(cursor_pos_, 1);
 		edit.commit(cursor_pos_);
-
-		request_parsing();
-		ensure_cursor_visible();
-		request_full_render();
 	}
+
+	request_parsing();
+	ensure_cursor_visible();
+	request_full_render();
 }
 
 void editor::del()
 {
-	if (cursor_pos_ < doc_->get_last_position())
+	if (selection_)
+	{
+		auto edit = doc_->edit();
+		edit.remove(*selection_);
+		cursor_pos_ = selection_->start;
+		edit.commit(cursor_pos_);
+		selection_.reset();
+	}
+	else if (cursor_pos_ < doc_->get_last_position())
 	{
 		auto edit = doc_->edit();
 		edit.remove_after(cursor_pos_, 1);
 		edit.commit(cursor_pos_);
-
-		request_parsing();
-		request_full_render();
 	}
+
+	request_parsing();
+	request_full_render();
 }
 
 void editor::home()
@@ -456,6 +472,12 @@ unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 void editor::insert_at_cursor(const std::string& s)
 {
 	auto edit = doc_->edit();
+	if (selection_)
+	{
+		edit.remove(*selection_);
+		cursor_pos_ = selection_->start;
+		selection_.reset();
+	}
 	cursor_pos_ = edit.insert(cursor_pos_, s);
 	edit.commit(cursor_pos_);
 
