@@ -4,6 +4,34 @@
 
 namespace cpped { namespace document { namespace test {
 
+static void insert(document& doc, const document_position& pos, const std::string& text)
+{
+	auto edit = doc.edit();
+	edit.insert(pos, text);
+	edit.commit({0, 0});
+}
+
+static void remove(document& doc, const document_range& rng)
+{
+	auto edit = doc.edit();
+	edit.remove(rng);
+	edit.commit({0, 0});
+}
+
+static void remove_before(document& doc, const document_position& pos, unsigned c)
+{
+	auto edit = doc.edit();
+	edit.remove_before(pos, c);
+	edit.commit({0, 0});
+}
+
+static void remove_after(document& doc, const document_position& pos, unsigned c)
+{
+	auto edit = doc.edit();
+	edit.remove_after(pos, c);
+	edit.commit({0, 0});
+}
+
 BOOST_AUTO_TEST_SUITE( document_tests )
 
 BOOST_AUTO_TEST_CASE(document_lines)
@@ -27,7 +55,8 @@ R"(1
 	}
 }
 
-BOOST_AUTO_TEST_CASE(insert)
+
+BOOST_AUTO_TEST_CASE(inserting)
 {
 	std::string text =
 R"(111
@@ -39,19 +68,19 @@ R"(111
 
 	BOOST_CHECK_EQUAL(doc.to_string(), text);
 
-	doc.insert(document_position{1, 2}, "44");
+	insert(doc, document_position{1, 2}, "44");
 	BOOST_CHECK_EQUAL(doc.to_string(), "111\n224422\n33333");
 
-	doc.insert(document_position{0, 0}, "0");
+	insert(doc, document_position{0, 0}, "0");
 	BOOST_CHECK_EQUAL(doc.to_string(), "0111\n224422\n33333");
 
-	doc.insert(document_position{0, 4}, "xx");
+	insert(doc, document_position{0, 4}, "xx");
 	BOOST_CHECK_EQUAL(doc.to_string(), "0111xx\n224422\n33333");
 
-	doc.insert(document_position{2, 0}, "abcdef");
+	insert(doc, document_position{2, 0}, "abcdef");
 	BOOST_CHECK_EQUAL(doc.to_string(), "0111xx\n224422\nabcdef33333");
 
-	doc.insert(document_position{2, 11}, "END");
+	insert(doc, document_position{2, 11}, "END");
 	BOOST_CHECK_EQUAL(doc.to_string(), "0111xx\n224422\nabcdef33333END");
 }
 
@@ -160,7 +189,9 @@ BOOST_AUTO_TEST_CASE(insert_character_no_token)
 	std::string l1 = doc.get_line(1).to_string();
 	std::string l2 = doc.get_line(2).to_string();
 
-	doc.insert(document_position{1, 1}, "x");
+	auto edit = doc.edit();
+	edit.insert(document_position{1, 1}, "x");
+	edit.commit({0, 0});
 
 	// no changes to previous and subsequent line
 	BOOST_CHECK_EQUAL(doc.get_line(0).to_string(), l0);
@@ -209,7 +240,9 @@ BOOST_AUTO_TEST_CASE(insert_newline_no_tokens)
 	auto line1 = doc.get_line(1);
 	BOOST_CHECK_EQUAL(line1.get_length(), 4);
 
-	doc.insert(document_position{1, 2}, "\n");
+	auto edit = doc.edit();
+	edit.insert(document_position{1, 2}, "\n");
+	edit.commit({0, 0});
 
 	BOOST_REQUIRE_EQUAL(4, doc.get_line_count());
 	BOOST_CHECK_EQUAL(doc.get_line(0).get_length(), 3);
@@ -244,7 +277,7 @@ BOOST_AUTO_TEST_CASE(insert_newline_between_tokens)
 	auto line1 = doc.get_line(1);
 	BOOST_CHECK_EQUAL(line1.get_length(), 6);
 
-	doc.insert(document_position{1, 3}, "\n");
+	insert(doc, document_position{1, 3}, "\n");
 
 	BOOST_REQUIRE_EQUAL(4, doc.get_line_count());
 
@@ -292,7 +325,7 @@ BOOST_AUTO_TEST_CASE(insert_newline_inside_token)
 	auto line1 = doc.get_line(1);
 	BOOST_CHECK_EQUAL(line1.get_length(), 3);
 
-	doc.insert(document_position{1, 2}, "\n");
+	insert(doc, document_position{1, 2}, "\n");
 
 	BOOST_REQUIRE_EQUAL(4, doc.get_line_count());
 
@@ -329,17 +362,17 @@ BOOST_AUTO_TEST_CASE(multiline_insert_no_tokens)
 	BOOST_CHECK_EQUAL(doc.to_string(), text);
 
 	// insert multiple lines at the beginning
-	doc.insert(document_position{0,0}, "aa\nbb\ncc");
+	insert(doc, document_position{0,0}, "aa\nbb\ncc");
 	BOOST_CHECK_EQUAL(doc.to_string(), "aa\nbb\ncc1122\n333\n5566");
 	BOOST_CHECK_EQUAL(doc.get_line_count(), 5);
 
 	// insert multiple lines in the middle
-	doc.insert(document_position{2, 4}, "xxx\nyyy\nzzz");
+	insert(doc, document_position{2, 4}, "xxx\nyyy\nzzz");
 	BOOST_CHECK_EQUAL(doc.to_string(), "aa\nbb\ncc11xxx\nyyy\nzzz22\n333\n5566");
 	BOOST_CHECK_EQUAL(doc.get_line_count(), 7);
 
 	// insert multiple lines at the end
-	doc.insert(document_position{6, 4}, "alpha\nbeta\ngamma");
+	insert(doc, document_position{6, 4}, "alpha\nbeta\ngamma");
 	BOOST_CHECK_EQUAL(doc.to_string(), "aa\nbb\ncc11xxx\nyyy\nzzz22\n333\n5566alpha\nbeta\ngamma");
 	BOOST_CHECK_EQUAL(doc.get_line_count(), 9);
 }
@@ -351,20 +384,20 @@ BOOST_AUTO_TEST_CASE(remove_single_char_no_tokens)
 	doc.load_from_raw_data(text, "");
 
 
-	doc.remove_before(document_position{1, 1}, 1); // remove '1'
+	remove_before(doc, document_position{1, 1}, 1); // remove '1'
 
 	BOOST_CHECK_EQUAL(doc.get_line_count(), 3);
 	BOOST_CHECK_EQUAL(doc.to_string(), "aaa\n23456\nzzz");
 	BOOST_CHECK_EQUAL(doc.get_line(1).to_string(), "23456");
 
 
-	doc.remove_after(document_position{1, 4}, 1); // remove '6'
+	remove_after(doc, document_position{1, 4}, 1); // remove '6'
 
 	BOOST_CHECK_EQUAL(doc.get_line_count(), 3);
 	BOOST_CHECK_EQUAL(doc.to_string(), "aaa\n2345\nzzz");
 	BOOST_CHECK_EQUAL(doc.get_line(1).to_string(), "2345");
 
-	doc.remove({{1, 1}, {1, 3}}); // remove '34'
+	remove(doc, {{1, 1}, {1, 3}}); // remove '34'
 	BOOST_CHECK_EQUAL(doc.to_string(), "aaa\n25\nzzz");
 	BOOST_CHECK_EQUAL(doc.get_line(1).to_string(), "25");
 }

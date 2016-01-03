@@ -47,7 +47,7 @@ struct line_token
 
 std::ostream& operator << (std::ostream& s, const line_token& t);
 
-struct document_position : public boost::partially_ordered<document_position>
+struct document_position : public boost::totally_ordered<document_position>
 {
 	unsigned line = 0;
 	unsigned column = 0;

@@ -91,11 +91,13 @@ void editor::set_document(document::document& doc)
 
 void editor::replace(const document::document_position& pos, unsigned len, const std::string& replacement)
 {
+	auto edit = doc_->edit();
 	if (len > 0)
 	{
-		doc_->remove_after(pos, len);
+		edit.remove_after(pos, len);
 	}
-	cursor_pos_ = doc_->insert(pos, replacement);
+	cursor_pos_ = edit.insert(pos, replacement);
+	edit.commit(cursor_pos_);
 	request_parsing();
 }
 
@@ -283,11 +285,7 @@ void editor::shift_arrow(Action action)
 	action();
 	auto cursor_after = cursor_pos_;
 
-	if (cursor_before == cursor_after)
-	{
-		selection_.reset();
-	}
-	else
+	if (cursor_before != cursor_after)
 	{
 		if (selection_)
 		{
@@ -295,6 +293,9 @@ void editor::shift_arrow(Action action)
 				selection_->end = cursor_after;
 			else
 				selection_->start = cursor_after;
+
+			if (selection_->end == selection_->start)
+				selection_.reset();
 		}
 		else
 		{
@@ -354,7 +355,10 @@ void editor::backspace()
 	// TODO any smart-unindenting goes here
 	if (cursor_pos_ > document::document_position{0, 0})
 	{
-		cursor_pos_ = doc_->remove_before(cursor_pos_, 1);
+		auto edit = doc_->edit();
+		cursor_pos_ = edit.remove_before(cursor_pos_, 1);
+		edit.commit(cursor_pos_);
+
 		request_parsing();
 		ensure_cursor_visible();
 		request_full_render();
@@ -365,7 +369,10 @@ void editor::del()
 {
 	if (cursor_pos_ < doc_->get_last_position())
 	{
-		doc_->remove_after(cursor_pos_, 1);
+		auto edit = doc_->edit();
+		edit.remove_after(cursor_pos_, 1);
+		edit.commit(cursor_pos_);
+
 		request_parsing();
 		request_full_render();
 	}
@@ -448,7 +455,9 @@ unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 
 void editor::insert_at_cursor(const std::string& s)
 {
-	cursor_pos_ = doc_->insert(cursor_pos_, s);
+	auto edit = doc_->edit();
+	cursor_pos_ = edit.insert(cursor_pos_, s);
+	edit.commit(cursor_pos_);
 
 	// TODO check if can complete here
 	request_parsing();

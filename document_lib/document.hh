@@ -43,6 +43,34 @@ private:
 	const line_data& line_data_;
 };
 
+// interface for editing the document
+class document_edit
+{
+public:
+
+	document_edit(document& doc);
+
+	// insert string at location. Returns the position of the end of inserted text
+	document_position insert(document_position pos, const std::string& text);
+
+	// removes indicated range
+	void remove(document_range r);
+	// removes characters before the positon, returns the position of the begining of the removed range
+	document_position remove_before(document_position pos, unsigned count);
+	// removes characters after the positon, returns the position of the end of the removed range
+	document_position remove_after(document_position pos, unsigned count);
+
+
+	// commits the edit, together with current cursor position
+	void commit(const document_position& cursor_pos);
+
+private:
+
+	document& document_;
+	document_data* current_data_;
+	std::unique_ptr<document_data> changed_data_;
+};
+
 class document
 {
 public:
@@ -57,31 +85,22 @@ public:
 	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const token_data& tokens);
 	void load_from_file(const boost::filesystem::path& path);
 
-	unsigned get_line_count() const { return current_data_->data.get_line_count(); }
+	unsigned get_line_count() const { return current_data_->data->get_line_count(); }
 
 	unsigned line_length(unsigned index)
 	{
 		return get_line(index).get_length();
 	}
 
-	document_line get_line(unsigned index) const { return document_line(current_data_->data.get_line(index)); }
+	document_line get_line(unsigned index) const { return document_line(current_data_->data->get_line(index)); }
 
-	// insert string at location. Returns the position of the end of inserted text
-	document_position insert(document_position pos, const std::string& text);
-
-	// removes indicated range
-	void remove(document_range r);
-	// removes characters before the positon, returns the position of the begining of the removed range
-	document_position remove_before(document_position pos, unsigned count);
-	// removes characters after the positon, returns the position of the end of the removed range
-	document_position remove_after(document_position pos, unsigned count);
 
 
 	// iterates over no more than 'count' lines in range, starting from first_line
 	template<typename FUN>
 	void for_lines(unsigned first_line, unsigned max_count, FUN f)
 	{
-		current_data_->data.for_lines(first_line, max_count,
+		current_data_->data->for_lines(first_line, max_count,
 			[&](const line_data& ld)
 			{
 				f(document_line(ld));
@@ -91,28 +110,32 @@ public:
 	// Requests parsing
 	void parse_language();
 
-	const std::vector<char>& get_raw_data() const { return current_data_->data.get_raw_data(); }
+	const std::vector<char>& get_raw_data() const { return current_data_->data->get_raw_data(); }
 	const boost::filesystem::path& get_file_name() const { return file_name_; }
 
 	std::string to_string() const; // mostly for testing
 
-	document_data& get_data() { return current_data_->data; } // for tests
+	document_data& get_data() { return *current_data_->data; } // for tests
 	std::uint64_t get_current_version() const { return current_data_->version; }
 
-	document_position get_last_position() const { return current_data_->data.get_last_position(); }
+	document_position get_last_position() const { return current_data_->data->get_last_position(); }
 
 	bool has_unsaved_changed() const { return _has_unsaved_changes; }
 
 	void set_tokens(std::uint64_t version, const token_data& tokens);
 
-	const std::vector<diagnostic_message>& get_diagnostics() const { return current_data_->data.get_diagnostics(); }
+	const std::vector<diagnostic_message>& get_diagnostics() const { return current_data_->data->get_diagnostics(); }
+
+	document_edit edit() { return document_edit(*this); }
+	void commit_change(std::unique_ptr<document_data>&& new_data, const document_position& cursor_pos);
 
 private:
 
 	struct versioned_data
 	{
-		document_data data;
+		std::unique_ptr<document_data> data;
 		std::uint64_t version;
+		document_position cursor_position;
 	};
 
 	void erase_redo(); // erases any data ahead of current_data_
