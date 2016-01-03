@@ -65,6 +65,10 @@ private:
 	void cursor_left();
 	void cursor_right();
 
+	void copy();
+	void paste();
+	void cut();
+
 	template<typename Action>
 	void shift_arrow(Action action);
 

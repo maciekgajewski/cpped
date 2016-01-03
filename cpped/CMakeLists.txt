@@ -7,6 +7,7 @@ add_executable(cpped
 	navigator_widget.cc navigator_widget.hh
 	main_window.cc main_window.hh
 	completer_widget.cc completer_widget.hh
+	clipboard.cc clipboard.hh
 )
 
 target_link_libraries(cpped

@@ -2,6 +2,7 @@
 #include "main_window.hh"
 #include "styles.hh"
 #include "project.hh"
+#include "clipboard.hh"
 
 #include "document_lib/document.hh"
 
@@ -52,6 +53,7 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 
 	nct::event_dispatcher dispatcher;
 	cpped::style_manager styles;
+	cpped::clipboard clipboard;
 	cpped::main_window main_window(project, dispatcher, styles);
 	cpped::editor_window& editor = main_window.get_current_editor();
 
@@ -75,7 +77,7 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 			}
 			return received;
 		});
-	dispatcher.set_global_quit_key("^X");
+	dispatcher.set_global_quit_key("KEY_F(10)");
 	dispatcher.run();
 }
 

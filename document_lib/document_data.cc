@@ -301,6 +301,12 @@ std::pair<unsigned, const line_token*> document_data::get_token_before(const doc
 	return {pos.line, tok};
 }
 
+std::string document_data::get_range_content(const document_range& rng) const
+{
+	return std::string(
+		positon_to_offset(rng.start), positon_to_offset(rng.end));
+}
+
 
 data_type::const_iterator document_data::positon_to_offset(document_position pos) const
 {

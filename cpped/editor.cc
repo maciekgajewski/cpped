@@ -1,6 +1,7 @@
 #include "editor.hh"
 
 #include "editor_window.hh"
+#include "clipboard.hh"
 
 #include "document_lib/document.hh"
 
@@ -61,8 +62,19 @@ bool editor::on_special_key(int key_code, const char* key_name)
 		case KEY_HOME:
 			home(); return true;
 		case KEY_END:
-			end(); return true;
+			end(); return true;		
 	}
+
+	static const std::string copy_key = "^C";
+	static const std::string paste_key = "^V";
+	static const std::string cut_key = "^X";
+
+	if (key_name == copy_key)
+		copy();
+	else if (key_name == paste_key)
+		paste();
+	else if (key_name == cut_key)
+		cut();
 
 	return false;
 }
@@ -247,6 +259,36 @@ void editor::cursor_right()
 			// scroll right
 			first_column_ += (workspace_x - window_.get_workspace_width());
 		}
+	}
+}
+
+void editor::copy()
+{
+	if (selection_)
+	{
+		clipboard::set(doc_->get_range_content(*selection_));
+	}
+}
+
+void editor::paste()
+{
+	if (!clipboard::empty())
+	{
+		insert_at_cursor(clipboard::get());
+	}
+}
+
+void editor::cut()
+{
+	if (selection_)
+	{
+		clipboard::set(doc_->get_range_content(*selection_));
+		auto edit = doc_->edit();
+		edit.remove(*selection_);
+		cursor_pos_ = selection_->start;
+		edit.commit(cursor_pos_);
+
+		request_full_render();
 	}
 }
 

@@ -64,6 +64,8 @@ public:
 
 	const std::vector<diagnostic_message>& get_diagnostics() const { return diagnostics_; }
 
+	std::string get_range_content(const document_range& rng) const;
+
 private:
 
 	data_type::const_iterator positon_to_offset(document_position pos) const;

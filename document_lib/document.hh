@@ -116,6 +116,7 @@ public:
 	std::string to_string() const; // mostly for testing
 
 	document_data& get_data() { return *current_data_->data; } // for tests
+	const document_data& get_data() const { return *current_data_->data; } // for tests
 	std::uint64_t get_current_version() const { return current_data_->version; }
 
 	document_position get_last_position() const { return current_data_->data->get_last_position(); }
@@ -128,6 +129,7 @@ public:
 
 	document_edit edit() { return document_edit(*this); }
 	void commit_change(std::unique_ptr<document_data>&& new_data, const document_position& cursor_pos);
+	std::string get_range_content(const document_range& rng) const { return get_data().get_range_content(rng); }
 
 private:
 
