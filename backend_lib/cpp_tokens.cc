@@ -99,6 +99,7 @@ document::token_data get_cpp_tokens_with_diagnostics(const clang::translation_un
 	{
 		clang::diagnostic diag = diags[i];
 		std::string message = diag.format(CXDiagnostic_DisplaySourceLocation|CXDiagnostic_DisplaySourceRanges).c_str();
+#ifdef ENABLE_LOGGING
 		LOG(" * " << message);
 		for(auto r = 0u; r < diag.get_num_ranges(); r++)
 		{
@@ -107,7 +108,7 @@ document::token_data get_cpp_tokens_with_diagnostics(const clang::translation_un
 			auto end = rng.get_end().get_location_info();
 			LOG("    " << start.line << ":" << start.column << " - " << end.line << ":" << end.column);
 		}
-
+#endif
 
 		switch(diag.get_severity())
 		{

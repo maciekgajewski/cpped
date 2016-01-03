@@ -80,7 +80,7 @@ status_provider::~status_provider()
 		message_stack->pop(this);
 }
 
-void status_provider::set_status(const std::__cxx11::string& text)
+void status_provider::set_status(const std::string& text)
 {
 	if (message_stack)
 		message_stack->set_message(this, text);

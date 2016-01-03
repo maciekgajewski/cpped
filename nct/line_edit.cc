@@ -10,7 +10,7 @@ line_edit::line_edit(event_dispatcher& ed, event_window* parent)
 {
 }
 
-void line_edit::set_text(const std::__cxx11::string& t)
+void line_edit::set_text(const std::string& t)
 {
 	text_ = t;
 	first_column_ = 0;

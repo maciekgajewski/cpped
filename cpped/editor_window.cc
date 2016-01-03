@@ -24,7 +24,7 @@ struct text_renderer
 	style_manager& styles_;
 
 	// volatile
-	unsigned phys_column_ = 0;
+	unsigned phys_column_;
 	document::document_position position_;
 
 	void render_text(const nct::style& style, const char* begin, const char* end);

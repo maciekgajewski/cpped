@@ -97,7 +97,6 @@ private:
 	friend class translation_unit;
 	friend class source_range;
 	friend class token_list;
-	friend class source_range;
 };
 
 class source_range

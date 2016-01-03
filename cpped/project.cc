@@ -60,7 +60,7 @@ document::document& project::open_file(const fs::path& file)
 		auto doc_ptr = std::make_unique<document::document>();
 		doc_ptr->load_from_raw_data(reply.data, absolute, reply.tokens);
 
-		auto p = open_files_.insert(std::make_pair(absolute, open_file_data{std::move(doc_ptr), 0} ));
+		auto p = open_files_.insert(std::make_pair(absolute, open_file_data{std::move(doc_ptr), 0, 0} ));
 		assert(p.second);
 		return *p.first->second.document;
 	}

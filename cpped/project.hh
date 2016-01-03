@@ -46,8 +46,8 @@ private:
 	struct open_file_data
 	{
 		std::unique_ptr<document::document> document;
-		std::uint64_t last_version_parsed = 0;
-		std::uint64_t last_version_send = 0;
+		std::uint64_t last_version_parsed;
+		std::uint64_t last_version_send;
 	};
 
 	void on_file_tokens(const backend::messages::file_tokens_feed& token_feed);

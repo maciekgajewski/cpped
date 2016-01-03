@@ -6,6 +6,8 @@ namespace nct {
 
 struct style
 {
+	style() = default;
+	style(int bg, int fg) : bgcolor(bg), fgcolor(fg) {}
 	int bgcolor;
 	int fgcolor;
 	int flags = 0;
