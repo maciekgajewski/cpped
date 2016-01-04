@@ -200,7 +200,7 @@ void editor::request_cursor_update()
 	info.column = column;
 	info.status_text = "";
 	info.file_name = doc_->get_file_name();
-	info.unsaved = doc_->has_unsaved_changed();
+	info.unsaved = doc_->has_unsaved_changes();
 
 	window_.update_status_info(info);
 	window_.refresh_cursor(cy, cx);

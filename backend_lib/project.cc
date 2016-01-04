@@ -55,7 +55,7 @@ project::project(event_dispatcher& ed)
 					}
 					catch(...)
 					{
-						reply.parsed = false;
+						reply.parsed = file.was_new(); // if file is new, tolerate parsing error
 					}
 				}
 				else
@@ -81,7 +81,10 @@ project::project(event_dispatcher& ed)
 			{
 				open_file& file = *it->second;
 				file.set_data(feed.data, feed.version);
-				touch_units(feed.file);
+				if (!file.uses_provisional_unit())
+				{
+					touch_units(feed.file);
+				}
 				// get completion (if requested)
 				if (feed.cursor_position)
 				{
@@ -96,10 +99,7 @@ project::project(event_dispatcher& ed)
 				tokens_feed.version = feed.version;
 				auto state = file.parse(get_unsaved_data());
 				tokens_feed.tokens = std::move(state);
-				if (!tokens_feed.tokens.tokens.empty())
-				{
-					event_dispatcher_.send_message(tokens_feed);
-				}
+				event_dispatcher_.send_message(tokens_feed);
 				LOG("Data feed processed");
 			}
 			else

@@ -81,8 +81,8 @@ public:
 	document();
 	~document();
 
-	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path);
-	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const token_data& tokens);
+	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path, bool new_file = false);
+	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const token_data& tokens, bool new_file);
 	void load_from_file(const boost::filesystem::path& path);
 
 	unsigned get_line_count() const { return current_data_->data->get_line_count(); }
@@ -121,7 +121,7 @@ public:
 
 	document_position get_last_position() const { return current_data_->data->get_last_position(); }
 
-	bool has_unsaved_changed() const { return _has_unsaved_changes; }
+	bool has_unsaved_changes() const { return _has_unsaved_changes; }
 
 	void set_tokens(std::uint64_t version, const token_data& tokens);
 

@@ -37,6 +37,8 @@ public:
 		data_ = d;
 		version_ = version;
 		has_unsaved_data_ = true;
+		if (provisional_unit_)
+			provisional_unit_->mark_dirty();
 	}
 
 	void set_data(const std::string& d, std::uint64_t version)
@@ -44,6 +46,8 @@ public:
 		data_.assign(d.begin(), d.end());
 		version_ = version;
 		has_unsaved_data_ = true;
+		if (provisional_unit_)
+			provisional_unit_->mark_dirty();
 	}
 
 	document::token_data parse(const std::vector<CXUnsavedFile>& unsaved_data);

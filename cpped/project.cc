@@ -58,9 +58,9 @@ project::open_file_result project::open_file(const fs::path& file)
 		}
 
 		auto doc_ptr = std::make_unique<document::document>();
-		doc_ptr->load_from_raw_data(reply.data, absolute, reply.tokens);
+		doc_ptr->load_from_raw_data(reply.data, absolute, reply.tokens, reply.new_file);
 
-		auto p = open_files_.insert(std::make_pair(absolute, open_file_data{std::move(doc_ptr), 0, 0} ));
+		auto p = open_files_.insert(std::make_pair(absolute, open_file_data{std::move(doc_ptr), 0, 0, reply.parsed} ));
 		assert(p.second);
 		return {*p.first->second.document, reply.new_file};
 	}
@@ -100,6 +100,9 @@ void project::request_parsing(
 	const document::document& doc,
 	const boost::optional<document::document_position>& cursor_pos)
 {
+	if (!open_files_[doc.get_file_name()].is_source)
+		return; // ignore for non-source files
+
 	if (!parsing_in_progress_)
 	{
 		send_parse_request(doc, cursor_pos);

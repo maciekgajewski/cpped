@@ -18,7 +18,7 @@ document::~document()
 {
 }
 
-void document::load_from_raw_data(const std::string& data, const fs::path& path)
+void document::load_from_raw_data(const std::string& data, const fs::path& path, bool new_file)
 {
 	file_name_ = fs::absolute(path);
 
@@ -34,11 +34,12 @@ void document::load_from_raw_data(const std::string& data, const fs::path& path)
 		current_data_ = data_.begin();
 		last_version_ = 0;
 	}
+	_has_unsaved_changes = new_file;
 }
 
-void document::load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const token_data& tokens)
+void document::load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const token_data& tokens, bool new_file)
 {
-	load_from_raw_data(data, path);
+	load_from_raw_data(data, path, new_file);
 	current_data_->data->set_tokens(tokens);
 }
 
