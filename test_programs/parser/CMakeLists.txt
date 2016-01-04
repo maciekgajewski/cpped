@@ -1,8 +1,4 @@
-# TODO write FindClang
-include_directories(/usr/lib/llvm-3.7/include)
-include_directories(/usr/include/llvm-3.7)
 
-link_directories(/usr/lib/llvm-3.7/lib)
 
 add_executable(parser
 	main.cc
@@ -10,8 +6,7 @@ add_executable(parser
 
 target_link_libraries(parser
 
-	LLVM-3.7
-	clang-3.7
+	${CLANG_LIBRARIES}
 
 #clangFrontend
 #clangDriver

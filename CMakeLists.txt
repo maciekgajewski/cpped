@@ -5,15 +5,19 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -Wall -Wno-sign-compare")
 
 enable_testing()
 
-# Debian provided
-set(CLANG_INCLUDE_DIRS /usr/lib/llvm-3.7/include /usr/include/llvm-3.7)
-set(CLANG_LINK_DIRS /usr/lib/llvm-3.7/lib)
-set(CLANG_LIBRARIES	LLVM-3.7 clang-3.7)
 
-# local debug build
-#set(CLANG_INCLUDE_DIRS /home/maciek/workspace/llvm/tools/clang/include)
-#set(CLANG_LINK_DIRS /home/maciek/workspace/build/llvm-debug/lib)
-#set(CLANG_LIBRARIES	clang)
+option(CLANG_ROOT "Clang installation dir")
+
+if(DEFINED CLANG_ROOT)
+	set(CLANG_INCLUDE_DIRS ${CLANG_ROOT}/include)
+	set(CLANG_LINK_DIRS ${CLANG_ROOT}/lib)
+	set(CLANG_LIBRARIES    clang)
+else()
+# Debian provided
+	set(CLANG_INCLUDE_DIRS /usr/lib/llvm-3.7/include /usr/include/llvm-3.7)
+	set(CLANG_LINK_DIRS /usr/lib/llvm-3.7/lib)
+	set(CLANG_LIBRARIES	LLVM-3.7 clang-3.7)
+endif()
 
 include_directories(${CLANG_INCLUDE_DIRS})
 link_directories(${CLANG_LINK_DIRS})
