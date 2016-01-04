@@ -287,10 +287,23 @@ unsigned editor_window::get_workspace_height() const
 void editor_window::open_file(const boost::filesystem::path& file)
 {
 	// TODO modal dialog to save unsavedchanges in current document
-
-	document::document& doc = project_.open_file(file);
-	editor_.set_document(doc);
-	set_status("Document loaded");
+	try
+	{
+		auto result = project_.open_file(file);
+		editor_.set_document(result.document);
+		if (result.was_new)
+		{
+			set_status("New file: " + file.string());
+		}
+		else
+		{
+			set_status("File loaded: " + file.string());
+		}
+	}
+	catch(const std::exception& e)
+	{
+		set_status(std::string("Error opening file: ") + e.what());
+	}
 }
 
 }

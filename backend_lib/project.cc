@@ -44,8 +44,24 @@ project::project(event_dispatcher& ed)
 				messages::open_file_reply reply;
 				reply.file = request.file;
 				reply.data.assign(file.get_data().begin(), file.get_data().end());
-				auto state = file.parse(get_unsaved_data());
-				reply.tokens = std::move(state);
+				reply.new_file = file.was_new();
+				if (file.is_source())
+				{
+					try
+					{
+						auto state = file.parse(get_unsaved_data());
+						reply.tokens = std::move(state);
+						reply.parsed = true;
+					}
+					catch(...)
+					{
+						reply.parsed = false;
+					}
+				}
+				else
+				{
+					reply.parsed = false;
+				}
 				LOG("Sending back file data");
 				event_dispatcher_.send_message(reply);
 			}

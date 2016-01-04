@@ -96,6 +96,8 @@ struct open_file_reply
 	std::string error;
 	std::string data; // TODO be smarter about large buffers, use copy-less structures
 	document::token_data tokens;
+	bool new_file;
+	bool parsed;
 };
 template<typename Writer> void serialize(Writer& writer, const open_file_reply& m)
 {
@@ -103,6 +105,8 @@ template<typename Writer> void serialize(Writer& writer, const open_file_reply& 
 	serialize(writer, m.error);
 	serialize(writer, m.data);
 	serialize(writer, m.tokens);
+	serialize(writer, m.new_file);
+	serialize(writer, m.parsed);
 }
 template<typename Reader> void deserialize(Reader& reader, open_file_reply& m)
 {
@@ -110,6 +114,8 @@ template<typename Reader> void deserialize(Reader& reader, open_file_reply& m)
 	deserialize(reader, m.error);
 	deserialize(reader, m.data);
 	deserialize(reader, m.tokens);
+	deserialize(reader, m.new_file);
+	deserialize(reader, m.parsed);
 }
 
 // B->F

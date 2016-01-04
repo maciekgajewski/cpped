@@ -50,11 +50,13 @@ public:
 	std::vector<messages::completion_record> complete_at(
 		const std::vector<CXUnsavedFile>& unsaved_data,
 		const document::document_position& pos);
+	bool is_source() const { return unit_ != nullptr; }
 
 	bool has_unsaved_data() const { return has_unsaved_data_; }
 
 	const boost::filesystem::path& get_path() const{ return path_; }
 	std::uint64_t get_version() const { return version_; }
+	bool was_new() const { return was_new_; }
 
 private:
 
@@ -67,6 +69,7 @@ private:
 	std::unique_ptr<compilation_unit> provisional_unit_;
 	bool has_unsaved_data_ = false;
 	std::uint64_t version_ = 0;
+	bool was_new_ = false; // if file was newly created
 };
 
 }}

@@ -12,7 +12,15 @@ namespace  fs = boost::filesystem;
 open_file::open_file(const fs::path& path)
 	: path_(path)
 {
-	load_from_disk();
+	if (fs::exists(path))
+	{
+		load_from_disk();
+		was_new_ = false;
+	}
+	else
+	{
+		was_new_ = true;
+	}
 }
 
 document::token_data open_file::parse(const std::vector<CXUnsavedFile>& unsaved_data)

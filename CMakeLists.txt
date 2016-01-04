@@ -5,9 +5,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -Wall -Wno-sign-compare")
 
 enable_testing()
 
-
-option(CLANG_ROOT "Clang installation dir")
-
 if(DEFINED CLANG_ROOT)
 	set(CLANG_INCLUDE_DIRS ${CLANG_ROOT}/include)
 	set(CLANG_LINK_DIRS ${CLANG_ROOT}/lib)
@@ -22,9 +19,6 @@ endif()
 include_directories(${CLANG_INCLUDE_DIRS})
 link_directories(${CLANG_LINK_DIRS})
 
-# cursome ncurses
-#INCLUDE_DIRECTORIES(/home/maciek/workspace/build/ncurses-debug/include)
-#LINK_DIRECTORIES(/home/maciek/workspace/build/ncurses-debug/lib)
 
 find_package(Boost COMPONENTS system filesystem program_options date_time)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})

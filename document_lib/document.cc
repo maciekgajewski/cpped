@@ -24,9 +24,16 @@ void document::load_from_raw_data(const std::string& data, const fs::path& path)
 
 	data_.clear();
 	data_.emplace_back(versioned_data{std::make_unique<document_data>(), 0});
-	data_.back().data->load_from_raw_data(data);
-	current_data_ = data_.begin();
-	last_version_ = 0;
+	if (data.empty())
+	{
+		data_.back().data->init_empty();
+	}
+	else
+	{
+		data_.back().data->load_from_raw_data(data);
+		current_data_ = data_.begin();
+		last_version_ = 0;
+	}
 }
 
 void document::load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const token_data& tokens)

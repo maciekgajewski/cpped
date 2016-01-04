@@ -39,7 +39,7 @@ void project::open_cmake_project(const boost::filesystem::path& build_dir)
 	files_ = std::move(reply.files);
 }
 
-document::document& project::open_file(const fs::path& file)
+project::open_file_result project::open_file(const fs::path& file)
 {
 	fs::path absolute = fs::absolute(file);
 	auto it = open_files_.find(absolute);
@@ -62,11 +62,11 @@ document::document& project::open_file(const fs::path& file)
 
 		auto p = open_files_.insert(std::make_pair(absolute, open_file_data{std::move(doc_ptr), 0, 0} ));
 		assert(p.second);
-		return *p.first->second.document;
+		return {*p.first->second.document, reply.new_file};
 	}
 	else
 	{
-		return *it->second.document;
+		return {*it->second.document, false};
 	}
 }
 

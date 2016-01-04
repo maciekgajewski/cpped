@@ -20,12 +20,18 @@ class project
 {
 public:
 
+	struct open_file_result
+	{
+		document::document&	document;
+		bool was_new;
+	};
+
 	boost::signals2::signal<void(const std::string&)> status_signal;
 
 	project(backend::endpoint& ep);
 
 	void open_cmake_project(const boost::filesystem::path& build_dir);
-	document::document& open_file(const boost::filesystem::path& file);
+	open_file_result open_file(const boost::filesystem::path& file);
 	document::document& get_open_file(const boost::filesystem::path& file);
 
 	template<typename OutIt>
@@ -33,6 +39,7 @@ public:
 	template<typename OutIt>
 	void get_all_open_files(OutIt out) const;
 
+	// TODO create project_file class, make these two methods
 	void request_parsing(
 		const document::document& doc,
 		const boost::optional<document::document_position>& cursor_pos);
