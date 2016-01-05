@@ -2,6 +2,8 @@
 
 #include "nct/event_window.hh"
 #include "nct/status_message.hh"
+#include "nct/fbuttons.hh"
+
 #include <memory>
 
 namespace cpped {
@@ -33,6 +35,7 @@ private:
 	style_manager& style_;
 	nct::status_message_receiver status_message_receiver_;
 	std::unique_ptr<editor_window> editor_;
+	nct::fbuttons fbuttons_;
 };
 
 }

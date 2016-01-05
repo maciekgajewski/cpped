@@ -9,7 +9,8 @@ main_window::main_window(project& pr, nct::event_dispatcher& ed, style_manager& 
 	: nct::event_window(ed, nullptr),
 	project_(pr), style_(sm),
 	status_message_receiver_([this](const std::string& s) { set_status_message(s); }),
-	editor_(std::make_unique<editor_window>(pr, ed, sm, this))
+	editor_(std::make_unique<editor_window>(pr, ed, sm, this)),
+	fbuttons_(ed, this)
 {
 	project_.status_signal.connect(
 		[this](const std::string st)
@@ -30,7 +31,8 @@ void main_window::on_shown()
 void main_window::on_resized()
 {
 	nct::size sz = get_size();
-	editor_->move({0, 0}, {sz.h - 1, sz.w});
+	editor_->move({0, 0}, {sz.h - 2, sz.w});
+	fbuttons_.move({sz.h - 1, 0}, {1, sz.w});
 	update();
 }
 
@@ -46,14 +48,14 @@ void main_window::update()
 	nct::ncurses_window& window = get_ncurses_window();
 
 	nct::style style{COLOR_CYAN, COLOR_BLACK};
-	window.horizontal_line(window.get_height()-1, 0, style, ' ', window.get_width());
+	window.horizontal_line(window.get_height()-2, 0, style, ' ', window.get_width());
 
 	// status - left aligned
-	window.move_cursor(window.get_height()-1, 0);
+	window.move_cursor(window.get_height()-2, 0);
 	window.style_print(style, status_);
 
-	// project attaus - right aligned
-	window.move_cursor(window.get_height()-1, window.get_width()-project_status_.size());
+	// project status - right aligned
+	window.move_cursor(window.get_height()-2, window.get_width()-project_status_.size());
 	window.style_print(style, project_status_);
 }
 

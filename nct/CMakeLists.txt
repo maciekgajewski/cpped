@@ -9,6 +9,7 @@ add_library(nct
 	list_widget.cc list_widget.hh
 	status_message.cc status_message.hh
 	style.cc style.hh
+	fbuttons.cc fbuttons.hh
 )
 
 target_include_directories(nct INTERFACE ..)

@@ -33,10 +33,14 @@ void ncurses_window::attr_print(attr_t attr, const char* text, unsigned length)
 void ncurses_window::attr_fill_line(attr_t attr, chtype c, int line)
 {
 	move_cursor(line, 0);
+	attr_fill(attr, c, get_width());
+}
 
+void ncurses_window::attr_fill(attr_t attr, chtype c, int count)
+{
 	::wattron(win_, attr);
 
-	for(int i = 0; i < get_width(); i++)
+	for(int i = 0; i < count; i++)
 		put_char(c);
 
 	::wattron(win_, attr);

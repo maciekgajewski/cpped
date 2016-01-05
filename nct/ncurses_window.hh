@@ -29,9 +29,13 @@ public:
 	void put_char(const style& s, chtype c) { ::waddch(win_, c | s.to_attr()); }
 	void attr_fill_line(attr_t attr, chtype c, int line);
 
+	// prints character 'count' times at current position
+	void attr_fill(attr_t attr, chtype c, int count);
+
 	void style_print(const style& s, const std::string& text) { style_print(s, text.c_str(), text.size()); }
 	void style_print(const style& s, const char* text, unsigned length);
 	void style_fill_line(const style& s, chtype c, int line) { attr_fill_line(s.to_attr(), c, line); }
+	void style_fill(const style& s, chtype c, int count) { attr_fill(s.to_attr(), c, count); }
 
 	void clear() { ::wclear(win_); }
 	void clear_to_eol() { ::wclrtoeol(win_); }
