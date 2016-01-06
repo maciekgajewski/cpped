@@ -100,6 +100,11 @@ void list_widget::on_shown()
 	update();
 }
 
+void list_widget::on_resized()
+{
+	update();
+}
+
 void list_widget::update()
 {
 	if (!is_visible()) return;

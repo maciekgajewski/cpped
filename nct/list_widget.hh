@@ -44,6 +44,7 @@ private:
 	bool on_special_key(int key_code, const char* key_name) override;
 
 	void on_shown() override;
+	void on_resized() override;
 
 	void update();
 	void items_changed();
