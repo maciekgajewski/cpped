@@ -40,6 +40,7 @@ private:
 	std::unique_ptr<editor_window> editor_;
 	nct::fbuttons fbuttons_;
 	navigator_widget navigator_;
+	nct::fbutton_action_provider fbutton_provider_;
 
 };
 

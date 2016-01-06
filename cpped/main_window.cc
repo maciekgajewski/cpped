@@ -34,6 +34,9 @@ main_window::main_window(project& pr, nct::event_dispatcher& ed, style_manager& 
 			editor.set_active();
 			editor.open_file(p);
 		});
+
+	fbutton_provider_.set_action(
+		9 /* F10 */, "Quit", {});
 }
 
 void main_window::on_shown()
