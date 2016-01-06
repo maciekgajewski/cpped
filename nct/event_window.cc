@@ -79,11 +79,13 @@ void event_window::move(const position& pos, const size& sz)
 			}
 			if (pos != position_)
 			{
-				window_->move(pos.y, pos.x);
+				position_ = pos;
+				position global_pos = to_global({0 ,0});
+				window_->move(global_pos.y, global_pos.x);
 			}
 		}
-		position_ = pos;
 		size_ = sz;
+		position_ = pos;
 		on_resized();
 	}
 }

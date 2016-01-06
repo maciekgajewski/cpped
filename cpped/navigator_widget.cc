@@ -11,6 +11,7 @@ navigator_widget::navigator_widget(project& pr, nct::event_dispatcher& ed, nct::
 	, editor_(ed, this)
 {
 	editor_.set_help_text("type here to navigate (ctrl-k)");
+	editor_.set_style(nct::style{COLOR_BLACK, COLOR_WHITE});
 	editor_.hint_selected_signal.connect([this](const nct::line_edit::completion_hint& h) { on_hint_selected(h); });
 }
 

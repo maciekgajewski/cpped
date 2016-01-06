@@ -8,6 +8,9 @@ namespace nct {
 line_edit::line_edit(event_dispatcher& ed, event_window* parent)
 	: event_window(ed, parent)
 {
+	// default styles
+	style_ = nct::style{COLOR_CYAN, COLOR_BLACK};
+	help_text_color_ = COLOR_BLUE;
 }
 
 void line_edit::set_text(const std::string& t)
@@ -15,6 +18,18 @@ void line_edit::set_text(const std::string& t)
 	text_ = t;
 	first_column_ = 0;
 	cursor_pos_ = 0;
+	update();
+}
+
+void line_edit::on_text_changed()
+{
+	if(hints_widget_)
+	{
+		hints_widget_->set_filter(text_);
+		update_hints_size();
+	}
+
+	text_changed_signal(text_);
 	update();
 }
 
@@ -29,15 +44,7 @@ unsigned line_edit::on_sequence(const std::string& s)
 	{
 		text_.insert(text_.begin() + cursor_pos_, s.begin(), endl_pos);
 		cursor_pos_ += endl_pos - s.begin();
-
-		if(hints_widget_)
-		{
-			hints_widget_->set_filter(text_);
-			update_hints_size();
-		}
-
-		text_changed_signal(text_);
-		update();
+		on_text_changed();
 	}
 	if (endl_pos != s.end())
 	{
@@ -127,8 +134,7 @@ void line_edit::backspace()
 	{
 		cursor_pos_--;
 		text_.erase(text_.begin() + cursor_pos_);
-		text_changed_signal(text_);
-		update();
+		on_text_changed();
 	}
 }
 
@@ -137,8 +143,7 @@ void line_edit::del()
 	if (cursor_pos_ < text_.size())
 	{
 		text_.erase(text_.begin() + cursor_pos_);
-		text_changed_signal(text_);
-		update();
+		on_text_changed();
 	}
 }
 
@@ -161,12 +166,11 @@ void line_edit::update()
 	if (!is_visible()) return;
 	ncurses_window& window = get_ncurses_window();
 
-	nct::style text_style = nct::style{COLOR_CYAN, COLOR_BLACK};
-	nct::style help_text_style = nct::style{COLOR_CYAN, COLOR_BLUE};
+	style help_text_style = {style_.bgcolor, help_text_color_};
 
 	// background
 	window.move_cursor(0, 0);
-	window.style_fill_line(text_style, ' ', get_size().w);
+	window.style_fill_line(style_, ' ', get_size().w);
 
 	// text
 	window.move_cursor(0, 0);
@@ -176,7 +180,7 @@ void line_edit::update()
 	}
 	else if (first_column_ < text_.size())
 	{
-		window.style_print(text_style, text_.c_str() + first_column_, get_size().w);
+		window.style_print(style_, text_.c_str() + first_column_, get_size().w);
 	}
 
 	// cursor
@@ -238,16 +242,32 @@ void line_edit::update_hints_size()
 
 	size content_size = hints_widget_->get_content_size();
 
-	position global_pos = to_global(position{1, 0});
+	position global_pos = to_global(position{0, 0});
 
 	size sz;
-	int max_h = std::min(LINES - global_pos.y, 40);
-	int max_w = std::min(COLS - global_pos.x, 80);
+	position pos;
+	if (global_pos.y > LINES/2)
+	{
+		// bottom half of the screen - show hints above
+		int max_h = std::min(global_pos.y-1, 40);
+		int max_w = std::min(COLS - global_pos.x, 80);
 
-	sz.h = std::min(max_h, content_size.h);
-	sz.w = std::min(max_w, content_size.w);
-	hints_widget_->move(position{1, 0}, sz);
+		sz.h = std::min(max_h, content_size.h);
+		sz.w = std::min(max_w, content_size.w);
+		pos = {-1 - sz.h, 0};
+	}
+	else
+	{
+		// top part of the screen, show hints below
+		int max_h = std::min(LINES - global_pos.y, 40);
+		int max_w = std::min(COLS - global_pos.x, 80);
 
+		sz.h = std::min(max_h, content_size.h);
+		sz.w = std::min(max_w, content_size.w);
+		pos = {1, 0};
+	}
+
+	hints_widget_->move(pos, sz);
 }
 
 

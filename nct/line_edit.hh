@@ -29,6 +29,9 @@ public:
 	template<typename Container>
 	void set_completion_hints(const Container& hints);
 
+	void set_style(const style& s) { style_ = s; }
+	void set_help_text_color(int color) { help_text_color_ = color; }
+
 // signals
 
 	boost::signals2::signal<void(const std::string&)> text_changed_signal;
@@ -55,6 +58,7 @@ private:
 	void hints_changed();
 	void show_hints();
 	void update_hints_size();
+	void on_text_changed();
 
 	std::string text_;
 	std::string help_text_;
@@ -63,6 +67,8 @@ private:
 
 	std::vector<completion_hint> hints_;
 	boost::optional<list_widget> hints_widget_;
+	style style_;
+	int help_text_color_;
 };
 
 template<typename Container>

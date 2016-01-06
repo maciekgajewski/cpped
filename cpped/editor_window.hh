@@ -2,7 +2,6 @@
 
 #include "editor.hh"
 #include "completer_widget.hh"
-#include "navigator_widget.hh"
 
 #include "nct/event_window.hh"
 #include "nct/status_message.hh"
@@ -64,13 +63,12 @@ public:
 private:
 
 	unsigned left_margin_width_ = 0; // calculated when rendering
-	unsigned top_margin_ = 2;
+	unsigned top_margin_ = 1;
 	unsigned bottom_margin_ = 1;
 
 	project& project_;
 	style_manager& styles_;
 	editor editor_;
-	navigator_widget navigator_;
 	completer_widget completer_;
 	nct::position cursor_pos_;
 	nct::status_provider status_provider_;

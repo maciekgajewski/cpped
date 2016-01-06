@@ -94,12 +94,8 @@ void text_renderer::put_char(const nct::style& style, char c)
 
 editor_window::editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm, event_window* parent)
 	: event_window(ed, parent), project_(pr), styles_(sm), editor_(*this)
-	, navigator_(pr, ed, this)
 	, completer_(pr, ed, this)
 {
-	navigator_.file_selected_signal.connect(
-		[this](const fs::path& p) { open_file(p); set_active(); });
-
 	completer_.completion_cancelled_signal.connect(
 		[this]() { editor_.enable_parsing(); set_active(); });
 	completer_.completion_signal.connect(
@@ -119,14 +115,7 @@ unsigned editor_window::on_sequence(const std::string& s)
 
 bool editor_window::on_special_key(int key_code, const char* key_name)
 {
-	static const std::string navigation = "^K";
 	static const std::string complete = "^@";
-
-	if (key_name == navigation)
-	{
-		navigator_.set_active();
-		return true;
-	}
 
 	if (key_name == complete)
 	{
@@ -157,7 +146,6 @@ void editor_window::on_shown()
 
 void editor_window::on_resized()
 {
-	navigator_.move(nct::position{1, 5}, nct::size{1, get_size().w - 7});
 	editor_.update();
 }
 
