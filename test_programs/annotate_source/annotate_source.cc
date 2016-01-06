@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 	for(const std::string& a : args)
 		cmdline.push_back(a.c_str());
 
-	tu.parse(idx, argv[1], doc.get_raw_data().data(), doc.get_raw_data().size(), cmdline);
+	tu.parse(idx, argv[1], doc.get_raw_data().data(), doc.get_raw_data().size(), cmdline, clang::translation_unit::full_parsing_options());
 
 	clang::source_file file = tu.get_file(argv[1]);
 	clang::source_location file_begin = tu.get_location_for_offset(file, 0);

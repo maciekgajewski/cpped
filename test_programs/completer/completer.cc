@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 	for(const std::string& a : args)
 		cmdline.push_back(a.c_str());
 
-	tu.parse(idx, filename, doc.get_raw_data().data(), doc.get_raw_data().size(), cmdline);
+	tu.parse(idx, filename, doc.get_raw_data().data(), doc.get_raw_data().size(), cmdline, clang::translation_unit::full_parsing_options());
 
 	clang::source_file file = tu.get_file(filename);
 	clang::source_location file_end = tu.get_location_for_offset(file, doc.get_raw_data().size());

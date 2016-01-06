@@ -5,7 +5,12 @@
 
 namespace cpped { namespace clang {
 
-void translation_unit::parse(index& idx, const char* filename, const char* unsaved_data, std::size_t unsaved_data_size, const std::vector<const char*> cmdline)
+void translation_unit::parse(
+	index& idx, const char* filename,
+	const char* unsaved_data,
+	std::size_t unsaved_data_size,
+	const std::vector<const char*> cmdline,
+	unsigned parsingOptions)
 {
 	std::vector<CXUnsavedFile> unsaved_data_vec;
 	if (unsaved_data)
@@ -13,17 +18,17 @@ void translation_unit::parse(index& idx, const char* filename, const char* unsav
 		unsaved_data_vec.push_back(
 			CXUnsavedFile{filename, unsaved_data, unsaved_data_size});
 	}
-	parse(idx, filename, unsaved_data_vec, cmdline);
+	parse(idx, filename, unsaved_data_vec, cmdline, parsingOptions);
 }
 
-void translation_unit::parse(index& idx, const char* filename, const std::vector<CXUnsavedFile>& unsaved_data, const std::vector<const char*> cmdline)
+void translation_unit::parse(
+	index& idx, const char* filename,
+	const std::vector<CXUnsavedFile>& unsaved_data,
+	const std::vector<const char*> cmdline,
+	unsigned parsingOptions)
 {
 	dispose();
 
-	unsigned parsingOptions = CXTranslationUnit_CacheCompletionResults
-		 | CXTranslationUnit_PrecompiledPreamble
-		 | CXTranslationUnit_IncludeBriefCommentsInCodeCompletion
-		 | CXTranslationUnit_DetailedPreprocessingRecord;
 
 	CXErrorCode ec = clang_parseTranslationUnit2(
 			idx.clang_idx,
@@ -37,6 +42,14 @@ void translation_unit::parse(index& idx, const char* filename, const std::vector
 	{
 		throw std::runtime_error("Error parsing");
 	}
+}
+
+unsigned translation_unit::full_parsing_options()
+{
+	return CXTranslationUnit_CacheCompletionResults
+		 | CXTranslationUnit_PrecompiledPreamble
+		 | CXTranslationUnit_IncludeBriefCommentsInCodeCompletion
+		 | CXTranslationUnit_DetailedPreprocessingRecord;
 }
 
 void translation_unit::reparse(const char* filename, const char* unsaved_data, std::size_t unsaved_data_size)

@@ -14,7 +14,7 @@ document::token_data parse_document_data(const document::document_data& d)
 {
 	clang::index idx(0, 0);
 	clang::translation_unit tu;
-	tu.parse(idx, "code.cc", d.get_raw_data().data(), d.get_raw_data().size(), {});
+	tu.parse(idx, "code.cc", d.get_raw_data().data(), d.get_raw_data().size(), {}, clang::translation_unit::full_parsing_options());
 
 	document::token_data dt;
 	dt.tokens = get_cpp_tokens(tu, "code.cc", d.get_raw_data());
@@ -149,7 +149,7 @@ void fun() {
 
 	clang::index idx(0, 0);
 	clang::translation_unit tu;
-	tu.parse(idx, "code.cc", d.get_raw_data().data(), d.get_raw_data().size(), {});
+	tu.parse(idx, "code.cc", d.get_raw_data().data(), d.get_raw_data().size(), {}, clang::translation_unit::full_parsing_options());
 
 	document::token_data dt;
 	dt.tokens =  get_cpp_tokens(tu, "code.cc", d.get_raw_data());

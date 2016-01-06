@@ -12,7 +12,7 @@ compilation_unit::compilation_unit(const boost::filesystem::path& path, clang::i
 {
 }
 
-void compilation_unit::parse(const std::vector<CXUnsavedFile>& unsaved_data)
+void compilation_unit::parse(const std::vector<CXUnsavedFile>& unsaved_data, parse_mode mode)
 {
 	assert(needs_parsing());
 
@@ -27,14 +27,35 @@ void compilation_unit::parse(const std::vector<CXUnsavedFile>& unsaved_data)
 		std::back_inserter(cmdline),
 		[&](const std::string& c) { return c.c_str(); });
 
+	unsigned parsingOptions = 0;
+	if (mode == parse_mode::full)
+	{
+		parsingOptions = CXTranslationUnit_CacheCompletionResults
+			 | CXTranslationUnit_PrecompiledPreamble
+			 | CXTranslationUnit_IncludeBriefCommentsInCodeCompletion
+			 | CXTranslationUnit_DetailedPreprocessingRecord;
+	}
+	else
+	{
+		parsingOptions = CXTranslationUnit_SkipFunctionBodies|CXTranslationUnit_PrecompiledPreamble;
+	}
+
 	translation_unit_.parse(
 		index_,
 		path_.string().c_str(),
 		unsaved_data,
-		cmdline);
+		cmdline,
+		parsingOptions);
 
 	needs_parsing_ = false;
-	needs_reparsing_ = false;
+	if (mode == parse_mode::full)
+	{
+		needs_reparsing_ = false;
+	}
+	else
+	{
+		needs_reparsing_ = true;
+	}
 
 	update_includes();
 

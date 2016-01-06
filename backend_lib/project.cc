@@ -200,7 +200,7 @@ void project::scheduled_parse_file(const boost::filesystem::path& path)
 	if (unit && unit->needs_parsing())
 	{
 		LOG("Scheduled parsing of " << path);
-		unit->parse(get_unsaved_data());
+		unit->parse(get_unsaved_data(), parse_mode::fast);
 		files_parsed_++;
 
 		if (files_parsed_ < files_to_parse_)

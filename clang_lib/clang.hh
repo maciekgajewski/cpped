@@ -421,10 +421,10 @@ public:
 	translation_unit(const translation_unit&) = delete;
 	~translation_unit() { dispose(); }
 
-	void parse(index& idx, const char* filename, const char* unsaved_data, std::size_t unsaved_data_size, const std::vector<const char*> cmdline);
+	void parse(index& idx, const char* filename, const char* unsaved_data, std::size_t unsaved_data_size, const std::vector<const char*> cmdline, unsigned parsingOptions);
 	void reparse(const char* filename, const char* unsaved_data, std::size_t unsaved_data_size);
 
-	void parse(index& idx, const char* filename, const std::vector<CXUnsavedFile>& unsaved_data, const std::vector<const char*> cmdline);
+	void parse(index& idx, const char* filename, const std::vector<CXUnsavedFile>& unsaved_data, const std::vector<const char*> cmdline, unsigned opts);
 	void reparse(const std::vector<CXUnsavedFile>& unsaved_data);
 
 	source_file get_file(const char* file_name) const { return source_file(clang_getFile(clang_tu, file_name)); }
@@ -466,6 +466,8 @@ public:
 	cursor get_cursor() const { return clang_getTranslationUnitCursor(clang_tu); }
 
 	diagnostic_set get_diagnostics() const { return clang_getDiagnosticSetFromTU(clang_tu); }
+
+	static unsigned full_parsing_options();
 
 private:
 
