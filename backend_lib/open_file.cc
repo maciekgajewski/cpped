@@ -23,6 +23,24 @@ open_file::open_file(const fs::path& path)
 	}
 }
 
+void open_file::save()
+{
+	// create temporary file
+	fs::path temp_dir = fs::temp_directory_path();
+	fs::path temp_file = fs::unique_path(temp_dir/"cpped-%%%%-%%%%-%%%%-%%%%.tmp");
+
+	std::ofstream file(temp_file.string());
+	file.write(data_.data(), data_.size());
+	if (!file.good())
+	{
+		fs::remove(temp_file);
+		throw std::runtime_error("Error writing to temp file: " + temp_file.string());
+	}
+	file.close();
+
+	fs::rename(temp_file, path_);
+}
+
 document::token_data open_file::parse(const std::vector<CXUnsavedFile>& unsaved_data)
 {
 	document::token_data tokens;

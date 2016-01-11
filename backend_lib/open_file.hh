@@ -50,6 +50,8 @@ public:
 			provisional_unit_->mark_dirty();
 	}
 
+	void save();
+
 	document::token_data parse(const std::vector<CXUnsavedFile>& unsaved_data);
 	std::vector<messages::completion_record> complete_at(
 		const std::vector<CXUnsavedFile>& unsaved_data,

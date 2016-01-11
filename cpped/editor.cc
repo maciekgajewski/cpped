@@ -70,11 +70,17 @@ bool editor::on_special_key(int key_code, const char* key_name)
 	static const std::string cut_key = "^X";
 
 	if (key_name == copy_key)
+	{
 		copy();
+	}
 	else if (key_name == paste_key)
+	{
 		paste();
+	}
 	else if (key_name == cut_key)
+	{
 		cut();
+	}
 
 	return false;
 }

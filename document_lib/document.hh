@@ -121,7 +121,8 @@ public:
 
 	document_position get_last_position() const { return current_data_->data->get_last_position(); }
 
-	bool has_unsaved_changes() const { return _has_unsaved_changes; }
+	bool has_unsaved_changes() const { return current_data_->has_unsaved_changes; }
+	void set_saved(std::uint64_t version);
 
 	void set_tokens(std::uint64_t version, const token_data& tokens);
 
@@ -138,6 +139,7 @@ private:
 		std::unique_ptr<document_data> data;
 		std::uint64_t version;
 		document_position cursor_position;
+		bool has_unsaved_changes;
 	};
 
 	void erase_redo(); // erases any data ahead of current_data_
@@ -148,7 +150,6 @@ private:
 
 	boost::filesystem::path file_name_;
 
-	bool _has_unsaved_changes = false;
 	std::uint64_t last_version_ = 0;
 };
 

@@ -147,6 +147,42 @@ std::vector<backend::messages::completion_record> project::get_completion(const 
 	return reply.results;
 }
 
+void project::save_file(const boost::filesystem::path& file)
+{
+	auto it = open_files_.find(file);
+	if (it != open_files_.end())
+	{
+		document::document& doc = *it->second.document;
+		// send data, if needed
+		if (it->second.last_version_send < it->second.document->get_current_version())
+		{
+			backend::messages::document_changed_feed change_feed;
+			change_feed.file = file;
+			change_feed.version = doc.get_current_version();
+			change_feed.data.assign(doc.get_raw_data().begin(), doc.get_raw_data().end());
+
+			endpoint_.send_message(change_feed);
+			it->second.last_version_send = doc.get_current_version();
+			parsing_in_progress_ = true;
+		}
+
+		backend::messages::save_reply reply;
+		backend::messages::save_request request;
+		request.file = file;
+
+		endpoint_.send_sync_request(request, reply);
+
+		if (!reply.error.empty())
+		{
+			throw std::runtime_error(reply.error);
+		}
+		else
+		{
+			doc.set_saved(reply.version);
+		}
+	}
+}
+
 void project::on_file_tokens(const backend::messages::file_tokens_feed& token_feed)
 {
 	auto it = open_files_.find(token_feed.file);

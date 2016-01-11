@@ -124,6 +124,30 @@ project::project(event_dispatcher& ed)
 
 			event_dispatcher_.send_message(reply);
 		});
+
+	event_dispatcher_.register_message_handler<messages::save_request>(
+		[this](const messages::save_request& request)
+		{
+			messages::save_reply reply;
+			reply.file = request.file;
+
+			auto it = open_files_.find(request.file);
+			if (it != open_files_.end())
+			{
+				open_file& file = *it->second;
+				try
+				{
+					file.save();
+					reply.version = file.get_version();
+				}
+				catch(const std::exception& e)
+				{
+					reply.error = e.what();
+				}
+			}
+
+			event_dispatcher_.send_message(reply);
+		});
 }
 
 void project::touch_units(const fs::path& changed_file)

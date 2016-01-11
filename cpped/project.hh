@@ -48,6 +48,8 @@ public:
 		const boost::filesystem::path& file,
 		const document::document_position& cursor_pos);
 
+	void save_file(const boost::filesystem::path& file);
+
 private:
 
 	struct open_file_data

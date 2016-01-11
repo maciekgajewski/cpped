@@ -1,5 +1,7 @@
 #include "document.hh"
 
+#include <boost/range/algorithm.hpp>
+
 #include <iostream>
 
 namespace cpped { namespace  document {
@@ -31,10 +33,10 @@ void document::load_from_raw_data(const std::string& data, const fs::path& path,
 	else
 	{
 		data_.back().data->load_from_raw_data(data);
-		current_data_ = data_.begin();
-		last_version_ = 0;
 	}
-	_has_unsaved_changes = new_file;
+	current_data_ = data_.begin();
+	last_version_ = 0;
+	current_data_->has_unsaved_changes = new_file;
 }
 
 void document::load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const token_data& tokens, bool new_file)
@@ -113,6 +115,18 @@ std::string document::to_string() const
 	return current_data_->data->to_string();
 }
 
+void document::set_saved(std::uint64_t version)
+{
+	auto it = boost::find_if(
+		data_,
+		[&](const versioned_data& d) { return d.version == version; });
+
+	if (it != data_.end())
+	{
+		it->has_unsaved_changes = false;
+	}
+}
+
 void document::set_tokens(std::uint64_t version, const token_data& tokens)
 {
 	if (current_data_->version == version)
@@ -132,7 +146,7 @@ void document::commit_change(std::unique_ptr<document_data>&& new_data, const do
 
 	crop_history();
 
-	_has_unsaved_changes = true;
+	current_data_->has_unsaved_changes = true;
 
 	document_changed_signal();
 }

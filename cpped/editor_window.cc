@@ -115,9 +115,10 @@ unsigned editor_window::on_sequence(const std::string& s)
 
 bool editor_window::on_special_key(int key_code, const char* key_name)
 {
-	static const std::string complete = "^@";
+	static const std::string complete_key = "^@";
+	static const std::string save_key = "^S";
 
-	if (key_name == complete)
+	if (key_name == complete_key)
 	{
 		const document::document* doc = editor_.get_document();
 		if (doc)
@@ -128,7 +129,21 @@ bool editor_window::on_special_key(int key_code, const char* key_name)
 			return true;
 		}
 	}
-
+	else if (key_name == save_key)
+	{
+		status_provider_.set_status("Saving...");
+		try
+		{
+			assert(editor_.get_document());
+			project_.save_file(editor_.get_document()->get_file_name());
+			status_provider_.set_status("Saved");
+		}
+		catch(const std::exception& e)
+		{
+			status_provider_.set_status(std::string("Error saving file: ") + e.what());
+		}
+		editor_.update();
+	}
 
 	return editor_.on_special_key(key_code, key_name);
 }

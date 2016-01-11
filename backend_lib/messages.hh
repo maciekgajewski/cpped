@@ -211,4 +211,40 @@ template<typename Reader> void deserialize(Reader& reader, status_feed& m)
 	deserialize(reader, m.message);
 }
 
+// F->B
+struct save_request
+{
+	static const std::uint64_t ID = 10;
+	fs::path file;
+};
+template<typename Writer> void serialize(Writer& writer, const save_request& m)
+{
+	serialize(writer, m.file);
+}
+template<typename Reader> void deserialize(Reader& reader, save_request& m)
+{
+	deserialize(reader, m.file);
+}
+
+// F->B
+struct save_reply
+{
+	static const std::uint64_t ID = 11;
+	fs::path file;
+	std::uint64_t version;
+	std::string error;
+};
+template<typename Writer> void serialize(Writer& writer, const save_reply& m)
+{
+	serialize(writer, m.file);
+	serialize(writer, m.version);
+	serialize(writer, m.error);
+}
+template<typename Reader> void deserialize(Reader& reader, save_reply& m)
+{
+	deserialize(reader, m.file);
+	deserialize(reader, m.version);
+	deserialize(reader, m.error);
+}
+
 }}}
