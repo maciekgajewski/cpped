@@ -2,6 +2,7 @@
 
 #include "styles.hh"
 #include "editor_window.hh"
+#include "event_loop.hh"
 
 #include <boost/filesystem.hpp>
 
@@ -36,7 +37,7 @@ main_window::main_window(project& pr, nct::event_dispatcher& ed, style_manager& 
 		});
 
 	fbutton_provider_.set_action(
-		9 /* F10 */, "Quit", {});
+		9 /* F10 */, "Quit", []() { event_loop::get_current()->stop(); });
 }
 
 void main_window::on_shown()
@@ -65,6 +66,11 @@ bool main_window::on_special_key(int key_code, const char* key_name)
 	if (key_name == navigation)
 	{
 		navigator_.set_active();
+		return true;
+	}
+
+	if (fbuttons_.try_special_key(key_code))
+	{
 		return true;
 	}
 

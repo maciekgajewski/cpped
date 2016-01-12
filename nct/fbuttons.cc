@@ -38,6 +38,18 @@ public:
 		}
 	}
 
+	void call_handler(unsigned idx) const
+	{
+		auto it = std::find_if(
+			providers_.begin(), providers_.end(),
+			[&](const fbutton_action_provider* p) { return p->has_action(idx); });
+
+		if (it != providers_.end())
+		{
+			(*it)->call_handler(idx);
+		}
+	}
+
 private:
 	fbuttons* widget_;
 	std::vector<fbutton_action_provider*> providers_;
@@ -86,6 +98,18 @@ void fbuttons::update()
 			window.style_print(text_style, instance_->get_text(i));
 		}
 	}
+}
+
+bool fbuttons::try_special_key(int key_code)
+{
+	if (key_code >= KEY_F(1) && key_code < KEY_F(1) + NBUTTONS)
+	{
+		int i = key_code - KEY_F(1);
+		instance_->call_handler(i);
+		return true;
+	}
+
+	return false;
 }
 
 fbutton_action_provider::fbutton_action_provider()

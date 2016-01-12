@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 
 namespace cpped {
 
@@ -14,7 +15,7 @@ public:
 
 	static event_loop* get_current();
 
-	// starts the event loop. Wil lreturn only after stop is called
+	// starts the event loop. Will return only after stop is called
 	void run();
 
 	// interrupts event loop

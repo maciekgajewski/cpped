@@ -116,6 +116,45 @@ void event_dispatcher::run()
 	}
 }
 
+void event_dispatcher::stdin_readable()
+{
+	WINDOW* active_window = get_active_ncurses_window();
+	::wtimeout(active_window, 0); // enter non-blocking mode
+
+	std::string input_buffer;
+	MEVENT mouse_event;
+
+	for(int c = ::wgetch(active_window); c != ERR; c = ::wgetch(active_window))
+	{
+		if(::getmouse(&mouse_event) == OK)
+		{
+			send_sequence(input_buffer);
+			send_mouse_event(mouse_event);
+		}
+		else
+		{
+			// distinguish between regular/special
+			if ((c > 31 && c < 256) || c == '\n' || c == '\t')
+			{
+				input_buffer.push_back(c);
+			}
+			else
+			{
+				send_sequence(input_buffer);
+				// special char
+				const char* key_name = ::keyname(c);
+				if (key_name == quit_key_)
+				{
+					return;
+				}
+				send_special_key(c, key_name);
+			}
+		}
+	}
+	check_for_terminal_resize();
+	send_sequence(input_buffer);
+}
+
 void event_dispatcher::add_window(event_window* win)
 {
 	windows_.insert(win);

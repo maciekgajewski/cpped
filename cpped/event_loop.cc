@@ -80,20 +80,28 @@ private:
 	unsigned files_ = 0;
 };
 
-static thread_local epoll_observer* current_instance = nullptr;
+static thread_local epoll_observer* current_observer = nullptr;
+static thread_local event_loop* current_instance = nullptr;
 
 event_loop::event_loop()
 {
 	if (current_instance)
 		throw std::logic_error("Only onve instance of event_loop per thread allowed");
-
-	current_instance = new epoll_observer;
+	assert(current_observer == nullptr);
+	current_instance = this;
+	current_observer = new epoll_observer;
 }
 
 event_loop::~event_loop()
 {
-	delete current_instance;
+	delete current_observer;
+	current_observer = nullptr;
 	current_instance = nullptr;
+}
+
+event_loop* event_loop::get_current()
+{
+	return current_instance;
 }
 
 void event_loop::run()
@@ -104,7 +112,7 @@ void event_loop::run()
 	while(run_)
 	{
 		std::vector<epoll_event> events;
-		current_instance->wait(10 /*ms*/, events);
+		current_observer->wait(10 /*ms*/, events);
 
 		for(const epoll_event& event : events)
 		{
@@ -118,18 +126,18 @@ observed_file::observed_file(int fd, const observed_file::handler_t& handler)
 	: fd_(fd), handler_(handler)
 {
 	assert(handler_);
-	if (!current_instance)
+	if (!current_observer)
 		throw std::logic_error("Event loop not availabale");
 
 	epoll_data_t data;
 	data.ptr = this;
-	current_instance->observe_for_readablity(fd, data);
+	current_observer->observe_for_readablity(fd, data);
 }
 
 observed_file::~observed_file()
 {
-	assert(current_instance);
-	current_instance->remove(fd_);
+	assert(current_observer);
+	current_observer->remove(fd_);
 }
 
 

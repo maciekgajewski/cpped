@@ -17,6 +17,7 @@ public:
 	~fbuttons();
 
 	void update();
+	bool try_special_key(int key_code);
 
 private:
 

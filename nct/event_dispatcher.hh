@@ -26,7 +26,10 @@ public:
 	void exit();
 	void run();
 
+	void stdin_readable();
+
 	event_window* get_active_window() const { return active_window_; }
+	void render_windows();
 
 private:
 
@@ -39,7 +42,6 @@ private:
 	void send_special_key(int c, const char* key_name);
 	void send_sequence(std::string& seq);
 
-	void render_windows();
 	void check_for_terminal_resize();
 
 	window_set windows_;

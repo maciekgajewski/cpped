@@ -26,6 +26,7 @@ public:
 	~endpoint();
 
 	void set_fd(int fd);
+	int get_fd() const { return fd_; }
 
 	// High-level message sending, includes framing
 	template<typename Msg>

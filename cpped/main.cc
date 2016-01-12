@@ -3,6 +3,7 @@
 #include "styles.hh"
 #include "project.hh"
 #include "clipboard.hh"
+#include "event_loop.hh"
 
 #include "document_lib/document.hh"
 
@@ -51,12 +52,12 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 	::setlocale(LC_ALL, "en_EN.utf-8");
 	nct::ncurses_env env;
 
+	cpped::event_loop event_loop;
 	nct::event_dispatcher dispatcher;
 	cpped::style_manager styles;
 	cpped::clipboard clipboard;
 	cpped::main_window main_window(project, dispatcher, styles);
 	cpped::editor_window& editor = main_window.get_current_editor();
-
 
 	if (file_to_open)
 	{
@@ -67,18 +68,11 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 	main_window.set_active(); // so it recevies input
 	main_window.show();
 
-	dispatcher.set_poll_function([&]()
-		{
-			bool received = false;
-			while(endpoint.has_message())
-			{
-				endpoint.receive_message();
-				received = true;
-			}
-			return received;
-		});
-	dispatcher.set_global_quit_key("KEY_F(10)");
-	dispatcher.run();
+	dispatcher.render_windows();
+	cpped::observed_file observed_stdin(STDIN_FILENO, [&]() { dispatcher.stdin_readable(); dispatcher.render_windows(); });
+	cpped::observed_file observed_pipe(endpoint.get_fd(), [&]() { endpoint.receive_message(); dispatcher.render_windows(); });
+
+	event_loop.run();
 }
 
 int main(int argc, char** argv)
