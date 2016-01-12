@@ -13,7 +13,7 @@ void line_data::copy_and_insert(const line_data& source, unsigned column, const 
 	tokens_ = source.tokens_;
 	for(line_token& token : tokens_)
 	{
-		if (token.end > column)
+		if (token.end >= column)
 		{
 			token.end += text.length();
 			if (token.begin > column)
@@ -93,26 +93,38 @@ void line_data::copy_and_remove(const line_data& source, unsigned removed_begin,
 		}
 		else
 		{
-			if (token.end < removed_end)
+			// possibilities:
+			// {aabbcc.., a{abbcc.., aab}bcc
+
+			if (token.begin < removed_begin)
 			{
-				if (token.begin < removed_begin)
-				{
-					// end of token clipped
-					tokens_.push_back(token);
-					tokens_.back().end = removed_begin;
-				}
-				// else fully removed, skip
+				// a{a...
+				// end of the token clipped
+				tokens_.push_back(token);
+				tokens_.back().end = removed_begin;
 			}
 			else
 			{
-				tokens_.push_back(token);
-				tokens_.back().end -= (removed_end-removed_begin);
-				if (token.begin > removed_end)
-					// fully after the removed part
-					tokens_.back().begin -= (removed_end-removed_begin);
+				// possibilites: aa}bbcc or a}abbcc
+				if (token.end <= removed_end)
+				{
+					// token fully removed: ..aabb}cc
+				}
 				else
-					// front of the token clipped
-					tokens_.back().begin = removed_begin;
+				{
+					tokens_.push_back(token);
+					tokens_.back().end -= (removed_end-removed_begin);
+					if (token.begin < removed_end)
+					{
+						// front of the token clipped
+						tokens_.back().begin = removed_begin;
+					}
+					else
+					{
+						// token after the removed are, just shifted
+						tokens_.back().begin -= (removed_end-removed_begin);
+					}
+				}
 			}
 		}
 	}

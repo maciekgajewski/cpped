@@ -503,7 +503,53 @@ BOOST_AUTO_TEST_CASE(set_tokens)
 	BOOST_CHECK_EQUAL(tokens4[0], (line_token{0, 3, token_type::preprocessor})); // xxx
 }
 
+BOOST_AUTO_TEST_CASE(appending_extends_token)
+{
+	std::string text = "1122";
+	document_data data;
+	data.load_from_raw_data(text);
 
+	std::vector<token> tokens = {
+		token{token_type::comment, {{0,0}, {0,2}}}, // 11
+		token{token_type::keyword, {{0,2}, {0,4}}}, // 22
+		};
+	token_data dt;
+	dt.tokens = tokens;
+
+	data.set_tokens(dt);
+
+	document_data edited;
+	edited.copy_inserting(data, {0,4}, "22");
+
+	const auto& tokens0 = edited.get_line(0).get_tokens();
+	BOOST_REQUIRE_EQUAL(tokens0.size(), 2); // 11 2222
+	BOOST_CHECK_EQUAL(tokens0[0], (line_token{0, 2, token_type::comment})); // 11
+	BOOST_CHECK_EQUAL(tokens0[1], (line_token{2, 6, token_type::keyword})); // 2222
+}
+
+BOOST_AUTO_TEST_CASE(deleting_preserves_token)
+{
+	std::string text = "1122";
+	document_data data;
+	data.load_from_raw_data(text);
+
+	std::vector<token> tokens = {
+		token{token_type::comment, {{0,0}, {0,2}}}, // 11
+		token{token_type::keyword, {{0,2}, {0,4}}}, // 22
+		};
+	token_data dt;
+	dt.tokens = tokens;
+
+	data.set_tokens(dt);
+
+	document_data edited;
+	edited.copy_removing(data, document_range{{0, 3}, {0, 4}}); // delete the last '2'
+
+	const auto& tokens0 = edited.get_line(0).get_tokens();
+	BOOST_REQUIRE_EQUAL(tokens0.size(), 2); // 11 2
+	BOOST_CHECK_EQUAL(tokens0[0], (line_token{0, 2, token_type::comment})); // 11
+	BOOST_CHECK_EQUAL(tokens0[1], (line_token{2, 3, token_type::keyword})); // 2
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 
