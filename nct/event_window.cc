@@ -3,17 +3,17 @@
 #include "event_window.hh"
 
 #include "ncurses_env.hh"
-#include "event_dispatcher.hh"
+#include "window_manager.hh"
 
 namespace nct {
 
-event_window::event_window(window_manager& ed, event_window* parent)
-	: event_dispatcher_(ed), parent_(parent)
+event_window::event_window(window_manager& wm, event_window* parent)
+	: window_manager_(wm), parent_(parent)
 {
 	if (parent)
 		parent->children_.insert(this);
 	else
-		event_dispatcher_.add_window(this);
+		window_manager_.add_window(this);
 }
 
 event_window::~event_window()
@@ -21,24 +21,24 @@ event_window::~event_window()
 	if (parent_)
 		parent_->children_.remove(this);
 	else
-		event_dispatcher_.remove_window(this);
+		window_manager_.remove_window(this);
 
 	for(event_window* child: children_)
 	{
 		child->parent_ = nullptr;
-		event_dispatcher_.add_window(child);
+		window_manager_.add_window(child);
 	}
 }
 
 void event_window::set_active()
 {
-	event_dispatcher_.set_active_window(this);
+	window_manager_.set_active_window(this);
 	on_activated();
 }
 
 bool event_window::is_active() const
 {
-	return event_dispatcher_.get_active_window() == this;
+	return window_manager_.get_active_window() == this;
 }
 
 void event_window::hide()

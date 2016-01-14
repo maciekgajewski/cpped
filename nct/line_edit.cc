@@ -1,6 +1,6 @@
 #include "line_edit.hh"
 
-#include "event_dispatcher.hh"
+#include "window_manager.hh"
 #include "style.hh"
 
 namespace nct {
@@ -217,7 +217,7 @@ void line_edit::show_hints()
 
 	if (!hints_widget_.is_initialized())
 	{
-		hints_widget_.emplace(get_event_dispatcher(), this);
+		hints_widget_.emplace(get_window_manager(), this);
 	}
 
 	// create hitns

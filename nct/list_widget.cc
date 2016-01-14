@@ -1,6 +1,6 @@
 #include "list_widget.hh"
 
-#include "event_dispatcher.hh"
+#include "window_manager.hh"
 
 #include <boost/range/adaptor/filtered.hpp>
 

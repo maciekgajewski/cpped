@@ -57,7 +57,7 @@ void completer_widget::activate(
 	{
 		items.push_back({std::move(record.text) /* no help text*/});
 	}
-	list_.emplace(get_event_dispatcher(), this);
+	list_.emplace(get_window_manager(), this);
 	list_->set_items(items);
 	list_->set_filter(filter_);
 

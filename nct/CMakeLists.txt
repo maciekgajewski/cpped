@@ -1,5 +1,5 @@
 add_library(nct
-	event_dispatcher.cc event_dispatcher.hh
+	window_manager.cc window_manager.hh
 	event_window.cc event_window.hh
 	ncurses_env.cc ncurses_env.hh
 	ncurses_window.cc ncurses_window.hh

@@ -1,6 +1,6 @@
 #include "ncurses_inc.hh"
 
-#include "event_dispatcher.hh"
+#include "window_manager.hh"
 
 #include "event_window.hh"
 #include "ncurses_env.hh"

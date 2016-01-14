@@ -8,7 +8,7 @@
 #include "document_lib/document.hh"
 
 #include "nct/ncurses_env.hh"
-#include "nct/event_dispatcher.hh"
+#include "nct/window_manager.hh"
 
 #include "backend_lib/backend.hh"
 
@@ -53,10 +53,10 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 	nct::ncurses_env env;
 
 	cpped::event_loop event_loop;
-	nct::window_manager dispatcher;
+	nct::window_manager window_manager;
 	cpped::style_manager styles;
 	cpped::clipboard clipboard;
-	cpped::main_window main_window(project, dispatcher, styles);
+	cpped::main_window main_window(project, window_manager, styles);
 	cpped::editor_window& editor = main_window.get_current_editor();
 
 	if (file_to_open)
@@ -68,9 +68,9 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 	main_window.set_active(); // so it recevies input
 	main_window.show();
 
-	dispatcher.render_windows();
-	cpped::observed_file observed_stdin(STDIN_FILENO, [&]() { dispatcher.stdin_readable(); dispatcher.render_windows(); });
-	cpped::observed_file observed_pipe(endpoint.get_fd(), [&]() { endpoint.receive_message(); dispatcher.render_windows(); });
+	window_manager.render_windows();
+	cpped::observed_file observed_stdin(STDIN_FILENO, [&]() { window_manager.stdin_readable(); window_manager.render_windows(); });
+	cpped::observed_file observed_pipe(endpoint.get_fd(), [&]() { endpoint.receive_message(); window_manager.render_windows(); });
 
 	event_loop.run();
 }
