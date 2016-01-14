@@ -46,7 +46,7 @@ private:
 	void on_shown() override;
 	void on_resized() override;
 
-	void update();
+	void render(ncurses_window& surface) override;
 	void items_changed();
 
 	// useful aread

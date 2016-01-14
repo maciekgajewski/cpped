@@ -29,7 +29,7 @@ void list_widget::set_filter(const std::string& filter)
 		filter_ = filter;
 		current_item_ = 0;
 		count_displayed_items();
-		update();
+		request_redraw();
 	}
 }
 
@@ -63,7 +63,7 @@ void list_widget::select_next()
 		{
 			first_line_++;
 		}
-		update();
+		request_redraw();
 	}
 }
 
@@ -76,7 +76,7 @@ void list_widget::select_previous()
 		{
 			first_line_--;
 		}
-		update();
+		request_redraw();
 	}
 }
 
@@ -97,32 +97,29 @@ bool list_widget::on_special_key(int key_code, const char* key_name)
 
 void list_widget::on_shown()
 {
-	update();
+	request_redraw();
 }
 
 void list_widget::on_resized()
 {
-	update();
+	request_redraw();
 }
 
-void list_widget::update()
+void list_widget::render(ncurses_window& surface)
 {
-	if (!is_visible()) return;
-	ncurses_window& window = get_ncurses_window();
-
 	nct::style normal_style = nct::style{COLOR_CYAN, COLOR_BLACK};
 	nct::style help_style = nct::style{COLOR_CYAN, COLOR_BLUE};
 	nct::style selected_normal_style = nct::style{COLOR_YELLOW, COLOR_BLACK};
 	nct::style selected_help_style = nct::style{COLOR_YELLOW, COLOR_BLUE};
 
 
-	window.clear();
-	window.set_background(normal_style, ' ');
+	surface.clear();
+	surface.set_background(normal_style, ' ');
 
 	// predicate for selecting lines with filter
 	contains_filter_functor contains_filter_pred{filter_};
 
-	unsigned items_to_show = std::min<unsigned>(items_displayed_, window.get_height());
+	unsigned items_to_show = std::min<unsigned>(items_displayed_, surface.get_height());
 
 	auto range = boost::adaptors::filter(items_, contains_filter_pred);
 	auto it = range.begin();
@@ -131,25 +128,25 @@ void list_widget::update()
 	{
 		const list_item& item = *it++;
 
-		window.move_cursor(position{int(line), 0});
+		surface.move_cursor(position{int(line), 0});
 		if (line+first_line_ == current_item_)
 		{
-			window.style_fill_line(selected_normal_style, ' ', line);
-			window.move_cursor(position{int(line), 0});
-			window.style_print(selected_normal_style, item.text);
-			window.move_cursor(position{int(line), int(longest_text_+1)});
-			window.style_print(selected_help_style, item.help_text);
+			surface.style_fill_line(selected_normal_style, ' ', line);
+			surface.move_cursor(position{int(line), 0});
+			surface.style_print(selected_normal_style, item.text);
+			surface.move_cursor(position{int(line), int(longest_text_+1)});
+			surface.style_print(selected_help_style, item.help_text);
 		}
 		else
 		{
-			window.style_print(normal_style, item.text);
-			window.move_cursor(position{int(line), int(longest_text_+1)});
-			window.style_print(help_style, item.help_text);
+			surface.style_print(normal_style, item.text);
+			surface.move_cursor(position{int(line), int(longest_text_+1)});
+			surface.style_print(help_style, item.help_text);
 		}
 
 	}
 
-	refresh_window();
+	request_redraw();
 }
 
 void list_widget::items_changed()

@@ -26,14 +26,6 @@ class editor_window final : public nct::event_window
 {
 public:
 
-	struct status_info
-	{
-		unsigned docy, docx, column; // current cursor coordinates
-		std::string status_text; // extra text displayed in status line
-		boost::filesystem::path file_name;
-		bool unsaved; // if file has unsaved changes
-	};
-
 	editor_window(project& pr, nct::window_manager& ed, style_manager& sm, nct::event_window* parent = nullptr);
 
 	unsigned on_sequence(const std::string& s) override;
@@ -46,13 +38,8 @@ public:
 
 	// inward-facing API, used by editor
 
-	void render(
-		document::document& doc,
-		unsigned first_column, unsigned first_line,
-		const editor_settings& settings,
-		const boost::optional<document::document_range>& selection);
-	void update_status_info(const status_info& info);
 	void refresh_cursor(int wy, int wx);
+	void request_full_render() { request_redraw(); }
 
 	unsigned get_workspace_width() const;
 	unsigned get_workspace_height() const;
@@ -61,6 +48,9 @@ public:
 	void set_status(const std::string& s) { status_provider_.set_status(s); }
 
 private:
+
+	void render(nct::ncurses_window& surface) override;
+	void render_status_info(nct::ncurses_window& surface, const editor::status_info& info);
 
 	unsigned left_margin_width_ = 0; // calculated when rendering
 	unsigned top_margin_ = 1;

@@ -41,29 +41,36 @@ bool event_window::is_active() const
 	return window_manager_.get_active_window() == this;
 }
 
+void event_window::destroy_surface()
+{
+	window_.reset();
+	for(event_window* child : children_)
+		child->destroy_surface();
+}
+
+void event_window::create_surface()
+{
+	assert(!window_);
+	position global_pos = to_global({0 ,0});
+	window_.emplace(size_.h, size_.w, global_pos.y, global_pos.x);
+}
+
 void event_window::hide()
 {
-	if (window_)
+	if (visible_)
 	{
-		window_.reset();
+		visible_ = false;
 		on_hidden();
-		for(event_window* child : children_)
-			child->hide();
+		destroy_surface();
 	}
 }
 
 void event_window::show()
 {
-	if (!window_)
+	if (!visible_)
 	{
-		if (size_.h > 0 && size_.w > 0)
-		{
-			position global_pos = to_global({0 ,0});
-			window_.emplace(size_.h, size_.w, global_pos.y, global_pos.x);
-		}
+		visible_ = true;
 		on_shown();
-		for(event_window* child : children_)
-			child->show();
 	}
 }
 
@@ -90,24 +97,13 @@ void event_window::move(const position& pos, const size& sz)
 	}
 }
 
-ncurses_window&event_window::get_ncurses_window()
-{
-	if (window_)
-	{
-		return *window_;
-	}
-	else
-	{
-		throw std::logic_error("Attempt to access hidden window");
-	}
-}
-
 void event_window::do_show_cursor()
 {
 	if (window_ && requested_cursor_position_)
 	{
 		::curs_set(1);
 		window_->move_cursor(*requested_cursor_position_);
+		window_->no_out_refresh();
 	}
 	else
 	{
@@ -115,30 +111,44 @@ void event_window::do_show_cursor()
 	}
 }
 
-void event_window::do_refresh()
+void event_window::do_render()
 {
 	if (fullscreen_)
 	{
 		set_size(nct::ncurses_env::get_current()->get_stdscr().get_size());
 	}
 
-	if (window_ || size_ == nct::size{0, 0})
+	if (visible_)
 	{
-//		if (refresh_requested_)
-//		{
-			if (window_)
+		// draw this window
+		if (size_ != nct::size{0, 0})
+		{
+			if (!window_)
 			{
-				window_->redraw();
-				window_->no_out_refresh();
+				create_surface();
 			}
+			render(*window_);
+			window_->redraw();
+			window_->no_out_refresh();
+		}
+		// draw children
+		for(event_window* child : children_)
+			child->do_render();
 
-			for(event_window* child : children_)
-				child->do_refresh();
-
-			refresh_requested_ = false;
-//		}
+		redraw_requested_ = false;
 	}
+}
 
+ncurses_window& event_window::get_ncurses_window()
+{
+	if (window_)
+	{
+		return *window_;
+	}
+	else
+	{
+		throw std::logic_error("Trying to get surface of hidden window");
+	}
 }
 
 void event_window::set_fullscreen(bool fs)

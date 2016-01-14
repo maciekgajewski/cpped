@@ -18,7 +18,7 @@ void line_edit::set_text(const std::string& t)
 	text_ = t;
 	first_column_ = 0;
 	cursor_pos_ = 0;
-	update();
+	request_redraw();
 }
 
 void line_edit::on_text_changed()
@@ -30,7 +30,7 @@ void line_edit::on_text_changed()
 	}
 
 	text_changed_signal(text_);
-	update();
+	request_redraw();
 }
 
 unsigned line_edit::on_sequence(const std::string& s)
@@ -99,7 +99,7 @@ void line_edit::on_activated()
 
 void line_edit::on_shown()
 {
-	update();
+	request_redraw();
 }
 
 void line_edit::cursor_left()
@@ -111,7 +111,7 @@ void line_edit::cursor_left()
 		{
 			first_column_ = cursor_pos_;
 		}
-		update();
+		request_redraw();
 	}
 }
 
@@ -124,7 +124,7 @@ void line_edit::cursor_right()
 		{
 			first_column_++;
 		}
-		update();
+		request_redraw();
 	}
 }
 
@@ -161,26 +161,23 @@ void line_edit::enter()
 	}
 }
 
-void line_edit::update()
+void line_edit::render(ncurses_window& surface)
 {
-	if (!is_visible()) return;
-	ncurses_window& window = get_ncurses_window();
-
 	style help_text_style = {style_.bgcolor, help_text_color_};
 
 	// background
-	window.move_cursor(0, 0);
-	window.style_fill_line(style_, ' ', get_size().w);
+	surface.move_cursor(0, 0);
+	surface.style_fill_line(style_, ' ', get_size().w);
 
 	// text
-	window.move_cursor(0, 0);
+	surface.move_cursor(0, 0);
 	if (text_.empty())
 	{
-		window.style_print(help_text_style, help_text_);
+		surface.style_print(help_text_style, help_text_);
 	}
 	else if (first_column_ < text_.size())
 	{
-		window.style_print(style_, text_.c_str() + first_column_, get_size().w);
+		surface.style_print(style_, text_.c_str() + first_column_, get_size().w);
 	}
 
 	// cursor
@@ -193,7 +190,7 @@ void line_edit::update()
 		hide_cursor();
 	}
 
-	refresh_window();
+	request_redraw();
 }
 
 void line_edit::hints_changed()

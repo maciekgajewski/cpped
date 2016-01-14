@@ -27,8 +27,8 @@ private:
 	void on_resized() override;
 	void on_activated() override;
 	bool on_special_key(int key_code, const char *key_name) override;
+	void render(nct::ncurses_window& surface) override;
 
-	void update();
 	void set_status_message(const std::string& st);
 
 	std::string project_status_;

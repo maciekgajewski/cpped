@@ -186,7 +186,7 @@ void editor::ensure_cursor_visible()
 
 void editor::request_full_render()
 {
-	window_.render(*doc_, first_column_, first_line_, settings_, selection_);
+	window_.request_full_render();
 	request_cursor_update();
 }
 
@@ -196,20 +196,23 @@ void editor::request_cursor_update()
 	int cx = column - int(first_column_);
 	int cy = int(cursor_pos_.line )- int(first_line_);
 
+	window_.refresh_cursor(cy, cx);
+}
 
-	// last parse time
-	using namespace std::literals::chrono_literals;
+editor::status_info editor::get_status_info() const
+{
+	assert(doc_);
 
-	editor_window::status_info info;
+	int column = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
+
+	status_info info;
 	info.docx = cursor_pos_.column;
 	info.docy = cursor_pos_.line;
 	info.column = column;
 	info.status_text = "";
 	info.file_name = doc_->get_file_name();
 	info.unsaved = doc_->has_unsaved_changes();
-
-	window_.update_status_info(info);
-	window_.refresh_cursor(cy, cx);
+	return info;
 }
 
 void editor::request_parsing()

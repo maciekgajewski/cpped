@@ -16,12 +16,13 @@ public:
 	fbuttons(window_manager& ed, event_window* parent);
 	~fbuttons();
 
-	void update();
 	bool try_special_key(int key_code);
+	void update() { request_redraw(); }
 
 private:
 
-	void on_shown() override { update(); }
+	void render(ncurses_window& surface) override;
+	void on_shown() override { request_redraw(); }
 
 };
 

@@ -164,16 +164,16 @@ void editor_window::on_resized()
 	editor_.update();
 }
 
-void editor_window::render(document::document& doc,
-		unsigned first_column,
-		unsigned first_line,
-		const editor_settings& settings,
-		const boost::optional<document::document_range>& selection)
+void editor_window::render(nct::ncurses_window& surface)
 {
-	if (!is_visible()) return;
-	nct::ncurses_window& window = get_ncurses_window();
+	unsigned first_column = editor_.get_first_column();
+	unsigned first_line = editor_.get_first_line();
+	const editor_settings& settings = editor_.get_settings();
+	boost::optional<document::document_range> selection = editor_.get_selection();
+	assert(editor_.get_document());
+	const document::document& doc = *editor_.get_document();
 
-	window.clear();
+	surface.clear();
 
 	int line_count_digits = 8;
 	if (doc.get_line_count() < 10)
@@ -190,17 +190,17 @@ void editor_window::render(document::document& doc,
 	std::snprintf(fmt, 32, " %%%dd ", line_count_digits);
 	char lineno_buf[32];
 
-	text_renderer renderer{first_column, settings, window, get_workspace_width(), selection, styles_};
+	text_renderer renderer{first_column, settings, surface, get_workspace_width(), selection, styles_};
 
 	// iterate over lines
 	unsigned line_no = 0;
 	doc.for_lines(first_line, get_workspace_height(), [&](const document::document_line& line)
 	{
-		window.move_cursor(line_no + top_margin_, 0);
+		surface.move_cursor(line_no + top_margin_, 0);
 
 		// print line number
 		std::snprintf(lineno_buf, 32, fmt, first_line+line_no+1);
-		window.style_print(styles_.line_numbers, lineno_buf, left_margin_width_);
+		surface.style_print(styles_.line_numbers, lineno_buf, left_margin_width_);
 
 		// print line
 		renderer.phys_column_ = 0;
@@ -217,13 +217,11 @@ void editor_window::render(document::document& doc,
 		line_no++;
 	});
 
-	refresh_window();
+	render_status_info(surface, editor_.get_status_info());
 }
 
 void editor_window::refresh_cursor(int wy, int wx)
 {
-	if (!is_visible()) return;
-
 	if (wx >= 0 && wy >= 0 && wx < get_workspace_width() && wy < get_workspace_height())
 	{
 		int x = wx + left_margin_width_;
@@ -236,42 +234,37 @@ void editor_window::refresh_cursor(int wy, int wx)
 		hide_cursor();
 	}
 
-	refresh_window();
+	request_redraw();
 }
 
-void editor_window::update_status_info(const status_info& info)
+void editor_window::render_status_info(nct::ncurses_window& surface, const editor::status_info& info)
 {
-	if (!is_visible()) return;
-	nct::ncurses_window& window = get_ncurses_window();
-
-	window.set_style_on(styles_.status);
+	surface.set_style_on(styles_.status);
 
 	// top line
 	// window.horizontal_line(0,0, WACS_D_HLINE, window.get_width()); doesn't work on xfce (?)
-	window.horizontal_line(0, 0, ACS_HLINE, window.get_width());
+	surface.horizontal_line(0, 0, ACS_HLINE, surface.get_width());
 	std::string file_name_string = info.file_name.string();
-	int file_name_x = (window.get_width() - file_name_string.length()) / 2;
-	window.move_cursor(0, file_name_x);
-	window.print(info.file_name.string());
+	int file_name_x = (surface.get_width() - file_name_string.length()) / 2;
+	surface.move_cursor(0, file_name_x);
+	surface.print(info.file_name.string());
 	if (info.unsaved)
-		window.print("*");
+		surface.print("*");
 
 
 	// bottom line
 
-	window.move_cursor(window.get_height()-1, 0);
-	window.clear_to_eol();
+	surface.move_cursor(surface.get_height()-1, 0);
+	surface.clear_to_eol();
 	char buf[32];
 
 	// cursor pos. character under cursor
 	std::snprintf(buf, 32, "%d : %d-%d ", info.docy+1, info.docx+1, info.column+1);
-	window.print(buf);
+	surface.print(buf);
 
 	// status text
-	window.move_cursor(window.get_height()-1, 20);
-	window.print(info.status_text);
-
-	refresh_window();
+	surface.move_cursor(surface.get_height()-1, 20);
+	surface.print(info.status_text);
 }
 
 unsigned editor_window::get_workspace_width() const

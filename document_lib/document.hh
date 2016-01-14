@@ -94,11 +94,9 @@ public:
 
 	document_line get_line(unsigned index) const { return document_line(current_data_->data->get_line(index)); }
 
-
-
 	// iterates over no more than 'count' lines in range, starting from first_line
 	template<typename FUN>
-	void for_lines(unsigned first_line, unsigned max_count, FUN f)
+	void for_lines(unsigned first_line, unsigned max_count, FUN f) const
 	{
 		current_data_->data->for_lines(first_line, max_count,
 			[&](const line_data& ld)

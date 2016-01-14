@@ -19,6 +19,14 @@ struct editor_settings
 class editor
 {
 public:
+	struct status_info
+	{
+		unsigned docy, docx, column; // current cursor coordinates
+		std::string status_text; // extra text displayed in status line
+		boost::filesystem::path file_name;
+		bool unsaved; // if file has unsaved changes
+	};
+
 	editor(editor_window& win, document::document& d);
 	editor(editor_window& win);
 
@@ -37,6 +45,12 @@ public:
 	void enable_parsing() { parsing_disabled_ = false; }
 
 	void replace(const document::document_position& pos, unsigned len, const std::string& replacement);
+
+	unsigned get_first_line() const { return first_line_; }
+	unsigned get_first_column() const { return first_column_; }
+	boost::optional<document::document_range> get_selection() const { return selection_; }
+	const editor_settings& get_settings() const { return settings_; }
+	status_info get_status_info() const;
 
 private:
 

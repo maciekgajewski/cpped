@@ -72,30 +72,27 @@ fbuttons::~fbuttons()
 	instance_ = nullptr;
 }
 
-void fbuttons::update()
+void fbuttons::render(ncurses_window& surface)
 {
-	if (!is_visible()) return;
-	ncurses_window& window = get_ncurses_window();
-
 	style f_style = nct::style{COLOR_BLACK, COLOR_WHITE};
 	style text_style = nct::style{COLOR_CYAN, COLOR_BLACK};
 
 	char f_buf[8];
 
-	window.style_fill_line(text_style, ' ', 0);
+	surface.style_fill_line(text_style, ' ', 0);
 	for(unsigned i = 0; i < NBUTTONS; i++)
 	{
-		unsigned begin = std::floor(double(i) / NBUTTONS * window.get_width());
-		unsigned end = std::floor(double(i+1) / NBUTTONS * window.get_width());
+		unsigned begin = std::floor(double(i) / NBUTTONS * surface.get_width());
+		unsigned end = std::floor(double(i+1) / NBUTTONS * surface.get_width());
 
 		int fl = std::snprintf(f_buf, 8, "F%d", i+1);
-		window.move_cursor(0, begin);
-		window.style_print(f_style, f_buf, fl);
+		surface.move_cursor(0, begin);
+		surface.style_print(f_style, f_buf, fl);
 
 		if (end > (begin+fl))
 		{
 			// TODO print text here
-			window.style_print(text_style, instance_->get_text(i));
+			surface.style_print(text_style, instance_->get_text(i));
 		}
 	}
 }

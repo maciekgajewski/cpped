@@ -24,7 +24,7 @@ main_window::main_window(project& pr, nct::window_manager& ed, style_manager& sm
 			if (st != project_status_)
 			{
 				project_status_ = st;
-				update();
+				request_redraw();
 			}
 		});
 
@@ -42,7 +42,7 @@ main_window::main_window(project& pr, nct::window_manager& ed, style_manager& sm
 
 void main_window::on_shown()
 {
-	update();
+	request_redraw();
 }
 
 void main_window::on_resized()
@@ -51,7 +51,7 @@ void main_window::on_resized()
 	editor_->move({0, 0}, {sz.h - 3, sz.w});
 	fbuttons_.move({sz.h - 1, 0}, {1, sz.w});
 	navigator_.move({sz.h - 2, 0}, {1, sz.w});
-	update();
+	request_redraw();
 }
 
 void main_window::on_activated()
@@ -77,22 +77,19 @@ bool main_window::on_special_key(int key_code, const char* key_name)
 	return false;
 }
 
-void main_window::update()
+void main_window::render(nct::ncurses_window& surface)
 {
 	// just draw a bar at the bottom
-	if (!is_visible()) return;
-	nct::ncurses_window& window = get_ncurses_window();
-
 	nct::style style{COLOR_CYAN, COLOR_BLACK};
-	window.horizontal_line(window.get_height()-3, 0, style, ' ', window.get_width());
+	surface.horizontal_line(surface.get_height()-3, 0, style, ' ', surface.get_width());
 
 	// status - left aligned
-	window.move_cursor(window.get_height()-3, 0);
-	window.style_print(style, status_);
+	surface.move_cursor(surface.get_height()-3, 0);
+	surface.style_print(style, status_);
 
 	// project status - right aligned
-	window.move_cursor(window.get_height()-3, window.get_width()-project_status_.size());
-	window.style_print(style, project_status_);
+	surface.move_cursor(surface.get_height()-3, surface.get_width()-project_status_.size());
+	surface.style_print(style, project_status_);
 }
 
 void main_window::set_status_message(const std::string& st)
@@ -100,7 +97,7 @@ void main_window::set_status_message(const std::string& st)
 	if (st != status_)
 	{
 		status_ = st;
-		update();
+		request_redraw();
 	}
 }
 

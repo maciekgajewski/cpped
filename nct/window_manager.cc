@@ -121,12 +121,11 @@ void window_manager::render_windows()
 
 	for(event_window* w : windows_)
 	{
-		w->do_refresh();
+		w->do_render();
 	}
 	if (active_window_)
 		active_window_->do_show_cursor();
 	::doupdate();
-
 }
 
 void window_manager::check_for_terminal_resize()

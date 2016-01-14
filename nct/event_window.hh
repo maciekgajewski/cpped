@@ -62,6 +62,7 @@ public:
 	// window shown/hidden
 	virtual void on_shown() {}
 	virtual void on_hidden() {}
+	virtual void render(nct::ncurses_window& surface) {}
 
 	event_window* get_parent() const { return parent_; }
 
@@ -74,7 +75,7 @@ public:
 
 	void hide();
 	void show();
-	bool is_visible() const { return window_.is_initialized(); }
+	bool is_visible() const { return visible_; }
 
 	// window parameters
 	// position is always relative to the parent
@@ -86,15 +87,6 @@ public:
 	void move(const position& pos, const size& sz);
 	void set_size(const size& sz) { move(position_, sz); }
 	void set_position(const position& pos) { move(pos, size_); }
-
-	// Returns reference to ncurses window, throws if hidden and ncurses window not created.
-	// note: the reference may be invalidated by call to hide() or another method. Do not store!
-	ncurses_window& get_ncurses_window();
-
-	// called by the window system
-	void do_show_cursor();
-	void do_refresh();
-
 	void set_fullscreen(bool fs);
 
 protected:
@@ -103,14 +95,25 @@ protected:
 
 	void show_cursor(const position& pos) { requested_cursor_position_ = pos; }
 	void hide_cursor() { requested_cursor_position_ = boost::none; }
-	void refresh_window() { refresh_requested_ = true; if (parent_) parent_->refresh_window(); }
+	void request_redraw() { redraw_requested_ = true; if (parent_) parent_->request_redraw(); }
 
 	// converts local to global (screen) coordinates
 	position to_global(const position& pos);
 
 	window_manager& get_window_manager() const { return window_manager_; }
 
+private: // called by wm
+
+	void do_show_cursor();
+	void do_render();
+	ncurses_window& get_ncurses_window();
+
+	friend class window_manager;
+
 private:
+
+	void destroy_surface();
+	void create_surface();
 
 	window_manager& window_manager_;
 	boost::optional<ncurses_window> window_;
@@ -120,8 +123,9 @@ private:
 	size size_ = {0, 0};
 	window_set children_;
 	boost::optional<position> requested_cursor_position_;
-	bool refresh_requested_ = false; // TODO this is ignored now, remove if not used
+	bool redraw_requested_ = false;
 	bool fullscreen_ = false;
+	bool visible_ = true;
 };
 
 

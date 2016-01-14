@@ -47,13 +47,13 @@ private:
 
 	void on_shown() override;
 
+	void render(ncurses_window& surface) override;
+
 	void cursor_left();
 	void cursor_right();
 	void backspace();
 	void del();
 	void enter();
-
-	void update();
 
 	void hints_changed();
 	void show_hints();
