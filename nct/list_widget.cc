@@ -17,7 +17,7 @@ struct contains_filter_functor
 	}
 };
 
-list_widget::list_widget(event_dispatcher& ed, list_widget::event_window* parent)
+list_widget::list_widget(window_manager& ed, list_widget::event_window* parent)
 	: event_window(ed, parent)
 {
 }

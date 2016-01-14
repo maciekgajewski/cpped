@@ -5,7 +5,7 @@
 
 namespace nct {
 
-line_edit::line_edit(event_dispatcher& ed, event_window* parent)
+line_edit::line_edit(window_manager& ed, event_window* parent)
 	: event_window(ed, parent)
 {
 	// default styles

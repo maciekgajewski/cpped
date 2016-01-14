@@ -10,7 +10,7 @@ namespace cpped {
 
 namespace fs = boost::filesystem;
 
-main_window::main_window(project& pr, nct::event_dispatcher& ed, style_manager& sm)
+main_window::main_window(project& pr, nct::window_manager& ed, style_manager& sm)
 	: nct::event_window(ed, nullptr),
 	project_(pr), style_(sm),
 	status_message_receiver_([this](const std::string& s) { set_status_message(s); }),

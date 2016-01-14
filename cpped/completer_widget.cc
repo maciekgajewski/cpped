@@ -18,7 +18,7 @@ static bool is_valid(char c)
 }
 
 
-completer_widget::completer_widget(project& pr, nct::event_dispatcher& ed, nct::event_window* parent)
+completer_widget::completer_widget(project& pr, nct::window_manager& ed, nct::event_window* parent)
 	: nct::event_window(ed, parent), project_(pr)
 {
 }

@@ -10,21 +10,14 @@ namespace nct {
 
 
 
-class event_dispatcher
+class window_manager
 {
 public:
 
 	using polling_function = std::function<bool()>;
 
-	event_dispatcher() = default;
-	event_dispatcher(const event_dispatcher&) = delete;
-	void set_global_quit_key(const std::string& key_name) { quit_key_ = key_name; }
-
-	// called every spin of the loop. Screen repainted if returns true
-	void set_poll_function(const polling_function& pf) { poll_function_ = pf; }
-
-	void exit();
-	void run();
+	window_manager() = default;
+	window_manager(const window_manager&) = delete;
 
 	void stdin_readable();
 
@@ -46,8 +39,6 @@ private:
 
 	window_set windows_;
 	event_window* active_window_ = nullptr;
-	bool run_ = true;
-	std::string quit_key_;
 	WINDOW* get_active_ncurses_window() const;
 
 	polling_function poll_function_;

@@ -58,7 +58,7 @@ private:
 static const unsigned NBUTTONS = 10;
 static fbuttons_action_stack* instance_ = nullptr;
 
-fbuttons::fbuttons(event_dispatcher& ed, event_window* parent)
+fbuttons::fbuttons(window_manager& ed, event_window* parent)
 	: event_window(ed, parent)
 {
 	if (instance_)

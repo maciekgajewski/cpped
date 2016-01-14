@@ -12,7 +12,7 @@
 
 namespace nct {
 
-class event_dispatcher;
+class window_manager;
 class event_window;
 class color_palette;
 
@@ -43,7 +43,7 @@ public:
 class event_window
 {
 public:
-	event_window(event_dispatcher& ed, event_window* parent);
+	event_window(window_manager& ed, event_window* parent);
 	virtual ~event_window();
 
 	// event receviers
@@ -108,11 +108,11 @@ protected:
 	// converts local to global (screen) coordinates
 	position to_global(const position& pos);
 
-	event_dispatcher& get_event_dispatcher() const { return event_dispatcher_; }
+	window_manager& get_event_dispatcher() const { return event_dispatcher_; }
 
 private:
 
-	event_dispatcher& event_dispatcher_;
+	window_manager& event_dispatcher_;
 	boost::optional<ncurses_window> window_;
 	int z_ = 0;
 	event_window* parent_;

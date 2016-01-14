@@ -7,7 +7,7 @@
 
 namespace nct {
 
-event_window::event_window(event_dispatcher& ed, event_window* parent)
+event_window::event_window(window_manager& ed, event_window* parent)
 	: event_dispatcher_(ed), parent_(parent)
 {
 	if (parent)

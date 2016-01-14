@@ -13,7 +13,7 @@ class fbuttons : public event_window
 {
 public:
 
-	fbuttons(event_dispatcher& ed, event_window* parent);
+	fbuttons(window_manager& ed, event_window* parent);
 	~fbuttons();
 
 	void update();

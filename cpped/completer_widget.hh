@@ -17,7 +17,7 @@ public:
 	boost::signals2::signal<void()> completion_cancelled_signal;
 	boost::signals2::signal<void(const document::document_position& pos, unsigned len, const std::string&)> completion_signal;
 
-	completer_widget(project& pr, nct::event_dispatcher& ed, nct::event_window* parent);
+	completer_widget(project& pr, nct::window_manager& ed, nct::event_window* parent);
 
 	// activates on user request in specific point of a document.
 	// Requests completion sychronously

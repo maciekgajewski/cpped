@@ -92,7 +92,7 @@ void text_renderer::put_char(const nct::style& style, char c)
 }
 
 
-editor_window::editor_window(project& pr, nct::event_dispatcher& ed, style_manager& sm, event_window* parent)
+editor_window::editor_window(project& pr, nct::window_manager& ed, style_manager& sm, event_window* parent)
 	: event_window(ed, parent), project_(pr), styles_(sm), editor_(*this)
 	, completer_(pr, ed, this)
 {

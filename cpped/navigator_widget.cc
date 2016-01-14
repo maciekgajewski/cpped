@@ -5,7 +5,7 @@
 namespace cpped
 {
 
-navigator_widget::navigator_widget(project& pr, nct::event_dispatcher& ed, nct::event_window* parent)
+navigator_widget::navigator_widget(project& pr, nct::window_manager& ed, nct::event_window* parent)
 	: event_window(ed, parent)
 	, project_(pr)
 	, editor_(ed, this)

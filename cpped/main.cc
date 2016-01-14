@@ -53,7 +53,7 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 	nct::ncurses_env env;
 
 	cpped::event_loop event_loop;
-	nct::event_dispatcher dispatcher;
+	nct::window_manager dispatcher;
 	cpped::style_manager styles;
 	cpped::clipboard clipboard;
 	cpped::main_window main_window(project, dispatcher, styles);

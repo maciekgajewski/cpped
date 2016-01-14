@@ -19,7 +19,7 @@ public:
 		std::string help_text;
 	};
 
-	list_widget(event_dispatcher& ed, event_window* parent);
+	list_widget(window_manager& ed, event_window* parent);
 
 	template<typename Container>
 	void set_items(const Container& items);

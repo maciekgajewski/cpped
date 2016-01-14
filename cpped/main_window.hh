@@ -17,7 +17,7 @@ class editor_window;
 class main_window : public nct::event_window
 {
 public:
-	main_window(project& pr, nct::event_dispatcher& ed, style_manager& sm);
+	main_window(project& pr, nct::window_manager& ed, style_manager& sm);
 
 	editor_window& get_current_editor() const { return *editor_; }
 

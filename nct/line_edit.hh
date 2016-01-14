@@ -21,7 +21,7 @@ public:
 		std::string help_text;
 	};
 
-	line_edit(event_dispatcher& ed, event_window* parent);
+	line_edit(window_manager& ed, event_window* parent);
 
 	void set_help_text(const std::string& t) { help_text_ = t; }
 	void set_text(const std::string& t);
