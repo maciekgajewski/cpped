@@ -38,7 +38,6 @@ public:
 
 	// inward-facing API, used by editor
 
-	void refresh_cursor(int wy, int wx);
 	void request_full_render() { request_redraw(); }
 
 	unsigned get_workspace_width() const;
@@ -51,6 +50,7 @@ private:
 
 	void render(nct::ncurses_window& surface) override;
 	void render_status_info(nct::ncurses_window& surface, const editor::status_info& info);
+	void update_cursor(const nct::position& pos);
 
 	unsigned left_margin_width_ = 0; // calculated when rendering
 	unsigned top_margin_ = 1;

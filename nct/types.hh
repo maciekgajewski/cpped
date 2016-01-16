@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 namespace nct {
 
 struct position
@@ -19,6 +21,11 @@ struct position
 	}
 };
 
+inline std::ostream& operator<<(std::ostream& o, const position& pos)
+{
+	return o << "(" << pos.x << ", " << pos.y << ")";
+}
+
 struct size
 {
 	int h;
@@ -30,5 +37,11 @@ struct size
 	}
 	bool operator != (const size& o) const { return !operator==(o); }
 };
+
+
+inline std::ostream& operator<<(std::ostream& o, const size& sz)
+{
+	return o << "(" << sz.w << "x" << sz.h << ")";
+}
 
 }

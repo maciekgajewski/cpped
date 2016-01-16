@@ -218,14 +218,15 @@ void editor_window::render(nct::ncurses_window& surface)
 	});
 
 	render_status_info(surface, editor_.get_status_info());
+	update_cursor(editor_.get_cursor_workspace_position());
 }
 
-void editor_window::refresh_cursor(int wy, int wx)
+void editor_window::update_cursor(const nct::position& pos)
 {
-	if (wx >= 0 && wy >= 0 && wx < get_workspace_width() && wy < get_workspace_height())
+	if (pos.x >= 0 && pos.y >= 0 && pos.x < get_workspace_width() && pos.y < get_workspace_height())
 	{
-		int x = wx + left_margin_width_;
-		int y = wy + top_margin_;
+		int x = pos.x + left_margin_width_;
+		int y = pos.y + top_margin_;
 		cursor_pos_ = {y, x};
 		show_cursor(cursor_pos_);
 	}
@@ -233,8 +234,6 @@ void editor_window::refresh_cursor(int wy, int wx)
 	{
 		hide_cursor();
 	}
-
-	request_redraw();
 }
 
 void editor_window::render_status_info(nct::ncurses_window& surface, const editor::status_info& info)
@@ -250,7 +249,6 @@ void editor_window::render_status_info(nct::ncurses_window& surface, const edito
 	surface.print(info.file_name.string());
 	if (info.unsaved)
 		surface.print("*");
-
 
 	// bottom line
 

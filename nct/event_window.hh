@@ -107,6 +107,7 @@ private: // called by wm
 	void do_show_cursor();
 	void do_render();
 	ncurses_window& get_ncurses_window();
+	bool is_redraw_requested() const { return redraw_requested_; }
 
 	friend class window_manager;
 

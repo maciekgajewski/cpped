@@ -131,12 +131,8 @@ void editor::cursor_up()
 			assert(first_line_ > 0);
 			first_line_--;
 
-			request_full_render();
 		}
-		else
-		{
-			request_cursor_update();
-		}
+		request_full_render();
 	}
 }
 
@@ -187,16 +183,6 @@ void editor::ensure_cursor_visible()
 void editor::request_full_render()
 {
 	window_.request_full_render();
-	request_cursor_update();
-}
-
-void editor::request_cursor_update()
-{
-	int column = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
-	int cx = column - int(first_column_);
-	int cy = int(cursor_pos_.line )- int(first_line_);
-
-	window_.refresh_cursor(cy, cx);
 }
 
 editor::status_info editor::get_status_info() const
@@ -213,6 +199,15 @@ editor::status_info editor::get_status_info() const
 	info.file_name = doc_->get_file_name();
 	info.unsaved = doc_->has_unsaved_changes();
 	return info;
+}
+
+nct::position editor::get_cursor_workspace_position() const
+{
+	int column = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
+	int cx = column - int(first_column_);
+	int cy = int(cursor_pos_.line )- int(first_line_);
+
+	return {cy, cx};
 }
 
 void editor::request_parsing()

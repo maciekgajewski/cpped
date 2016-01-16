@@ -22,7 +22,6 @@ public:
 private:
 
 	void render(ncurses_window& surface) override;
-	void on_shown() override { request_redraw(); }
 
 };
 

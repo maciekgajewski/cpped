@@ -5,6 +5,8 @@
 #include "ncurses_env.hh"
 #include "window_manager.hh"
 
+#include "utils_lib/log.hh"
+
 namespace nct {
 
 event_window::event_window(window_manager& wm, event_window* parent)
@@ -71,6 +73,7 @@ void event_window::show()
 	{
 		visible_ = true;
 		on_shown();
+		request_redraw();
 	}
 }
 
@@ -101,6 +104,8 @@ void event_window::do_show_cursor()
 {
 	if (window_ && requested_cursor_position_)
 	{
+		LOG("do_show_cursordo_show_cursor, pos=" << *requested_cursor_position_ << "win pos=" << position_);
+
 		::curs_set(1);
 		window_->move_cursor(*requested_cursor_position_);
 		window_->no_out_refresh();
@@ -133,7 +138,12 @@ void event_window::do_render()
 		}
 		// draw children
 		for(event_window* child : children_)
-			child->do_render();
+		{
+			if (child->is_redraw_requested())
+			{
+				child->do_render();
+			}
+		}
 
 		redraw_requested_ = false;
 	}

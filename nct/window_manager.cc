@@ -119,11 +119,16 @@ void window_manager::render_windows()
 	std::sort(windows_.begin(), windows_.end(),
 		[](const event_window* a, const event_window* b) { return a->get_z() < b->get_z(); });
 
+	bool draw_something = false;
 	for(event_window* w : windows_)
 	{
-		w->do_render();
+		if (w->is_redraw_requested())
+		{
+			w->do_render();
+			draw_something = true;
+		}
 	}
-	if (active_window_)
+	if (draw_something && active_window_)
 		active_window_->do_show_cursor();
 	::doupdate();
 }

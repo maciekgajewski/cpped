@@ -17,4 +17,5 @@ target_include_directories(nct INTERFACE ..)
 target_link_libraries(nct
 
 	ncursesw
+	utils_lib
 )

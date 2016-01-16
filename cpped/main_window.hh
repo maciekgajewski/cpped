@@ -23,7 +23,6 @@ public:
 
 private:
 
-	void on_shown() override;
 	void on_resized() override;
 	void on_activated() override;
 	bool on_special_key(int key_code, const char *key_name) override;

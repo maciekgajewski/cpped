@@ -4,6 +4,8 @@
 
 #include "document_lib/document.hh"
 
+#include "nct/types.hh"
+
 #include <string>
 
 namespace cpped {
@@ -51,6 +53,8 @@ public:
 	boost::optional<document::document_range> get_selection() const { return selection_; }
 	const editor_settings& get_settings() const { return settings_; }
 	status_info get_status_info() const;
+	// return cursor position in workspace coords
+	nct::position get_cursor_workspace_position() const;
 
 private:
 
@@ -98,7 +102,6 @@ private:
 	void ensure_cursor_visible();
 
 	void request_full_render();
-	void request_cursor_update();
 	void request_parsing();
 
 	// converts document x (character in line) into column, taking all tabs into account

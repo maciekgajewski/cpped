@@ -41,11 +41,6 @@ main_window::main_window(project& pr, nct::window_manager& ed, style_manager& sm
 		9 /* F10 */, "Quit", []() { utils::event_loop::get_current()->stop(); });
 }
 
-void main_window::on_shown()
-{
-	request_redraw();
-}
-
 void main_window::on_resized()
 {
 	nct::size sz = get_size();
