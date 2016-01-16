@@ -2,6 +2,8 @@
 
 #include "messages.hh"
 
+#include "utils_lib/event_loop.hh"
+
 namespace cpped { namespace backend {
 
 event_dispatcher::event_dispatcher(endpoint& ep)
@@ -11,33 +13,29 @@ event_dispatcher::event_dispatcher(endpoint& ep)
 
 void event_dispatcher::run()
 {
-	using namespace  std::literals::chrono_literals;
+	utils::event_loop loop;
 
-	bool run = true;
 	endpoint_.register_message_handler<messages::stop>(
-		[&](const messages::stop&) { run = false; });
+		[&](const messages::stop&) { loop.stop(); });
 
-	while(run)
-	{
-		if (jobs_.empty())
+	utils::file_monitor endpoint_monitor(endpoint_.get_fd(),
+		[&]()
 		{
-			// block until messages
 			endpoint_.receive_message();
-		}
-		else
+		});
+
+	utils::idle_monitor idle_monitor(
+		[&]()
 		{
-			if (endpoint_.wait_for_message(1s))
-			{
-				endpoint_.receive_message();
-			}
-			else
+			if (!jobs_.empty())
 			{
 				auto job = jobs_.front();
 				jobs_.pop();
 				job();
 			}
-		}
-	}
+		});
+
+	loop.run();
 }
 
 }}

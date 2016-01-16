@@ -1,11 +1,18 @@
 #include "event_loop.hh"
 
+#include "log.hh"
+
+#include <boost/range/algorithm.hpp>
+
 #include <stdexcept>
 #include <cassert>
 #include <vector>
+#include <chrono>
 
 #include <sys/epoll.h>
 #include <unistd.h>
+
+using namespace  std::literals::chrono_literals;
 
 namespace cpped { namespace utils {
 
@@ -57,7 +64,7 @@ public:
 		files_--;
 	}
 
-	void wait(int ms, std::vector<epoll_event>& events)
+	void wait(std::chrono::duration<double> timeout, std::vector<epoll_event>& events)
 	{
 		events.resize(files_);
 
@@ -65,12 +72,12 @@ public:
 			epoll_fd_,
 			events.data(),
 			files_,
-			ms);
+			static_cast<int>(timeout/1ms));
 
 		if (r < 0)
 			throw std::runtime_error("epoll_wait failed");
 
-		assert(r < files_);
+		assert(r <= files_);
 		events.resize(r);
 	}
 
@@ -85,6 +92,7 @@ static thread_local event_loop* current_instance = nullptr;
 
 event_loop::event_loop()
 {
+	LOG("Creating event_loop, this=" << this << ", current_instance=" << current_instance);
 	if (current_instance)
 		throw std::logic_error("Only onve instance of event_loop per thread allowed");
 	assert(current_observer == nullptr);
@@ -112,17 +120,46 @@ void event_loop::run()
 	while(run_)
 	{
 		std::vector<epoll_event> events;
-		current_observer->wait(10 /*ms*/, events);
+		current_observer->wait(10ms, events);
 
-		for(const epoll_event& event : events)
+		if(events.empty())
 		{
-			observed_file* f = static_cast<observed_file*>(event.data.ptr);
+			on_idle();
+		}
+		else for(const epoll_event& event : events)
+		{
+			file_monitor* f = static_cast<file_monitor*>(event.data.ptr);
 			f->handler_();
 		}
 	}
 }
 
-observed_file::observed_file(int fd, const observed_file::handler_t& handler)
+void event_loop::on_idle()
+{
+	for(const auto& pair : idle_handlers_)
+	{
+		pair.second();
+	}
+}
+
+std::uint64_t event_loop::add_idle_handler(const std::function<void ()>& h)
+{
+	static std::uint64_t next_id = 0;
+	auto id = next_id++;
+
+	idle_handlers_.emplace_back(id, h);
+	return id;
+}
+
+void event_loop::remove_idle_handler(std::uint64_t id)
+{
+	auto it = boost::find_if(idle_handlers_,
+		[&](const auto& pair) { return pair.first == id; });
+	assert(it != idle_handlers_.end());
+	idle_handlers_.erase(it);
+}
+
+file_monitor::file_monitor(int fd, const file_monitor::handler_t& handler)
 	: fd_(fd), handler_(handler)
 {
 	assert(handler_);
@@ -134,10 +171,25 @@ observed_file::observed_file(int fd, const observed_file::handler_t& handler)
 	current_observer->observe_for_readablity(fd, data);
 }
 
-observed_file::~observed_file()
+file_monitor::~file_monitor()
 {
 	assert(current_observer);
 	current_observer->remove(fd_);
+}
+
+idle_monitor::idle_monitor(const idle_monitor::handler_t& handler)
+{
+	assert(handler);
+	if (!current_instance)
+		throw std::logic_error("Event loop not availabale");
+
+	id_ = current_instance->add_idle_handler(handler);
+}
+
+idle_monitor::~idle_monitor()
+{
+	assert(current_instance);
+	current_instance->remove_idle_handler(id_);
 }
 
 }}

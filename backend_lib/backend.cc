@@ -5,6 +5,7 @@
 #include "messages.hh"
 
 #include "utils_lib/log.hh"
+#include "utils_lib/event_loop.hh"
 
 #include <sys/wait.h>
 #include <sys/types.h>

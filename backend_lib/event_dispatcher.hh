@@ -34,8 +34,6 @@ private:
 
 	endpoint& endpoint_;
 	std::queue<std::function<void()>> jobs_;
-
-
 };
 
 }}

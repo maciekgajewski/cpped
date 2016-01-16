@@ -70,8 +70,8 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 	main_window.show();
 
 	window_manager.render_windows();
-	cpped::utils::observed_file observed_stdin(STDIN_FILENO, [&]() { window_manager.stdin_readable(); window_manager.render_windows(); });
-	cpped::utils::observed_file observed_pipe(endpoint.get_fd(), [&]() { endpoint.receive_message(); window_manager.render_windows(); });
+	cpped::utils::file_monitor observed_stdin(STDIN_FILENO, [&]() { window_manager.stdin_readable(); window_manager.render_windows(); });
+	cpped::utils::file_monitor observed_pipe(endpoint.get_fd(), [&]() { endpoint.receive_message(); window_manager.render_windows(); });
 
 	event_loop.run();
 }
