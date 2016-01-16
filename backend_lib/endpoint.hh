@@ -5,7 +5,8 @@
 #include "socket_reader.hh"
 #include "serialize.hh"
 #include "type_dispatcher.hh"
-#include "log.hh"
+
+#include "utils_lib/log.hh"
 
 #include <cstddef>
 #include <cstdlib>

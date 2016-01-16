@@ -3,7 +3,8 @@
 #include "styles.hh"
 #include "project.hh"
 #include "clipboard.hh"
-#include "event_loop.hh"
+
+#include "utils_lib/event_loop.hh"
 
 #include "document_lib/document.hh"
 
@@ -52,7 +53,7 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 	::setlocale(LC_ALL, "en_EN.utf-8");
 	nct::ncurses_env env;
 
-	cpped::event_loop event_loop;
+	cpped::utils::event_loop event_loop;
 	nct::window_manager window_manager;
 	cpped::style_manager styles;
 	cpped::clipboard clipboard;
@@ -69,8 +70,8 @@ void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_optio
 	main_window.show();
 
 	window_manager.render_windows();
-	cpped::observed_file observed_stdin(STDIN_FILENO, [&]() { window_manager.stdin_readable(); window_manager.render_windows(); });
-	cpped::observed_file observed_pipe(endpoint.get_fd(), [&]() { endpoint.receive_message(); window_manager.render_windows(); });
+	cpped::utils::observed_file observed_stdin(STDIN_FILENO, [&]() { window_manager.stdin_readable(); window_manager.render_windows(); });
+	cpped::utils::observed_file observed_pipe(endpoint.get_fd(), [&]() { endpoint.receive_message(); window_manager.render_windows(); });
 
 	event_loop.run();
 }

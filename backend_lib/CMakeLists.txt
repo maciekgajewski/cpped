@@ -11,7 +11,6 @@ add_library(backend_lib
 	project.cc project.hh
 	cpp_tokens.cc cpp_tokens.hh
 	project_connector.cc project_connector.hh
-	log.cc log.hh
 	compilation_unit.hh compilation_unit.cc
 	open_file.cc open_file.hh
 	completion.cc completion.hh
@@ -24,6 +23,7 @@ add_subdirectory(tests)
 target_link_libraries(backend_lib
 
 	clang_lib
+	utils_lib
 
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}

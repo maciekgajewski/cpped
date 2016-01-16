@@ -8,13 +8,13 @@ add_executable(cpped
 	main_window.cc main_window.hh
 	completer_widget.cc completer_widget.hh
 	clipboard.cc clipboard.hh
-	event_loop.cc event_loop.hh
 )
 
 target_link_libraries(cpped
 	document_lib
 	nct
 	backend_lib
+	utils_lib
 
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}

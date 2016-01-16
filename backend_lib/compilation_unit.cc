@@ -1,7 +1,8 @@
 #include "compilation_unit.hh"
 
-#include "log.hh"
 #include "completion.hh"
+
+#include "utils_lib/log.hh"
 
 namespace cpped { namespace backend {
 

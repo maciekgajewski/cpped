@@ -7,7 +7,7 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
-namespace cpped {
+namespace cpped { namespace utils {
 
 class epoll_observer
 {
@@ -140,6 +140,4 @@ observed_file::~observed_file()
 	current_observer->remove(fd_);
 }
 
-
-
-}
+}}

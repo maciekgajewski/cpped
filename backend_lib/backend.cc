@@ -3,7 +3,8 @@
 #include "event_dispatcher.hh"
 #include "project.hh"
 #include "messages.hh"
-#include "log.hh"
+
+#include "utils_lib/log.hh"
 
 #include <sys/wait.h>
 #include <sys/types.h>

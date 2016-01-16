@@ -2,7 +2,8 @@
 
 #include "styles.hh"
 #include "editor_window.hh"
-#include "event_loop.hh"
+
+#include "utils_lib/event_loop.hh"
 
 #include <boost/filesystem.hpp>
 
@@ -37,7 +38,7 @@ main_window::main_window(project& pr, nct::window_manager& ed, style_manager& sm
 		});
 
 	fbutton_provider_.set_action(
-		9 /* F10 */, "Quit", []() { event_loop::get_current()->stop(); });
+		9 /* F10 */, "Quit", []() { utils::event_loop::get_current()->stop(); });
 }
 
 void main_window::on_shown()

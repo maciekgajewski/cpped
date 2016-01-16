@@ -3,7 +3,7 @@
 #include <functional>
 #include <memory>
 
-namespace cpped {
+namespace cpped { namespace utils {
 
 // Simple event loop, observing number if file descriptors for readability
 class event_loop
@@ -42,4 +42,4 @@ private:
 	friend class event_loop;
 };
 
-}
+}}

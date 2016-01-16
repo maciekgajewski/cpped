@@ -1,7 +1,8 @@
 #include "open_file.hh"
 
-#include "log.hh"
 #include "compilation_unit.hh"
+
+#include "utils_lib/log.hh"
 
 #include <fstream>
 
