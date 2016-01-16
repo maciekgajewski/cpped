@@ -34,7 +34,7 @@ usage: cpped [options] [file ...]                  edit specified file(s)
 	options.print(std::cout);
 }
 
-void run_frontend(cpped::backend::endpoint& endpoint, const boost::program_options::variables_map& options)
+void run_frontend(cpped::ipc::endpoint& endpoint, const boost::program_options::variables_map& options)
 {
 	cpped::project project(endpoint);
 	boost::optional<std::string> file_to_open;
@@ -119,7 +119,7 @@ int main(int argc, char** argv)
 	}
 
 	cpped::backend::backend backend;
-	cpped::backend::endpoint* endpoint = backend.fork();
+	cpped::ipc::endpoint* endpoint = backend.fork();
 	if (endpoint)
 	{
 		run_frontend(*endpoint, vm);

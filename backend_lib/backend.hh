@@ -1,6 +1,6 @@
 #pragma once
 
-#include "endpoint.hh"
+#include "ipc_lib/endpoint.hh"
 
 #include <unistd.h>
 
@@ -17,12 +17,12 @@ public:
 	// Creates comm channel, forks process.
 	// In child process - starts and run's event loop, returns nullptr at the end of the program.
 	// In parent process - returns communication endpoint to talk to the child. Owns the endpoint.
-	endpoint* fork();
+	ipc::endpoint* fork();
 
 private:
 
 	pid_t pid_ = 0;
-	endpoint endpoint_;
+	ipc::endpoint endpoint_;
 };
 
 }}

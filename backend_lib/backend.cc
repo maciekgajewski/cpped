@@ -25,7 +25,7 @@ backend::~backend()
 	}
 }
 
-endpoint* backend::fork()
+ipc::endpoint* backend::fork()
 {
 	assert(pid_ == 0);
 

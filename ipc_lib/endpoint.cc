@@ -6,7 +6,7 @@
 #include <utility>
 #include <chrono>
 
-namespace cpped { namespace backend {
+namespace cpped { namespace ipc {
 
 endpoint::endpoint(int fd)
 	: fd_(fd)

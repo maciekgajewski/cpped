@@ -3,7 +3,7 @@
 #include <cstring>
 #include <unistd.h>
 
-namespace cpped { namespace backend {
+namespace cpped { namespace ipc {
 
 // Implements the 'writer', with writes buffered in stack-allocated buffer.
 template<typename UnderlyingWriter, unsigned BUFFER_SIZE = 64*1024>

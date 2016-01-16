@@ -13,7 +13,7 @@
 #include <cstdint>
 #include <chrono>
 
-namespace cpped { namespace backend {
+namespace cpped { namespace ipc {
 
 // Communication endpoint used to talk to the other process
 class endpoint

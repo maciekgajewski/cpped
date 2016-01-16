@@ -6,7 +6,7 @@
 
 namespace cpped { namespace backend {
 
-event_dispatcher::event_dispatcher(endpoint& ep)
+event_dispatcher::event_dispatcher(ipc::endpoint& ep)
 	: endpoint_(ep)
 {
 }

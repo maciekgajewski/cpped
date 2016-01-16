@@ -1,6 +1,7 @@
 #include "project.hh"
 
-#include "backend_lib/endpoint.hh"
+#include "ipc_lib/endpoint.hh"
+
 #include "backend_lib/messages.hh"
 
 #include "nct/status_message.hh"
@@ -15,7 +16,7 @@ namespace cpped {
 
 namespace fs = boost::filesystem;
 
-project::project(backend::endpoint& ep)
+project::project(ipc::endpoint& ep)
 	: endpoint_(ep)
 {
 	endpoint_.register_message_handler<backend::messages::file_tokens_feed>(

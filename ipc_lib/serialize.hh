@@ -10,7 +10,7 @@
 #include <string>
 
 
-namespace cpped { namespace backend {
+namespace cpped { namespace ipc {
 
 // Utility that blocks until it reads specific number of bytes
 template<typename Reader>

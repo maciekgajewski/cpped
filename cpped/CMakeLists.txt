@@ -15,6 +15,7 @@ target_link_libraries(cpped
 	nct
 	backend_lib
 	utils_lib
+	ipc_lib
 
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}

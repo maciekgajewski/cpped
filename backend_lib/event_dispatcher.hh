@@ -1,6 +1,6 @@
 #pragma once
 
-#include "endpoint.hh"
+#include "ipc_lib/endpoint.hh"
 
 #include <queue>
 
@@ -11,7 +11,7 @@ class event_dispatcher
 {
 public:
 
-	event_dispatcher(endpoint& ep);
+	event_dispatcher(ipc::endpoint& ep);
 
 	template<typename Msg>
 	void register_message_handler(const std::function<void(const Msg&)>& handler)
@@ -32,7 +32,7 @@ public:
 
 private:
 
-	endpoint& endpoint_;
+	ipc::endpoint& endpoint_;
 	std::queue<std::function<void()>> jobs_;
 };
 

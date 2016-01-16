@@ -4,7 +4,7 @@
 
 #include <unistd.h>
 
-namespace cpped { namespace backend {
+namespace cpped { namespace ipc {
 
 class socket_reader
 {

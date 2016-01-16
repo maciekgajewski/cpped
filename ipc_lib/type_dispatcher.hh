@@ -8,7 +8,7 @@
 #include <functional>
 #include <string>
 
-namespace cpped { namespace backend {
+namespace cpped { namespace ipc {
 
 using type_id = std::uint64_t;
 

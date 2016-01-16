@@ -13,7 +13,7 @@
 
 namespace cpped {
 
-namespace backend { class endpoint; }
+namespace ipc { class endpoint; }
 
 // Project - a collection of source files, targets, a code model
 class project
@@ -28,7 +28,7 @@ public:
 
 	boost::signals2::signal<void(const std::string&)> status_signal;
 
-	project(backend::endpoint& ep);
+	project(ipc::endpoint& ep);
 
 	void open_cmake_project(const boost::filesystem::path& build_dir);
 	open_file_result open_file(const boost::filesystem::path& file);
@@ -66,7 +66,7 @@ private:
 		const document::document& doc,
 		const boost::optional<document::document_position>& cursor_pos);
 
-	backend::endpoint& endpoint_;
+	ipc::endpoint& endpoint_;
 
 	// All project files
 	std::vector<boost::filesystem::path> files_;

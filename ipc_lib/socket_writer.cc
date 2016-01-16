@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 
-namespace cpped { namespace backend {
+namespace cpped { namespace ipc {
 
 
 void socket_writer::write(const void* data, std::size_t sz)
