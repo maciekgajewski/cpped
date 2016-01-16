@@ -35,3 +35,11 @@ YouCompleteMe proven to be a great source of insipirartion. Why very little (if 
 
 I decided loggign is the easiest way to see what going on in the backend process. I was contemplating some UI feature, but not now, not now.
 I was trying to use Boost.Logging, but it turned out to be such a pint in the ass: unpleasent to use, unpleasant to build.
+
+# 16-01-2016
+
+So, the biggest blocket for achieving grateeditor responsivness was the factm that parsing a file from scratch takes between 2-4 seconds, and it stalled the backend process.
+I just had an ides: spawn on, or even few more processes. The only goal for the parins of the _entire_ project, is to build to code model. This can be done in yet another worker, 
+and the result can be transferred back.
+Disk caching or buildign of PCH (if this makes sense) still may be requiired, to not go trough the same chores whenver the project is opened.
+
