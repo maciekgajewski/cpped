@@ -13,6 +13,8 @@
 
 #include "backend_lib/backend.hh"
 
+#include "ipc_lib/subprocess.hh"
+
 #include <boost/program_options.hpp>
 
 #include <iostream>
@@ -36,6 +38,9 @@ usage: cpped [options] [file ...]                  edit specified file(s)
 
 void run_frontend(cpped::ipc::endpoint& endpoint, const boost::program_options::variables_map& options)
 {
+	OPEN_LOG_FILE("cpped_front.log");
+	LOG("frontend process started");
+
 	cpped::project project(endpoint);
 	boost::optional<std::string> file_to_open;
 
@@ -118,10 +123,7 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	cpped::backend::backend backend;
-	cpped::ipc::endpoint* endpoint = backend.fork();
-	if (endpoint)
-	{
-		run_frontend(*endpoint, vm);
-	}
+	cpped::ipc::subprocess backend_process;
+	cpped::ipc::endpoint& endpoint = backend_process.fork(cpped::backend::run_backend_process);
+	run_frontend(endpoint, vm);
 }
