@@ -132,17 +132,17 @@ void event_window::do_render()
 			{
 				create_surface();
 			}
-			render(*window_);
+			if (is_redraw_requested())
+			{
+				render(*window_);
+			}
 			window_->redraw();
 			window_->no_out_refresh();
 		}
 		// draw children
 		for(event_window* child : children_)
 		{
-			if (child->is_redraw_requested())
-			{
-				child->do_render();
-			}
+			child->do_render();
 		}
 
 		redraw_requested_ = false;
