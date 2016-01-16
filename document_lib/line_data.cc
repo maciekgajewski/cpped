@@ -16,7 +16,7 @@ void line_data::copy_and_insert(const line_data& source, unsigned column, const 
 		if (token.end >= column)
 		{
 			token.end += text.length();
-			if (token.begin > column)
+			if (token.begin >= column)
 				token.begin += text.length();
 		}
 	}
