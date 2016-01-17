@@ -54,7 +54,7 @@ document::token_data open_file::parse(const std::vector<CXUnsavedFile>& unsaved_
 		if (unit_->needs_parsing())
 		{
 			LOG("... that needs parsing");
-			unit_->parse(unsaved_data, parse_mode::full);
+			unit_->parse(unsaved_data);
 		}
 		else
 		{

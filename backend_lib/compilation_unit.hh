@@ -14,8 +14,6 @@
 
 namespace cpped { namespace backend {
 
-enum class parse_mode { fast, full };
-
 // Translation unit
 class compilation_unit
 {
@@ -26,7 +24,7 @@ public:
 	compilation_unit(const boost::filesystem::path& path, clang::index& idx);
 
 	bool needs_parsing() const { return needs_parsing_; }
-	void parse(const std::vector<CXUnsavedFile>& unsaved_data, parse_mode mode);
+	void parse(const std::vector<CXUnsavedFile>& unsaved_data);
 	void reparse(const std::vector<CXUnsavedFile>& unsaved_data);
 
 	template<typename Container>

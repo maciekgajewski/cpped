@@ -102,7 +102,7 @@ void editor::set_document(document::document& doc)
 	doc_ = &doc;
 
 	doc_->tokens_updated_signal.connect([this]() { on_document_tokens_updated(); });
-
+	cursor_pos_ = {0, 0};
 	unsaved_document_.reset();
 	update();
 }
