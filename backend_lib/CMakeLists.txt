@@ -4,7 +4,6 @@ add_library(backend_lib
 	event_dispatcher.cc event_dispatcher.hh
 	project.cc project.hh
 	cpp_tokens.cc cpp_tokens.hh
-	project_connector.cc project_connector.hh
 	compilation_unit.hh compilation_unit.cc
 	open_file.cc open_file.hh
 	completion.cc completion.hh
