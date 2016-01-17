@@ -173,6 +173,11 @@ void event_window::set_fullscreen(bool fs)
 	}
 }
 
+void event_window::redraw_now()
+{
+	window_manager_.render_windows();
+}
+
 position event_window::to_global(const position& pos)
 {
 	if (parent_)

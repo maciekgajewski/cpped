@@ -283,6 +283,8 @@ void editor_window::open_file(const boost::filesystem::path& file)
 	// TODO modal dialog to save unsavedchanges in current document
 	try
 	{
+		set_status("Openig file...");
+		redraw_now();
 		auto result = project_.open_file(file);
 		editor_.set_document(result.document);
 		if (result.was_new)

@@ -65,7 +65,15 @@ int background_worker_entry(unsigned worker_number, ipc::endpoint& ep)
 			ep.receive_message();
 		});
 
-	loop.run();
+	try
+	{
+		loop.run();
+	}
+	catch(const std::exception& e)
+	{
+		LOG("Error in main loop: " << e.what());
+		return 1; // do nothing, just die
+	}
 
 	return 0;
 }

@@ -95,7 +95,10 @@ protected:
 
 	void show_cursor(const position& pos) { requested_cursor_position_ = pos; }
 	void hide_cursor() { requested_cursor_position_ = boost::none; }
+	// Request window redraw during the next cycle. 'render()' wil be called when the redraw is processed
 	void request_redraw() { redraw_requested_ = true; if (parent_) parent_->request_redraw(); }
+	// Performs redraw here and now
+	void redraw_now();
 
 	// converts local to global (screen) coordinates
 	position to_global(const position& pos);
