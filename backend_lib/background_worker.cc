@@ -39,7 +39,7 @@ static worker_messages::parse_file_result parse_file(const worker_messages::pars
 
 int background_worker_entry(unsigned worker_number, ipc::endpoint& ep)
 {
-	OPEN_LOG_FILE("cpped_worker_" + std::to_string(worker_number));
+	OPEN_LOG_FILE("cpped_worker_" + std::to_string(worker_number) + ".log");
 
 	ep.register_message_handler<worker_messages::parse_file_request>(
 		[&](const worker_messages::parse_file_request& req)
