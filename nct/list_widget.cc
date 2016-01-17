@@ -143,7 +143,6 @@ void list_widget::render(ncurses_window& surface)
 			surface.move_cursor(position{int(line), int(longest_text_+1)});
 			surface.style_print(help_style, item.help_text);
 		}
-
 	}
 
 	request_redraw();

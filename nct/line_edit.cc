@@ -251,7 +251,7 @@ void line_edit::update_hints_size()
 
 		sz.h = std::min(max_h, content_size.h);
 		sz.w = std::min(max_w, content_size.w);
-		pos = {-1 - sz.h, 0};
+		pos = {- sz.h, 0};
 	}
 	else
 	{
