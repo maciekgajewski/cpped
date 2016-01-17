@@ -8,6 +8,9 @@ add_library(backend_lib
 	compilation_unit.hh compilation_unit.cc
 	open_file.cc open_file.hh
 	completion.cc completion.hh
+	background_worker.cc background_worker.hh
+	background_worker_messages.hh
+	background_worker_manager.cc background_worker_manager.hh
 )
 
 target_include_directories(backend_lib INTERFACE ..)

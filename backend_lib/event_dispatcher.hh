@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utils_lib/event_loop.hh"
+
 #include "ipc_lib/endpoint.hh"
 
 #include <queue>
@@ -32,6 +34,7 @@ public:
 
 private:
 
+	utils::event_loop loop_;
 	ipc::endpoint& endpoint_;
 	std::queue<std::function<void()>> jobs_;
 };

@@ -8,6 +8,7 @@
 #include "document_lib/document_data.hh"
 
 #include <boost/container/flat_set.hpp>
+#include<boost/range/algorithm.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/signals2.hpp>
 
@@ -48,6 +49,17 @@ public:
 		const std::vector<CXUnsavedFile>& unsaved_data,
 		const boost::filesystem::path& path,
 		const document::document_position& pos);
+
+	template<typename Container>
+	void set_includes(const Container& includes)
+	{
+		boost::container::flat_set<boost::filesystem::path> is;
+		is.reserve(includes.size());
+		boost::copy(includes, std::inserter(is, is.end()));
+		set_includes(is);
+	}
+
+	void set_includes(const boost::container::flat_set<boost::filesystem::path>& includes);
 
 	bool includes(const boost::filesystem::path& file) const
 	{

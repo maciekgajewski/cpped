@@ -10,6 +10,12 @@
 
 namespace cpped { namespace ipc {
 
+subprocess::subprocess(subprocess&& o)
+	: endpoint_(std::move(o.endpoint_))
+{
+	std::swap(o.pid_, pid_);
+}
+
 subprocess::~subprocess()
 {
 	if (pid_ != 0)
@@ -19,11 +25,8 @@ subprocess::~subprocess()
 	}
 }
 
-ipc::endpoint& subprocess::fork(const subprocess_entry& child_process_entry)
+subprocess subprocess::fork(const subprocess_entry& child_process_entry)
 {
-	if (pid_ != 0)
-		throw std::logic_error("Process already started");
-
 	int sockets[2];
 
 	if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) < 0)
@@ -31,29 +34,37 @@ ipc::endpoint& subprocess::fork(const subprocess_entry& child_process_entry)
 		throw std::runtime_error("Unable to create sockets");
 	}
 
-	pid_ = ::fork();
+	pid_t pid = ::fork();
 
-	if (pid_ < 0)
+	if (pid < 0)
 	{
 		throw std::runtime_error("fork failed");
 	}
 
-	if (pid_ != 0)
+	endpoint ep;
+
+	if (pid != 0)
 	{
 		// parent process
 		::close(sockets[1]);
-		endpoint_.set_fd(sockets[0]);
-		return endpoint_;
+		ep.set_fd(sockets[0]);
+		return subprocess(pid, std::move(ep));
 	}
 	else
 	{
 		// child process
 		::close(sockets[0]);
-		endpoint_.set_fd(sockets[1]);
+		ep.set_fd(sockets[1]);
 
-		int return_code = child_process_entry(endpoint_);
+		int return_code = child_process_entry(ep);
 		std::exit(return_code);
 	}
+}
+
+subprocess::subprocess(pid_t pid, endpoint&& ep)
+	: pid_(pid), endpoint_(std::move(ep))
+{
+
 }
 
 }}

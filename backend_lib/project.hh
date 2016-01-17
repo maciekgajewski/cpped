@@ -2,6 +2,7 @@
 
 #include "compilation_unit.hh"
 #include "open_file.hh"
+#include "background_worker_manager.hh"
 
 #include "clang_lib/clang.hh"
 
@@ -15,7 +16,7 @@ class project
 {
 public:
 
-	project(event_dispatcher& ed);
+	project(event_dispatcher& ed, background_worker_manager& bwm);
 
 	// IPC message handlers
 
@@ -48,7 +49,7 @@ private:
 	void add_directory(const boost::filesystem::path& source_dir);
 	void add_compilation_database_file(const boost::filesystem::path& comp_database_path);
 
-	void scheduled_parse_file(const boost::filesystem::path& path);
+	void on_scheduled_file_parsed(const worker_messages::parse_file_result& result);
 
 	// Looks for compilation unit containing the file
 	void get_or_create_unit_for_file(open_file& file);
@@ -95,6 +96,7 @@ private:
 	unsigned files_to_parse_ = 0;
 	unsigned files_parsed_ = 0;
 
+	background_worker_manager& worker_manager_;
 };
 
 }}

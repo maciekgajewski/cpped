@@ -2,8 +2,6 @@
 
 #include "messages.hh"
 
-#include "utils_lib/event_loop.hh"
-
 namespace cpped { namespace backend {
 
 event_dispatcher::event_dispatcher(ipc::endpoint& ep)
@@ -13,10 +11,8 @@ event_dispatcher::event_dispatcher(ipc::endpoint& ep)
 
 void event_dispatcher::run()
 {
-	utils::event_loop loop;
-
 	endpoint_.register_message_handler<messages::stop>(
-		[&](const messages::stop&) { loop.stop(); });
+		[&](const messages::stop&) { loop_.stop(); });
 
 	utils::file_monitor endpoint_monitor(endpoint_.get_fd(),
 		[&]()
@@ -35,7 +31,7 @@ void event_dispatcher::run()
 			}
 		});
 
-	loop.run();
+	loop_.run();
 }
 
 }}

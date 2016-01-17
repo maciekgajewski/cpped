@@ -123,7 +123,6 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	cpped::ipc::subprocess backend_process;
-	cpped::ipc::endpoint& endpoint = backend_process.fork(cpped::backend::run_backend_process);
-	run_frontend(endpoint, vm);
+	cpped::ipc::subprocess backend_process = cpped::ipc::subprocess::fork(cpped::backend::run_backend_process);
+	run_frontend(backend_process.get_endpoint(), vm);
 }

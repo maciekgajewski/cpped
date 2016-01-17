@@ -4,6 +4,8 @@
 
 #include "utils_lib/log.hh"
 
+#include "clang_lib/utils.hh"
+
 namespace cpped { namespace backend {
 
 namespace fs = boost::filesystem;
@@ -104,6 +106,15 @@ std::vector<messages::completion_record> compilation_unit::complete_at(
 	return process_completion_results(results);
 }
 
+void compilation_unit::set_includes(const boost::container::flat_set<boost::filesystem::path>& includes)
+{
+	if (includes != included_files_)
+	{
+		included_files_ = includes;
+		includes_changed_signal();
+	}
+}
+
 void compilation_unit::mark_dirty()
 {
 	needs_reparsing_ = true;
@@ -113,27 +124,9 @@ void compilation_unit::mark_dirty()
 void compilation_unit::update_includes()
 {
 	assert(!translation_unit_.is_null());
+
 	LOG("looking for includes");
-
-	boost::container::flat_set<fs::path> includes;
-	includes.reserve(std::max<std::size_t>(32, included_files_.size()));
-
-	clang::cursor cursor = translation_unit_.get_cursor();
-	cursor.visit_children(
-		[&](const clang::cursor& visited_cursor, const clang::cursor& /*parent*/)
-		{
-			if (visited_cursor.get_kind() == CXCursor_InclusionDirective)
-			{
-				clang::source_file file = visited_cursor.get_included_file();
-				if (!file.is_null())
-				{
-					fs::path p(file.get_name().c_str());
-					includes.insert(fs::canonical(p));
-				}
-			}
-			return CXChildVisit_Continue;
-		});
-
+	boost::container::flat_set<fs::path> includes = clang::get_includes(translation_unit_);
 	LOG("finished looking for includes, includes found=" << includes.size());
 
 	if (includes != included_files_)

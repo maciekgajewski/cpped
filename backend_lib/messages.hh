@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ipc_lib/serialize.hh"
+
 #include "cpp_tokens.hh"
 
 #include "document_lib/document_data.hh"

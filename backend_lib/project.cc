@@ -14,8 +14,10 @@ namespace cpped { namespace backend {
 
 namespace fs = boost::filesystem;
 
-project::project(event_dispatcher& ed)
-	: event_dispatcher_(ed), index_(0, 0)
+project::project(event_dispatcher& ed, background_worker_manager& bwm)
+	: event_dispatcher_(ed),
+	index_(0, 0),
+	worker_manager_(bwm)
 {
 	// register message-receiving functions
 
@@ -148,6 +150,9 @@ project::project(event_dispatcher& ed)
 
 			event_dispatcher_.send_message(reply);
 		});
+
+	worker_manager_.signal_file_parsed.connect(
+		[this](const auto& msg) { this->on_scheduled_file_parsed(msg); });
 }
 
 void project::touch_units(const fs::path& changed_file)
@@ -198,6 +203,7 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 
 	files_to_parse_ = 0;
 	files_parsed_ = 0;
+	std::vector<fs::path> files_to_parse;
 	for(const fs::path& path : files_)
 	{
 		clang::compile_commands cc = db.get_compile_commands_for_file(path);
@@ -211,22 +217,22 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 			clang::compile_command command = cc.get_command(0);
 			u.set_compilation_flags(clang::get_sanitized_flags(command, path));
 
-			// schedule file parsing
-			event_dispatcher_.schedule_job([this, path]() { scheduled_parse_file(path); });
-			files_to_parse_++;
+			files_to_parse.push_back(path);
 		}
 	}
+	// schedule file parsing
+	files_to_parse_ += files_to_parse.size();
+	worker_manager_.parse_files(files_to_parse);
 }
 
-void project::scheduled_parse_file(const boost::filesystem::path& path)
+void project::on_scheduled_file_parsed(const worker_messages::parse_file_result& result)
 {
-	compilation_unit* unit = get_unit(path);
-	if (unit && unit->needs_parsing())
+	compilation_unit* unit = get_unit(result.file);
+	assert(unit);
+	if (unit)
 	{
-		LOG("Scheduled parsing of " << path);
-		unit->parse(get_unsaved_data(), parse_mode::fast);
+		unit->set_includes(result.includes);
 		files_parsed_++;
-
 		if (files_parsed_ < files_to_parse_)
 		{
 			event_dispatcher_.send_message(messages::status_feed{

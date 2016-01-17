@@ -11,11 +11,15 @@ namespace cpped { namespace backend {
 
 int run_backend_process(ipc::endpoint& ep)
 {
+	background_worker_manager bwm;
+
 	OPEN_LOG_FILE("cpped_back.log");
 	LOG("backend process started");
 
+
 	event_dispatcher dispatcher(ep);
-	project pr(dispatcher);
+	bwm.start();
+	project pr(dispatcher, bwm);
 
 	dispatcher.run();
 

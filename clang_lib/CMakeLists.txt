@@ -1,6 +1,7 @@
 add_library(clang_lib
 	clang.hh clang.cc
 	flags.cc flags.hh
+	utils.cc utils.hh
 )
 
 target_include_directories(clang_lib INTERFACE ..)
