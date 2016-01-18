@@ -25,7 +25,7 @@ static worker_messages::parse_file_result parse_file(const worker_messages::pars
 
 	clang::translation_unit tu;
 	clang::index idx(0, 0);
-	unsigned opts = CXTranslationUnit_SkipFunctionBodies|CXTranslationUnit_PrecompiledPreamble;
+	unsigned opts = CXTranslationUnit_SkipFunctionBodies|CXTranslationUnit_PrecompiledPreamble|CXTranslationUnit_DetailedPreprocessingRecord;
 	tu.parse(idx, req.file.c_str(), {}, cmdline, opts);
 
 	auto includes = clang::get_includes(tu);
@@ -46,9 +46,9 @@ int background_worker_entry(unsigned worker_number, ipc::endpoint& ep)
 		{
 			try
 			{
-				LOG("Recevied parse file request for: " << req.file);
+				LOG("Recevied parse file request for: " << req.file << "params: " << req.commanline_params.size());
 				auto reply = parse_file(req);
-				LOG("Recevied parse file reply for: " << req.file);
+				LOG("Sending parse file reply for: " << req.file << ", includes: " << reply.includes.size());
 				ep.send_message(reply);
 			}
 			catch(const std::exception& e)
