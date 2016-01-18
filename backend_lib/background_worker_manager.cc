@@ -47,11 +47,11 @@ void background_worker_manager::start()
 	}
 }
 
-void background_worker_manager::parse_files(const std::vector<boost::filesystem::path>& files)
+void background_worker_manager::parse_files(const std::vector<worker_messages::parse_file_request>& requests)
 {
-	for(const fs::path& file : files)
+	for(const auto& request : requests)
 	{
-		file_queue_.push(file);
+		file_queue_.push(request);
 	}
 
 	for(worker_t& worker: workers_)
@@ -68,8 +68,7 @@ void background_worker_manager::send_next_job(worker_t& worker)
 	assert(!worker.busy);
 	if (!file_queue_.empty())
 	{
-		worker_messages::parse_file_request req;
-		req.file = file_queue_.front();
+		worker_messages::parse_file_request req = std::move(file_queue_.front());
 		file_queue_.pop();
 
 		worker.subprocess->get_endpoint().send_message(req);

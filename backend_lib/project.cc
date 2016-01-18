@@ -203,7 +203,7 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 
 	files_to_parse_ = 0;
 	files_parsed_ = 0;
-	std::vector<fs::path> files_to_parse;
+	std::vector<worker_messages::parse_file_request> files_to_parse;
 	for(const fs::path& path : files_)
 	{
 		clang::compile_commands cc = db.get_compile_commands_for_file(path);
@@ -215,9 +215,13 @@ void project::add_compilation_database_file(const fs::path& comp_database_path)
 
 			compilation_unit& u = get_or_create_unit(path);
 			clang::compile_command command = cc.get_command(0);
-			u.set_compilation_flags(clang::get_sanitized_flags(command, path));
+			std::vector<std::string> flags = clang::get_sanitized_flags(command, path);
+			u.set_compilation_flags(flags);
 
-			files_to_parse.push_back(path);
+			worker_messages::parse_file_request parse_request;
+			parse_request.file = path;
+			parse_request.commanline_params = std::move(flags);
+			files_to_parse.push_back(parse_request);
 		}
 	}
 	// schedule file parsing

@@ -25,7 +25,7 @@ public:
 	void start();
 
 	// job intake
-	void parse_files(const std::vector<boost::filesystem::path>& files);
+	void parse_files(const std::vector<worker_messages::parse_file_request>& files);
 
 	// result output
 	boost::signals2::signal<void(const worker_messages::parse_file_result&)> signal_file_parsed;
@@ -42,7 +42,7 @@ private:
 	void send_next_job(worker_t& worker);
 	void on_file_parsed(unsigned worker_idx, const worker_messages::parse_file_result& msg);
 
-	std::queue<boost::filesystem::path> file_queue_;
+	std::queue<worker_messages::parse_file_request> file_queue_;
 	std::vector<worker_t> workers_;
 };
 
