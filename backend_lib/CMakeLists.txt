@@ -21,6 +21,7 @@ target_link_libraries(backend_lib
 	clang_lib
 	utils_lib
 	ipc_lib
+	document_lib
 
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}

@@ -22,5 +22,10 @@ std::ostream& operator << (std::ostream& s, const line_token& t)
 	return s << "token{b="<< t.begin << ", e=" << t.end << ", t=" << t.type << "}";
 }
 
+std::ostream& operator << (std::ostream& s, const document_position& pos)
+{
+	return s << "pos{l=" << pos.line << ", col=" << pos.column << "}";
+}
+
 
 }}

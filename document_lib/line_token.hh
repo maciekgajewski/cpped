@@ -80,6 +80,7 @@ template<typename Reader> void deserialize(Reader& reader, document_position& m)
 	deserialize(reader, m.column);
 }
 
+std::ostream& operator << (std::ostream& s, const document_position& pos);
 
 struct document_range
 {

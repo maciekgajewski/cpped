@@ -73,10 +73,13 @@ std::vector<messages::completion_record> open_file::complete_at(
 {
 	std::vector<messages::completion_record> result;
 
+	LOG("open_file::complete_at pos=" << pos << ", has unit=" << (unit_ != nullptr));
+
 	if (unit_)
 	{
 		result = unit_->complete_at(unsaved_data, path_, pos);
 	}
+	LOG("open_file::complete_at, got " << result.size() << " records");
 
 	return result;
 }
