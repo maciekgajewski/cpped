@@ -1,6 +1,7 @@
 #include "editor_window.hh"
 
 #include "styles.hh"
+#include "edited_file.hh"
 
 #include "document_lib/document.hh"
 
@@ -94,7 +95,7 @@ void text_renderer::put_char(const nct::style& style, char c)
 
 editor_window::editor_window(project& pr, nct::window_manager& ed, style_manager& sm, event_window* parent)
 	: event_window(ed, parent), project_(pr), styles_(sm), editor_(*this)
-	, completer_(pr, ed, this)
+	, completer_(ed, this)
 {
 	completer_.completion_cancelled_signal.connect(
 		[this]() { editor_.enable_parsing(); set_active(); });
@@ -120,22 +121,17 @@ bool editor_window::on_special_key(int key_code, const char* key_name)
 
 	if (key_name == complete_key)
 	{
-		const document::document* doc = editor_.get_document();
-		if (doc)
-		{
-			editor_.disable_parsing();
-			document::document_position cursor_pos = editor_.get_cursor_position();
-			completer_.activate(*doc, cursor_pos, cursor_pos_);
-			return true;
-		}
+		editor_.disable_parsing();
+		document::document_position cursor_pos = editor_.get_cursor_position();
+		completer_.activate(editor_.get_file(), cursor_pos, cursor_pos_);
+		return true;
 	}
 	else if (key_name == save_key)
 	{
 		status_provider_.set_status("Saving...");
 		try
 		{
-			assert(editor_.get_document());
-			project_.save_file(editor_.get_document()->get_file_name());
+			editor_.get_file().save();
 			status_provider_.set_status("Saved");
 		}
 		catch(const std::exception& e)
@@ -170,8 +166,7 @@ void editor_window::render(nct::ncurses_window& surface)
 	unsigned first_line = editor_.get_first_line();
 	const editor_settings& settings = editor_.get_settings();
 	boost::optional<document::document_range> selection = editor_.get_selection();
-	assert(editor_.get_document());
-	const document::document& doc = *editor_.get_document();
+	const document::document& doc = editor_.get_document();
 
 	surface.clear();
 
@@ -285,9 +280,9 @@ void editor_window::open_file(const boost::filesystem::path& file)
 	{
 		set_status("Openig file...");
 		redraw_now();
-		auto result = project_.open_file(file);
-		editor_.set_document(result.document);
-		if (result.was_new)
+		auto& result = project_.open_file(file);
+		editor_.set_document(result);
+		if (result.was_new())
 		{
 			set_status("New file: " + file.string());
 		}

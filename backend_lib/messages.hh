@@ -123,19 +123,19 @@ template<typename Reader> void deserialize(Reader& reader, open_file_reply& m)
 struct file_tokens_feed
 {
 	static const std::uint64_t ID = 5;
-	fs::path file;
+	fs::path path;
 	std::uint64_t version;
 	document::token_data tokens;
 };
 template<typename Writer> void serialize(Writer& writer, const file_tokens_feed& m)
 {
-	serialize(writer, m.file);
+	serialize(writer, m.path);
 	serialize(writer, m.version);
 	serialize(writer, m.tokens);
 }
 template<typename Reader> void deserialize(Reader& reader, file_tokens_feed& m)
 {
-	deserialize(reader, m.file);
+	deserialize(reader, m.path);
 	deserialize(reader, m.version);
 	deserialize(reader, m.tokens);
 }
@@ -144,21 +144,21 @@ template<typename Reader> void deserialize(Reader& reader, file_tokens_feed& m)
 struct document_changed_feed
 {
 	static const std::uint64_t ID = 6;
-	fs::path file;
+	fs::path path;
 	std::uint64_t version;
 	std::string data;
 	boost::optional<document::document_position> cursor_position;
 };
 template<typename Writer> void serialize(Writer& writer, const document_changed_feed& m)
 {
-	serialize(writer, m.file);
+	serialize(writer, m.path);
 	serialize(writer, m.version);
 	serialize(writer, m.data);
 	serialize(writer, m.cursor_position);
 }
 template<typename Reader> void deserialize(Reader& reader, document_changed_feed& m)
 {
-	deserialize(reader, m.file);
+	deserialize(reader, m.path);
 	deserialize(reader, m.version);
 	deserialize(reader, m.data);
 	deserialize(reader, m.cursor_position);
@@ -168,17 +168,17 @@ template<typename Reader> void deserialize(Reader& reader, document_changed_feed
 struct complete_at_request
 {
 	static const std::uint64_t ID = 7;
-	fs::path file;
+	fs::path path;
 	document::document_position cursor_position;
 };
 template<typename Writer> void serialize(Writer& writer, const complete_at_request& m)
 {
-	serialize(writer, m.file);
+	serialize(writer, m.path);
 	serialize(writer, m.cursor_position);
 }
 template<typename Reader> void deserialize(Reader& reader, complete_at_request& m)
 {
-	deserialize(reader, m.file);
+	deserialize(reader, m.path);
 	deserialize(reader, m.cursor_position);
 }
 
@@ -216,34 +216,34 @@ template<typename Reader> void deserialize(Reader& reader, status_feed& m)
 struct save_request
 {
 	static const std::uint64_t ID = 10;
-	fs::path file;
+	fs::path path;
 };
 template<typename Writer> void serialize(Writer& writer, const save_request& m)
 {
-	serialize(writer, m.file);
+	serialize(writer, m.path);
 }
 template<typename Reader> void deserialize(Reader& reader, save_request& m)
 {
-	deserialize(reader, m.file);
+	deserialize(reader, m.path);
 }
 
 // F->B
 struct save_reply
 {
 	static const std::uint64_t ID = 11;
-	fs::path file;
+	fs::path path;
 	std::uint64_t version;
 	std::string error;
 };
 template<typename Writer> void serialize(Writer& writer, const save_reply& m)
 {
-	serialize(writer, m.file);
+	serialize(writer, m.path);
 	serialize(writer, m.version);
 	serialize(writer, m.error);
 }
 template<typename Reader> void deserialize(Reader& reader, save_reply& m)
 {
-	deserialize(reader, m.file);
+	deserialize(reader, m.path);
 	deserialize(reader, m.version);
 	deserialize(reader, m.error);
 }

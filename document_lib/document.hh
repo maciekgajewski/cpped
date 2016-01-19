@@ -80,6 +80,7 @@ public:
 
 	document();
 	~document();
+	document(document&&) = default;
 
 	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path, bool new_file = false);
 	void load_from_raw_data(const std::string& data, const boost::filesystem::path& path, const token_data& tokens, bool new_file);
@@ -109,7 +110,7 @@ public:
 	void parse_language();
 
 	const std::vector<char>& get_raw_data() const { return current_data_->data->get_raw_data(); }
-	const boost::filesystem::path& get_file_name() const { return file_name_; }
+	const boost::filesystem::path& get_path() const { return path_; }
 
 	std::string to_string() const; // mostly for testing
 
@@ -146,7 +147,7 @@ private:
 	std::list<versioned_data> data_;
 	std::list<versioned_data>::iterator current_data_;
 
-	boost::filesystem::path file_name_;
+	boost::filesystem::path path_;
 
 	std::uint64_t last_version_ = 0;
 };

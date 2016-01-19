@@ -11,6 +11,7 @@
 namespace cpped {
 
 class editor_window;
+class edited_file;
 
 struct editor_settings
 {
@@ -29,7 +30,7 @@ public:
 		bool unsaved; // if file has unsaved changes
 	};
 
-	editor(editor_window& win, document::document& d);
+	editor(editor_window& win, edited_file& f);
 	editor(editor_window& win);
 
 	bool on_special_key(int key_code, const char* key_name);
@@ -38,9 +39,14 @@ public:
 
 	void update() { request_full_render(); }
 
-	void set_document(document::document& doc);
+	void set_document(edited_file& f);
 
-	const document::document* get_document() const { return doc_; }
+	const document::document& get_document() const;
+	document::document& get_document();
+
+	edited_file& get_file() { assert(file_); return *file_; }
+	const edited_file& get_file() const { assert(file_); return *file_; }
+
 	document::document_position get_cursor_position() const { return cursor_pos_; }
 
 	void disable_parsing() { parsing_disabled_ = true; }
@@ -120,12 +126,12 @@ private:
 	// settings
 	editor_settings settings_;
 
-	document::document* doc_;
+	edited_file* file_;
 	editor_window& window_;
-	std::unique_ptr<document::document> unsaved_document_;
 	bool parsing_disabled_ = false;
 	boost::optional<document::document_range> selection_;
 	bool extending_selection_ = false;
+	boost::signals2::scoped_connection tokens_udated_connection_;
 };
 
 }

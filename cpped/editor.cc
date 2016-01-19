@@ -2,22 +2,22 @@
 
 #include "editor_window.hh"
 #include "clipboard.hh"
+#include "edited_file.hh"
 
 #include "document_lib/document.hh"
 
 namespace cpped {
 
-editor::editor(editor_window& win, document::document& d)
+editor::editor(editor_window& win, edited_file& f)
 	: window_(win)
 {
-	set_document(d);
+	set_document(f);
 }
 
 editor::editor(editor_window& win)
 	: window_(win)
 {
-	unsaved_document_ = std::make_unique<document::document>();
-	doc_ = unsaved_document_.get();
+	// TODO? ??
 }
 
 bool editor::on_special_key(int key_code, const char* key_name)
@@ -97,19 +97,19 @@ bool editor::on_mouse(const MEVENT& event)
 	return false;
 }
 
-void editor::set_document(document::document& doc)
+void editor::set_document(edited_file& f)
 {
-	doc_ = &doc;
+	file_ = &f;
 
-	doc_->tokens_updated_signal.connect([this]() { on_document_tokens_updated(); });
+	tokens_udated_connection_.release().disconnect();
+	tokens_udated_connection_ = file_->get_document().tokens_updated_signal.connect([this]() { on_document_tokens_updated(); });
 	cursor_pos_ = {0, 0};
-	unsaved_document_.reset();
 	update();
 }
 
 void editor::replace(const document::document_position& pos, unsigned len, const std::string& replacement)
 {
-	auto edit = doc_->edit();
+	auto edit = get_document().edit();
 	if (len > 0)
 	{
 		edit.remove_after(pos, len);
@@ -138,7 +138,7 @@ void editor::cursor_up()
 
 void editor::adjust_cursor_column_to_desired()
 {
-	unsigned new_line_len = doc_->line_length(cursor_pos_.line);
+	unsigned new_line_len = get_document().line_length(cursor_pos_.line);
 	if (cursor_pos_.column > new_line_len)
 	{
 		cursor_pos_.column = new_line_len;
@@ -187,8 +187,6 @@ void editor::request_full_render()
 
 editor::status_info editor::get_status_info() const
 {
-	assert(doc_);
-
 	int column = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 
 	status_info info;
@@ -196,8 +194,8 @@ editor::status_info editor::get_status_info() const
 	info.docy = cursor_pos_.line;
 	info.column = column;
 	info.status_text = "";
-	info.file_name = doc_->get_file_name();
-	info.unsaved = doc_->has_unsaved_changes();
+	info.file_name = get_document().get_path();
+	info.unsaved = get_document().has_unsaved_changes();
 	return info;
 }
 
@@ -214,13 +212,13 @@ void editor::request_parsing()
 {
 	if (!parsing_disabled_)
 	{
-		window_.get_project().request_parsing(*doc_, boost::none);
+		file_->request_parsing(boost::none);
 	}
 }
 
 void editor::cursor_down()
 {
-	if (cursor_pos_.line < doc_->get_line_count()-1)
+	if (cursor_pos_.line < get_document().get_line_count()-1)
 	{
 		cursor_pos_.line++;
 		adjust_cursor_column_to_desired();
@@ -251,7 +249,7 @@ void editor::cursor_left()
 
 void editor::cursor_right()
 {
-	int ll = doc_->line_length(cursor_pos_.line);
+	int ll = get_document().line_length(cursor_pos_.line);
 	if (cursor_pos_.column < ll)
 	{
 		cursor_pos_.column++;
@@ -270,7 +268,7 @@ void editor::copy()
 {
 	if (selection_)
 	{
-		clipboard::set(doc_->get_range_content(*selection_));
+		clipboard::set(get_document().get_range_content(*selection_));
 	}
 }
 
@@ -286,8 +284,8 @@ void editor::cut()
 {
 	if (selection_)
 	{
-		clipboard::set(doc_->get_range_content(*selection_));
-		auto edit = doc_->edit();
+		clipboard::set(get_document().get_range_content(*selection_));
+		auto edit = get_document().edit();
 		edit.remove(*selection_);
 		cursor_pos_ = selection_->start;
 		edit.commit(cursor_pos_);
@@ -386,7 +384,7 @@ void editor::pg_up()
 void editor::pg_down()
 {
 	unsigned page_height = window_.get_workspace_height();
-	unsigned lines = doc_->get_line_count();
+	unsigned lines = get_document().get_line_count();
 	if (page_height < lines)
 		first_line_ = std::min(first_line_ + page_height, lines - page_height);
 
@@ -401,7 +399,7 @@ void editor::backspace()
 	// TODO any smart-unindenting goes here
 	if (selection_)
 	{
-		auto edit = doc_->edit();
+		auto edit = get_document().edit();
 		edit.remove(*selection_);
 		cursor_pos_ = selection_->start;
 		edit.commit(cursor_pos_);
@@ -409,7 +407,7 @@ void editor::backspace()
 	}
 	else if (cursor_pos_ > document::document_position{0, 0})
 	{
-		auto edit = doc_->edit();
+		auto edit = get_document().edit();
 		cursor_pos_ = edit.remove_before(cursor_pos_, 1);
 		edit.commit(cursor_pos_);
 	}
@@ -423,15 +421,15 @@ void editor::del()
 {
 	if (selection_)
 	{
-		auto edit = doc_->edit();
+		auto edit = get_document().edit();
 		edit.remove(*selection_);
 		cursor_pos_ = selection_->start;
 		edit.commit(cursor_pos_);
 		selection_.reset();
 	}
-	else if (cursor_pos_ < doc_->get_last_position())
+	else if (cursor_pos_ < get_document().get_last_position())
 	{
-		auto edit = doc_->edit();
+		auto edit = get_document().edit();
 		edit.remove_after(cursor_pos_, 1);
 		edit.commit(cursor_pos_);
 	}
@@ -450,7 +448,7 @@ void editor::home()
 
 void editor::end()
 {
-	const document::document_line& line = doc_->get_line(cursor_pos_.line);
+	const document::document_line& line = get_document().get_line(cursor_pos_.line);
 	cursor_pos_.column = line.get_length();
 	desired_cursor_column_ = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 	ensure_cursor_visible();
@@ -461,7 +459,7 @@ void editor::on_document_tokens_updated()
 {
 	unsigned errors = 0;
 	unsigned warnings = 0;
-	for(const document::diagnostic_message& d : doc_->get_diagnostics())
+	for(const document::diagnostic_message& d : get_document().get_diagnostics())
 	{
 		if (d.severity == document::problem_severity::error)
 			errors++;
@@ -497,7 +495,7 @@ unsigned editor::workspace_to_document_y(unsigned wy) const
 
 unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 {
-	const document::document_line& line =  doc_->get_line(docy);
+	const document::document_line& line =  get_document().get_line(docy);
 
 	if (docx > line.get_length())
 		throw std::runtime_error("line character out of bounds");
@@ -517,7 +515,7 @@ unsigned editor::document_x_to_column(unsigned docy, unsigned docx) const
 
 void editor::insert_at_cursor(const std::string& s)
 {
-	auto edit = doc_->edit();
+	auto edit = get_document().edit();
 	if (selection_)
 	{
 		edit.remove(*selection_);
@@ -533,6 +531,18 @@ void editor::insert_at_cursor(const std::string& s)
 	desired_cursor_column_ = document_x_to_column(cursor_pos_.line, cursor_pos_.column);
 	ensure_cursor_visible();
 	request_full_render();
+}
+
+document::document& editor::get_document()
+{
+	assert(file_);
+	return file_->get_document();
+}
+
+const document::document& editor::get_document() const
+{
+	assert(file_);
+	return file_->get_document();
 }
 
 }

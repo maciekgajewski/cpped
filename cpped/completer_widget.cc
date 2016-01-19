@@ -1,5 +1,7 @@
 #include "completer_widget.hh"
 
+#include "edited_file.hh"
+
 namespace cpped {
 
 
@@ -18,18 +20,18 @@ static bool is_valid(char c)
 }
 
 
-completer_widget::completer_widget(project& pr, nct::window_manager& ed, nct::event_window* parent)
-	: nct::event_window(ed, parent), project_(pr)
+completer_widget::completer_widget(nct::window_manager& ed, nct::event_window* parent)
+	: nct::event_window(ed, parent)
 {
 }
 
 void completer_widget::activate(
-	const document::document& doc,
+	edited_file& ef,
 	const document::document_position& cursor_pos,
 	const nct::position& screen_pos)
 {
 	// start with current cursor position, and move back until it's no longer a valid identifier
-	const document::document_line& line = doc.get_line(cursor_pos.line);
+	const document::document_line& line = ef.get_document().get_line(cursor_pos.line);
 
 	unsigned token_end = cursor_pos.column;
 	unsigned token_start = cursor_pos.column;
@@ -38,7 +40,7 @@ void completer_widget::activate(
 		token_start--;
 	}
 
-	auto result = project_.get_completion(doc.get_file_name(), {cursor_pos.line, token_start});
+	auto result = ef.get_completion({cursor_pos.line, token_start});
 
 	if (result.empty())
 	{

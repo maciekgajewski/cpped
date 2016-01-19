@@ -77,15 +77,15 @@ project::project(event_dispatcher& ed, background_worker_manager& bwm)
 	event_dispatcher_.register_message_handler<messages::document_changed_feed>(
 		[this](const messages::document_changed_feed& feed)
 		{
-			LOG("Data feed recevied for file " << feed.file << ", version " << feed.version);
-			auto it = open_files_.find(feed.file);
+			LOG("Data feed recevied for file " << feed.path << ", version " << feed.version);
+			auto it = open_files_.find(feed.path);
 			if (it != open_files_.end())
 			{
 				open_file& file = *it->second;
 				file.set_data(feed.data, feed.version);
 				if (!file.uses_provisional_unit())
 				{
-					touch_units(feed.file);
+					touch_units(feed.path);
 				}
 				// get completion (if requested)
 				if (feed.cursor_position)
@@ -97,7 +97,7 @@ project::project(event_dispatcher& ed, background_worker_manager& bwm)
 				}
 				// reparse
 				messages::file_tokens_feed tokens_feed;
-				tokens_feed.file = feed.file;
+				tokens_feed.path = feed.path;
 				tokens_feed.version = feed.version;
 				auto state = file.parse(get_unsaved_data());
 				tokens_feed.tokens = std::move(state);
@@ -106,7 +106,7 @@ project::project(event_dispatcher& ed, background_worker_manager& bwm)
 			}
 			else
 			{
-				LOG("FATAL: Data feed recevied for unknown file: " << feed.file);
+				LOG("FATAL: Data feed recevied for unknown file: " << feed.path);
 				// inconsistent data
 				std::terminate();
 			}
@@ -117,7 +117,7 @@ project::project(event_dispatcher& ed, background_worker_manager& bwm)
 		{
 			messages::complete_at_reply reply;
 
-			auto it = open_files_.find(request.file);
+			auto it = open_files_.find(request.path);
 			if (it != open_files_.end())
 			{
 				open_file& file = *it->second;
@@ -131,9 +131,9 @@ project::project(event_dispatcher& ed, background_worker_manager& bwm)
 		[this](const messages::save_request& request)
 		{
 			messages::save_reply reply;
-			reply.file = request.file;
+			reply.path = request.path;
 
-			auto it = open_files_.find(request.file);
+			auto it = open_files_.find(request.path);
 			if (it != open_files_.end())
 			{
 				open_file& file = *it->second;
@@ -436,7 +436,7 @@ void project::on_includes_updated(compilation_unit& cu)
 			pair.second->set_compilation_unit(&cu);
 			LOG("Replacing provisional cu on " << pair.first << " with " << cu.get_path());
 			messages::file_tokens_feed feed;
-			feed.file = pair.first;
+			feed.path = pair.first;
 			auto state = pair.second->parse(get_unsaved_data());
 			feed.tokens = std::move(state);
 			feed.version = pair.second->get_version();

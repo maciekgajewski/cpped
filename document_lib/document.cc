@@ -22,7 +22,7 @@ document::~document()
 
 void document::load_from_raw_data(const std::string& data, const fs::path& path, bool new_file)
 {
-	file_name_ = fs::absolute(path);
+	path_ = fs::absolute(path);
 
 	data_.clear();
 	data_.emplace_back(versioned_data{std::make_unique<document_data>(), 0});
@@ -47,11 +47,11 @@ void document::load_from_raw_data(const std::string& data, const boost::filesyst
 
 void document::load_from_file(const boost::filesystem::path& path)
 {
-	file_name_ = boost::filesystem::absolute(path);
+	path_ = boost::filesystem::absolute(path);
 
 	data_.clear();
 	data_.emplace_back(versioned_data{std::make_unique<document_data>(), 0});
-	data_.back().data->load_from_file(file_name_.string());
+	data_.back().data->load_from_file(path_.string());
 	current_data_ = data_.begin();
 	last_version_ = 0;
 }
