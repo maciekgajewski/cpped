@@ -97,6 +97,7 @@ void event_window::move(const position& pos, const size& sz)
 		size_ = sz;
 		position_ = pos;
 		on_resized();
+		request_redraw();
 	}
 }
 

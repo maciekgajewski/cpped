@@ -89,6 +89,11 @@ edited_file& project::get_open_file(const boost::filesystem::path& path)
 	return *file;
 }
 
+std::unique_ptr<edited_file> project::make_unsaved_file()
+{
+	return std::make_unique<edited_file>(endpoint_, document::document{}, false, true);
+}
+
 void project::on_file_tokens(const backend::messages::file_tokens_feed& token_feed)
 {
 	edited_file* file = find_file(token_feed.path);

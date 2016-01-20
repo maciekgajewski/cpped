@@ -127,6 +127,7 @@ private:
 	editor_settings settings_;
 
 	edited_file* file_;
+	std::unique_ptr<edited_file> unsaved_file_;
 	editor_window& window_;
 	bool parsing_disabled_ = false;
 	boost::optional<document::document_range> selection_;

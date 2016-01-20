@@ -275,7 +275,7 @@ unsigned editor_window::get_workspace_height() const
 
 void editor_window::open_file(const boost::filesystem::path& file)
 {
-	// TODO modal dialog to save unsavedchanges in current document
+	// TODO modal dialog to save unsaved changes in current document
 	try
 	{
 		set_status("Openig file...");

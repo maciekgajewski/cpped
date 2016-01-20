@@ -29,6 +29,9 @@ public:
 	void open_cmake_project(const boost::filesystem::path& build_dir);
 	edited_file& open_file(const boost::filesystem::path& path);
 	edited_file& get_open_file(const boost::filesystem::path& path);
+	std::unique_ptr<edited_file> make_unsaved_file();
+
+
 
 	// Returns (via output iterator) all open files (paths)
 	template<typename OutIt>

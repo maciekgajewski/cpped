@@ -17,7 +17,11 @@ editor::editor(editor_window& win, edited_file& f)
 editor::editor(editor_window& win)
 	: window_(win)
 {
-	// TODO? ??
+	unsaved_file_ = win.get_project().make_unsaved_file();
+	file_ = unsaved_file_.get();
+
+	tokens_udated_connection_ = file_->get_document().tokens_updated_signal.connect([this]() { on_document_tokens_updated(); });
+	cursor_pos_ = {0, 0};
 }
 
 bool editor::on_special_key(int key_code, const char* key_name)
@@ -100,6 +104,7 @@ bool editor::on_mouse(const MEVENT& event)
 void editor::set_document(edited_file& f)
 {
 	file_ = &f;
+	unsaved_file_.reset();
 
 	tokens_udated_connection_.release().disconnect();
 	tokens_udated_connection_ = file_->get_document().tokens_updated_signal.connect([this]() { on_document_tokens_updated(); });
