@@ -10,6 +10,7 @@ add_library(nct
 	status_message.cc status_message.hh
 	style.cc style.hh
 	fbuttons.cc fbuttons.hh
+	splitter.cc splitter.hh
 )
 
 target_include_directories(nct INTERFACE ..)
