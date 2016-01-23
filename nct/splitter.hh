@@ -2,6 +2,8 @@
 
 #include "event_window.hh"
 
+#include <boost/signals2.hpp>
+
 #include <array>
 
 namespace nct {
@@ -21,7 +23,10 @@ private:
 
 	void on_resized() override;
 	void render(nct::ncurses_window& surface) override;
+
 	void recalculate_sizes();
+	unsigned get_availabale_size() const;
+	void apply_size(nct::event_window* win, unsigned size_before, unsigned size);
 
 	enum class entry_type { fixed, stretching, unset };
 
@@ -31,6 +36,7 @@ private:
 		entry_type type_ = entry_type::unset;
 		unsigned requested_size_ = 0;
 		unsigned size_;
+		boost::signals2::scoped_connection title_chaned_connection_;
 	};
 
 	std::array<entry, 2> entries_;
@@ -39,19 +45,8 @@ private:
 
 namespace _splitter_directions
 {
-
-struct horizontal
-{
-	static unsigned get_size(const size& sz) { return sz.w; }
-	static void apply_size(nct::event_window*, const nct::size&, unsigned, unsigned);
-};
-
-struct vertical
-{
-	static unsigned get_size(const size& sz) { return sz.h; }
-	static void apply_size(nct::event_window*, const nct::size&, unsigned, unsigned);
-};
-
+	struct horizontal {};
+	struct vertical {};
 }
 
 using horizontal_splitter = splitter<_splitter_directions::horizontal>;

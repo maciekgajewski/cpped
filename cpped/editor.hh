@@ -110,6 +110,8 @@ private:
 	void request_full_render();
 	void request_parsing();
 
+	void update_window_title();
+
 	// converts document x (character in line) into column, taking all tabs into account
 	unsigned document_x_to_column(unsigned docy, unsigned docx) const;
 

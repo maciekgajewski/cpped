@@ -4,6 +4,7 @@
 #include "types.hh"
 
 #include <boost/optional.hpp>
+#include <boost/signals2.hpp>
 
 #include <string>
 #include <vector>
@@ -45,6 +46,9 @@ class event_window
 public:
 	event_window(window_manager& wm, event_window* parent);
 	virtual ~event_window();
+
+	// signals
+	boost::signals2::signal<void(const std::string&)> title_changed_signal;
 
 	// event receviers
 
@@ -90,6 +94,9 @@ public:
 	void set_position(const position& pos) { move(pos, size_); }
 	void set_fullscreen(bool fs);
 
+	void set_title(const std::string& title);
+	const std::string& get_title() const { return title_; }
+
 protected:
 
 	virtual void on_resized() {}
@@ -131,6 +138,7 @@ private:
 	bool redraw_requested_ = false;
 	bool fullscreen_ = false;
 	bool visible_ = true;
+	std::string title_;
 };
 
 

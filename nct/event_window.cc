@@ -190,6 +190,15 @@ void event_window::set_fullscreen(bool fs)
 	}
 }
 
+void event_window::set_title(const std::__cxx11::string& title)
+{
+	if (title != title_)
+	{
+		title_ = title;
+		title_changed_signal(title_);
+	}
+}
+
 void event_window::redraw_now()
 {
 	window_manager_.render_windows();

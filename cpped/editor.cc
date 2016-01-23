@@ -207,6 +207,7 @@ void editor::ensure_cursor_visible()
 void editor::request_full_render()
 {
 	window_.request_full_render();
+	update_window_title();
 }
 
 editor::status_info editor::get_status_info() const
@@ -237,6 +238,23 @@ void editor::request_parsing()
 	if (!parsing_disabled_)
 	{
 		file_->request_parsing(boost::none);
+	}
+}
+
+void editor::update_window_title()
+{
+	const auto& path = file_->get_path();
+	if (path.empty())
+	{
+		window_.set_title("<unsaved>");
+	}
+	else if (file_->get_document().has_unsaved_changes())
+	{
+		window_.set_title(path.string() + "*");
+	}
+	else
+	{
+		window_.set_title(path.string());
 	}
 }
 

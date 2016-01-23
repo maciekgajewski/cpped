@@ -12,6 +12,7 @@ open_files_widget::open_files_widget(nct::window_manager& wm, nct::event_window*
 
 	set_text_style(nct::style{COLOR_BLACK, COLOR_WHITE});
 	set_selected_text_style(nct::style{COLOR_YELLOW, COLOR_BLACK});
+	set_title("Open files");
 }
 
 void open_files_widget::file_opened(const fs::path& path)

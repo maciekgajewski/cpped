@@ -235,16 +235,6 @@ void editor_window::render_status_info(nct::ncurses_window& surface, const edito
 {
 	surface.set_style_on(styles_.status);
 
-	// top line
-	// window.horizontal_line(0,0, WACS_D_HLINE, window.get_width()); doesn't work on xfce (?)
-	surface.horizontal_line(0, 0, ACS_HLINE, surface.get_width());
-	std::string file_name_string = info.file_name.string();
-	int file_name_x = (surface.get_width() - file_name_string.length()) / 2;
-	surface.move_cursor(0, file_name_x);
-	surface.print(info.file_name.string());
-	if (info.unsaved)
-		surface.print("*");
-
 	// bottom line
 
 	surface.move_cursor(surface.get_height()-1, 0);

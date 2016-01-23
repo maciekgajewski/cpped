@@ -53,7 +53,7 @@ private:
 	void update_cursor(const nct::position& pos);
 
 	unsigned left_margin_width_ = 0; // calculated when rendering
-	unsigned top_margin_ = 1;
+	unsigned top_margin_ = 0;
 	unsigned bottom_margin_ = 1;
 
 	project& project_;
