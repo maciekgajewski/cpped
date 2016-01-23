@@ -15,11 +15,12 @@ public:
 	splitter(window_manager& wm, event_window* parent);
 
 	void set_fixed(unsigned idx, nct::event_window* win, unsigned requested_size);
-	void set_streatching(unsigned idx, nct::event_window* win);
+	void set_stretching(unsigned idx, nct::event_window* win);
 
 private:
 
 	void on_resized() override;
+	void recalculate_sizes();
 
 	enum class entry_type { fixed, stretching, unset };
 

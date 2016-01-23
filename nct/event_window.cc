@@ -38,10 +38,13 @@ void event_window::set_parent(event_window* parent)
 	{
 		throw std::logic_error("Window can be it's own parent");
 	}
-	parent_ = parent;
-	if (parent_)
+	if (parent_ != parent)
 	{
-		parent_->children_.insert(this);
+		parent_ = parent;
+		if (parent_)
+		{
+			parent_->children_.insert(this);
+		}
 	}
 }
 

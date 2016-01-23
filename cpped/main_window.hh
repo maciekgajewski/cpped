@@ -2,9 +2,10 @@
 
 #include "navigator_widget.hh"
 
-#include "nct/event_window.hh"
-#include "nct/status_message.hh"
-#include "nct/fbuttons.hh"
+#include <nct/event_window.hh>
+#include <nct/status_message.hh>
+#include <nct/fbuttons.hh>
+#include <nct/splitter.hh>
 
 #include <memory>
 
@@ -36,6 +37,8 @@ private:
 	project& project_;
 	style_manager& style_;
 	nct::status_message_receiver status_message_receiver_;
+	nct::horizontal_splitter main_splitter_;
+	nct::list_widget file_list_;
 	std::unique_ptr<editor_window> editor_;
 	nct::fbuttons fbuttons_;
 	navigator_widget navigator_;

@@ -11,13 +11,15 @@ namespace cpped {
 
 namespace fs = boost::filesystem;
 
-main_window::main_window(project& pr, nct::window_manager& ed, style_manager& sm)
-	: nct::event_window(ed, nullptr),
+main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm)
+	: nct::event_window(wm, nullptr),
 	project_(pr), style_(sm),
 	status_message_receiver_([this](const std::string& s) { set_status_message(s); }),
-	editor_(std::make_unique<editor_window>(pr, ed, sm, this)),
-	fbuttons_(ed, this),
-	navigator_(pr, ed, this)
+	main_splitter_(wm, this),
+	file_list_(wm, &main_splitter_),
+	editor_(std::make_unique<editor_window>(pr, wm, sm, &main_splitter_)),
+	fbuttons_(wm, this),
+	navigator_(pr, wm, this)
 {
 	project_.status_signal.connect(
 		[this](const std::string st)
@@ -28,6 +30,9 @@ main_window::main_window(project& pr, nct::window_manager& ed, style_manager& sm
 				request_redraw();
 			}
 		});
+
+	main_splitter_.set_fixed(0, &file_list_, 20);
+	main_splitter_.set_stretching(1, editor_.get());
 
 	navigator_.file_selected_signal.connect(
 		[this](const fs::path& p)
@@ -44,7 +49,7 @@ main_window::main_window(project& pr, nct::window_manager& ed, style_manager& sm
 void main_window::on_resized()
 {
 	nct::size sz = get_size();
-	editor_->move({0, 0}, {sz.h - 3, sz.w});
+	main_splitter_.move({0, 0}, {sz.h - 3, sz.w});
 	fbuttons_.move({sz.h - 1, 0}, {1, sz.w});
 	navigator_.move({sz.h - 2, 0}, {1, sz.w});
 	request_redraw();

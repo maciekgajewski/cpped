@@ -11,6 +11,7 @@
 
 #include <sys/epoll.h>
 #include <unistd.h>
+#include <signal.h>
 
 using namespace  std::literals::chrono_literals;
 
@@ -67,13 +68,18 @@ public:
 	void wait(std::chrono::duration<double> timeout, std::vector<epoll_event>& events)
 	{
 		events.resize(files_);
+		sigset_t mask;
+		::sigemptyset(&mask);
+		::sigaddset(&mask, SIGWINCH);
 
-		int r = ::epoll_wait(
+		int r = ::epoll_pwait(
 			epoll_fd_,
 			events.data(),
 			files_,
-			static_cast<int>(timeout/1ms));
+			static_cast<int>(timeout/1ms),
+			&mask);
 
+		// TODO need to handle SIGWINCH gracefully, instead of ignoring it
 		if (r < 0)
 			throw std::runtime_error("epoll_wait failed");
 
