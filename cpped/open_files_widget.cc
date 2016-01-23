@@ -9,6 +9,9 @@ open_files_widget::open_files_widget(nct::window_manager& wm, nct::event_window*
 {
 	selection_changed_signal.connect(
 		[this](const nct::list_widget::list_item& i) { on_selection_changed(i); });
+
+	set_text_style(nct::style{COLOR_BLACK, COLOR_WHITE});
+	set_selected_text_style(nct::style{COLOR_YELLOW, COLOR_BLACK});
 }
 
 void open_files_widget::file_opened(const fs::path& path)

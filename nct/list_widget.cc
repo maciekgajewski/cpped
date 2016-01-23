@@ -131,14 +131,8 @@ void list_widget::on_resized()
 
 void list_widget::render(ncurses_window& surface)
 {
-	nct::style normal_style = nct::style{COLOR_CYAN, COLOR_BLACK};
-	nct::style help_style = nct::style{COLOR_CYAN, COLOR_BLUE};
-	nct::style selected_normal_style = nct::style{COLOR_YELLOW, COLOR_BLACK};
-	nct::style selected_help_style = nct::style{COLOR_YELLOW, COLOR_BLUE};
-
-
 	surface.clear();
-	surface.set_background(normal_style, ' ');
+	surface.set_background(text_style_, ' ');
 
 	// predicate for selecting lines with filter
 	contains_filter_functor contains_filter_pred{filter_};
@@ -155,14 +149,14 @@ void list_widget::render(ncurses_window& surface)
 		surface.move_cursor(position{int(line), 0});
 		if (line+first_line_ == current_item_)
 		{
-			surface.style_fill_line(selected_normal_style, ' ', line);
-			surface.print({int(line), 0}, selected_normal_style, item.text);
-			surface.print({int(line), int(longest_text_+1)}, selected_help_style, item.help_text);
+			surface.style_fill_line(selected_text_style_, ' ', line);
+			surface.print({int(line), 0}, selected_text_style_, item.text);
+			surface.print({int(line), int(longest_text_+1)}, selected_help_style_, item.help_text);
 		}
 		else
 		{
-			surface.print({int(line), 0}, normal_style, item.text);
-			surface.print({int(line), int(longest_text_+1)}, help_style, item.help_text);
+			surface.print({int(line), 0}, text_style_, item.text);
+			surface.print({int(line), int(longest_text_+1)}, help_style_, item.help_text);
 		}
 	}
 }

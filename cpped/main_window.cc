@@ -31,7 +31,7 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 			}
 		});
 
-	main_splitter_.set_fixed(0, &open_file_list_, 20);
+	main_splitter_.set_fixed(0, &open_file_list_, 30);
 	main_splitter_.set_stretching(1, editor_.get());
 
 	navigator_.file_selected_signal.connect(

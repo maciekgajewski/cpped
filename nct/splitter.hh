@@ -20,6 +20,7 @@ public:
 private:
 
 	void on_resized() override;
+	void render(nct::ncurses_window& surface) override;
 	void recalculate_sizes();
 
 	enum class entry_type { fixed, stretching, unset };
@@ -29,6 +30,7 @@ private:
 		nct::event_window* window_ = nullptr;
 		entry_type type_ = entry_type::unset;
 		unsigned requested_size_ = 0;
+		unsigned size_;
 	};
 
 	std::array<entry, 2> entries_;

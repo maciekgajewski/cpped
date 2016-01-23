@@ -38,6 +38,11 @@ public:
 
 	unsigned get_filtered_count() const;
 
+	void set_text_style(const style& s) { text_style_ = s; request_redraw(); }
+	void set_help_style(const style& s) { help_style_ = s; request_redraw(); }
+	void set_selected_text_style(const style& s) { selected_text_style_ = s; request_redraw(); }
+	void set_selected_help_style(const style& s) { selected_help_style_ = s; request_redraw(); }
+
 	// actions
 
 	void select_next();
@@ -70,6 +75,11 @@ private:
 	unsigned longest_text_ = 0;
 	std::string filter_;
 	unsigned items_displayed_ = 0; // number of displayed items, after applying filter
+
+	nct::style text_style_ = nct::style{COLOR_CYAN, COLOR_BLACK};
+	nct::style help_style_ = nct::style{COLOR_CYAN, COLOR_BLUE};
+	nct::style selected_text_style_ = nct::style{COLOR_YELLOW, COLOR_BLACK};
+	nct::style selected_help_style_ = nct::style{COLOR_YELLOW, COLOR_BLUE};
 };
 
 template<typename Container>

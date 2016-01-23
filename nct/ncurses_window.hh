@@ -80,6 +80,8 @@ public:
 	void horizontal_line(int y, int x, style& s, chtype c, int len) { mvwhline(win_, y, x, s.to_attr() | c, len); }
 	void horizontal_line(int y, int x, const cchar_t* c, int len) { mvwhline_set(win_, y, x, c, len); }
 
+	void vertical_line(int y, int x, chtype c, int len) { mvwvline(win_, y, x, c, len); }
+
 private:
 
 	WINDOW* win_;
