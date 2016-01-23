@@ -10,6 +10,7 @@ add_executable(cpped
 	clipboard.cc clipboard.hh
 	edited_file.cc edited_file.hh
 	open_files_widget.cc open_files_widget.hh
+	editor_state.hh
 )
 
 target_link_libraries(cpped

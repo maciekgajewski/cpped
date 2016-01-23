@@ -103,12 +103,31 @@ bool editor::on_mouse(const MEVENT& event)
 
 void editor::set_document(edited_file& f)
 {
+	if (file_)
+	{
+		editor_state es;
+		es.cursor_position = cursor_pos_;
+		es.first_line = first_line_;
+		file_->set_editor_state(es);
+	}
+
 	file_ = &f;
 	unsaved_file_.reset();
 
 	tokens_udated_connection_.release().disconnect();
 	tokens_udated_connection_ = file_->get_document().tokens_updated_signal.connect([this]() { on_document_tokens_updated(); });
-	cursor_pos_ = {0, 0};
+
+	if (file_->get_editor_state())
+	{
+		const editor_state& es = *file_->get_editor_state();
+		cursor_pos_ = es.cursor_position;
+		first_line_ = es.first_line;
+	}
+	else
+	{
+		cursor_pos_ = {0, 0};
+	}
+	ensure_cursor_visible();
 	update();
 }
 

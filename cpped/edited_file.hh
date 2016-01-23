@@ -1,5 +1,7 @@
 #pragma once
 
+#include "editor_state.hh"
+
 #include "document_lib/document.hh"
 
 #include "backend_lib/messages.hh"
@@ -34,6 +36,9 @@ public:
 
 	void on_file_tokens(const backend::messages::file_tokens_feed& token_feed);
 
+	const boost::optional<editor_state>& get_editor_state() const { return editor_state_; }
+	void set_editor_state(const editor_state& es) { editor_state_ = es; }
+
 private:
 
 	void send_parse_request(
@@ -53,6 +58,8 @@ private:
 
 	// asynchronous parsing state
 	bool parsing_in_progress_ = false;
+
+	boost::optional<editor_state> editor_state_;
 };
 
 }
