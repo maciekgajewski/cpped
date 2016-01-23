@@ -65,6 +65,7 @@ public:
 	virtual void render(nct::ncurses_window& surface) {}
 
 	event_window* get_parent() const { return parent_; }
+	void set_parent(event_window* parent);
 
 	// window state manipulation
 

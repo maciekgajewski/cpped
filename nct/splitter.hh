@@ -14,6 +14,9 @@ public:
 
 	splitter(window_manager& wm, event_window* parent);
 
+	void set_fixed(unsigned idx, nct::event_window* win, unsigned requested_size);
+	void set_streatching(unsigned idx, nct::event_window* win);
+
 private:
 
 	void on_resized() override;
@@ -24,10 +27,10 @@ private:
 	{
 		nct::event_window* window_ = nullptr;
 		entry_type type_ = entry_type::unset;
-		unsigned size_ = 0;
+		unsigned requested_size_ = 0;
 	};
 
-	std::array<entry, 2> entires_;
+	std::array<entry, 2> entries_;
 
 };
 
@@ -37,11 +40,13 @@ namespace _splitter_directions
 struct horizontal
 {
 	static unsigned get_size(const size& sz) { return sz.w; }
+	static void apply_size(nct::event_window*, const nct::size&, unsigned, unsigned);
 };
 
 struct vertical
 {
 	static unsigned get_size(const size& sz) { return sz.h; }
+	static void apply_size(nct::event_window*, const nct::size&, unsigned, unsigned);
 };
 
 }

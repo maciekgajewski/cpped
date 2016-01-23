@@ -32,6 +32,19 @@ event_window::~event_window()
 	}
 }
 
+void event_window::set_parent(event_window* parent)
+{
+	if (parent == this)
+	{
+		throw std::logic_error("Window can be it's own parent");
+	}
+	parent_ = parent;
+	if (parent_)
+	{
+		parent_->children_.insert(this);
+	}
+}
+
 void event_window::set_active()
 {
 	window_manager_.set_active_window(this);
