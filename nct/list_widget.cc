@@ -63,6 +63,9 @@ void list_widget::select_next()
 		{
 			first_line_++;
 		}
+		list_item* item = get_current_item();
+		assert(item);
+		selection_changed_signal(*item);
 		request_redraw();
 	}
 }
@@ -75,6 +78,27 @@ void list_widget::select_previous()
 		while(current_item_ < first_line_)
 		{
 			first_line_--;
+		}
+		list_item* item = get_current_item();
+		assert(item);
+		selection_changed_signal(*item);
+		request_redraw();
+	}
+}
+
+void list_widget::select_item(unsigned index)
+{
+	if (items_displayed_ > 0 && index > items_displayed_)
+		throw std::runtime_error("Selected item out of index");
+
+	if (index != current_item_)
+	{
+		current_item_ = index;
+		if (items_displayed_ > 0)
+		{
+			list_item* item = get_current_item();
+			assert(item);
+			selection_changed_signal(*item);
 		}
 		request_redraw();
 	}
@@ -132,20 +156,15 @@ void list_widget::render(ncurses_window& surface)
 		if (line+first_line_ == current_item_)
 		{
 			surface.style_fill_line(selected_normal_style, ' ', line);
-			surface.move_cursor(position{int(line), 0});
-			surface.style_print(selected_normal_style, item.text);
-			surface.move_cursor(position{int(line), int(longest_text_+1)});
-			surface.style_print(selected_help_style, item.help_text);
+			surface.print({int(line), 0}, selected_normal_style, item.text);
+			surface.print({int(line), int(longest_text_+1)}, selected_help_style, item.help_text);
 		}
 		else
 		{
-			surface.style_print(normal_style, item.text);
-			surface.move_cursor(position{int(line), int(longest_text_+1)});
-			surface.style_print(help_style, item.help_text);
+			surface.print({int(line), 0}, normal_style, item.text);
+			surface.print({int(line), int(longest_text_+1)}, help_style, item.help_text);
 		}
 	}
-
-	request_redraw();
 }
 
 void list_widget::items_changed()
@@ -161,8 +180,8 @@ void list_widget::items_changed()
 	}
 
 	count_displayed_items();
-
 	content_size_.w = longest_text_ + 1 + longest_help;
+	request_redraw();
 }
 
 void list_widget::count_displayed_items()

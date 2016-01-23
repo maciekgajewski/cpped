@@ -63,11 +63,10 @@ void run_frontend(cpped::ipc::endpoint& endpoint, const boost::program_options::
 	cpped::style_manager styles;
 	cpped::clipboard clipboard;
 	cpped::main_window main_window(project, window_manager, styles);
-	cpped::editor_window& editor = main_window.get_current_editor();
 
 	if (file_to_open)
 	{
-		editor.open_file(*file_to_open);
+		main_window.open_file(*file_to_open);
 	}
 
 	main_window.set_fullscreen(true);

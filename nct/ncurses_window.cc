@@ -54,4 +54,15 @@ void ncurses_window::style_print(const style& s,  const char* text, unsigned len
 	::wattroff(win_, attr);
 }
 
+void ncurses_window::print(const position& pos, const style& s, const std::string& text)
+{
+	if (pos.y >= 0 && pos.y < get_height() && pos.x < get_width())
+	{
+		int chars_to_print = std::min<int>(
+			text.length(), get_width() - pos.x);
+		move_cursor(pos);
+		style_print(s, text.c_str(), chars_to_print);
+	}
+}
+
 }

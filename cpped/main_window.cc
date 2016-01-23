@@ -16,7 +16,7 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 	project_(pr), style_(sm),
 	status_message_receiver_([this](const std::string& s) { set_status_message(s); }),
 	main_splitter_(wm, this),
-	file_list_(wm, &main_splitter_),
+	open_file_list_(wm, &main_splitter_),
 	editor_(std::make_unique<editor_window>(pr, wm, sm, &main_splitter_)),
 	fbuttons_(wm, this),
 	navigator_(pr, wm, this)
@@ -31,7 +31,7 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 			}
 		});
 
-	main_splitter_.set_fixed(0, &file_list_, 20);
+	main_splitter_.set_fixed(0, &open_file_list_, 20);
 	main_splitter_.set_stretching(1, editor_.get());
 
 	navigator_.file_selected_signal.connect(
@@ -40,10 +40,24 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 			auto& editor = get_current_editor();
 			editor.set_active();
 			editor.open_file(p);
+			open_file_list_.file_opened(p);
+		});
+	open_file_list_.file_selected_signal.connect(
+		[this](const fs::path& p)
+		{
+			auto& editor = get_current_editor();
+			editor.set_active();
+			editor.open_file(p);
 		});
 
 	fbutton_provider_.set_action(
-		9 /* F10 */, "Quit", []() { utils::event_loop::get_current()->stop(); });
+				9 /* F10 */, "Quit", []() { utils::event_loop::get_current()->stop(); });
+}
+
+void main_window::open_file(const boost::filesystem::path& file)
+{
+	editor_->open_file(file);
+	open_file_list_.file_opened(file);
 }
 
 void main_window::on_resized()
@@ -63,11 +77,21 @@ void main_window::on_activated()
 bool main_window::on_special_key(int key_code, const char* key_name)
 {
 	static const std::string navigation = "^K";
+	static const std::string next_file = "^]";
+	static const std::string prev_file = "^[";
 
 	if (key_name == navigation)
 	{
 		navigator_.set_active();
 		return true;
+	}
+	else if (key_name == next_file)
+	{
+		open_file_list_.select_next_file();
+	}
+	else if (key_name == prev_file)
+	{
+		open_file_list_.select_previous_file();
 	}
 
 	if (fbuttons_.try_special_key(key_code))

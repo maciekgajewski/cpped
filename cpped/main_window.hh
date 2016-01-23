@@ -1,6 +1,7 @@
 #pragma once
 
 #include "navigator_widget.hh"
+#include "open_files_widget.hh"
 
 #include <nct/event_window.hh>
 #include <nct/status_message.hh>
@@ -21,6 +22,7 @@ public:
 	main_window(project& pr, nct::window_manager& ed, style_manager& sm);
 
 	editor_window& get_current_editor() const { return *editor_; }
+	void open_file(const boost::filesystem::path& file);
 
 private:
 
@@ -38,7 +40,7 @@ private:
 	style_manager& style_;
 	nct::status_message_receiver status_message_receiver_;
 	nct::horizontal_splitter main_splitter_;
-	nct::list_widget file_list_;
+	open_files_widget open_file_list_;
 	std::unique_ptr<editor_window> editor_;
 	nct::fbuttons fbuttons_;
 	navigator_widget navigator_;

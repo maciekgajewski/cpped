@@ -2,6 +2,9 @@
 
 #include "event_window.hh"
 
+#include <boost/any.hpp>
+#include <boost/signals2.hpp>
+
 #include <string>
 #include <vector>
 
@@ -17,9 +20,10 @@ public:
 	{
 		std::string text;
 		std::string help_text;
+		boost::any data;
 	};
 
-	list_widget(window_manager& ed, event_window* parent);
+	list_widget(window_manager& wm, event_window* parent);
 
 	template<typename Container>
 	void set_items(const Container& items);
@@ -38,6 +42,10 @@ public:
 
 	void select_next();
 	void select_previous();
+	void select_item(unsigned index); // by oridinal index, after applying filter
+
+	// signals
+	boost::signals2::signal<void(const list_item&)> selection_changed_signal;
 
 private:
 

@@ -37,6 +37,9 @@ public:
 	void style_fill_line(const style& s, chtype c, int line) { attr_fill_line(s.to_attr(), c, line); }
 	void style_fill(const style& s, chtype c, int count) { attr_fill(s.to_attr(), c, count); }
 
+	// Advanced printing - no wrapping etc
+	void print(const position& pos, const style& s, const std::string& text);
+
 	void clear() { ::wclear(win_); }
 	void clear_to_eol() { ::wclrtoeol(win_); }
 	void move_cursor(int row, int col) { ::wmove(win_, row, col); }

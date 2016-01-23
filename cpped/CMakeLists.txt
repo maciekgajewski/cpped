@@ -9,6 +9,7 @@ add_executable(cpped
 	completer_widget.cc completer_widget.hh
 	clipboard.cc clipboard.hh
 	edited_file.cc edited_file.hh
+	open_files_widget.cc open_files_widget.hh
 )
 
 target_link_libraries(cpped
