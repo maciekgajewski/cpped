@@ -10,6 +10,7 @@ ncurses_window::ncurses_window(int height, int width, int starty, int startx)
 {
 	win_ = ::newwin(height, width, starty, startx);
 	::keypad(win_, TRUE);
+	::leaveok(win_, FALSE);
 }
 
 ncurses_window::ncurses_window(WINDOW* w)
