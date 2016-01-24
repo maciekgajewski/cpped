@@ -15,10 +15,13 @@ line_edit::line_edit(window_manager& ed, event_window* parent)
 
 void line_edit::set_text(const std::string& t)
 {
-	text_ = t;
-	first_column_ = 0;
-	cursor_pos_ = 0;
-	request_redraw();
+	if (t != text_)
+	{
+		text_ = t;
+		first_column_ = 0;
+		cursor_pos_ = 0;
+		on_text_changed();
+	}
 }
 
 void line_edit::move_cursor_to_end()

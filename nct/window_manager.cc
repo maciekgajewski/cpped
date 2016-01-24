@@ -28,7 +28,7 @@ void window_manager::stdin_readable()
 		else
 		{
 			// distinguish between regular/special
-			if ((c > 31 && c < 256) || c == '\n' || c == '\t')
+			if ((c > 31 && c < 256))
 			{
 				input_buffer.push_back(c);
 			}

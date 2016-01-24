@@ -1,6 +1,7 @@
 #pragma once
 
 #include "project.hh"
+#include "commands.hh"
 
 #include <nct/event_window.hh>
 #include <nct/line_edit.hh>
@@ -27,8 +28,14 @@ private:
 	void on_resized() override;
 	bool on_special_key(int key_code, const char *key_name);
 
+	void on_text_changed(const std::string& text);
+	void on_enter_pressed();
+
+	command_context command_context_;
 	project& project_;
 	nct::line_edit editor_;
+	nct::list_widget hints_;
+	std::unique_ptr<icommand> root_command_;
 };
 
 }
