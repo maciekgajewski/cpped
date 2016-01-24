@@ -1,6 +1,6 @@
 #pragma once
 
-#include "navigator_widget.hh"
+#include "command_widget.hh"
 #include "open_files_widget.hh"
 
 #include <nct/event_window.hh>
@@ -43,7 +43,7 @@ private:
 	open_files_widget open_file_list_;
 	std::unique_ptr<editor_window> editor_;
 	nct::fbuttons fbuttons_;
-	navigator_widget navigator_;
+	command_widget navigator_;
 	nct::fbutton_action_provider fbutton_provider_;
 
 };

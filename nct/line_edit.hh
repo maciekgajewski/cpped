@@ -25,6 +25,7 @@ public:
 
 	void set_help_text(const std::string& t) { help_text_ = t; }
 	void set_text(const std::string& t);
+	void move_cursor_to_end();
 
 	template<typename Container>
 	void set_completion_hints(const Container& hints);
@@ -54,6 +55,8 @@ private:
 	void backspace();
 	void del();
 	void enter();
+	void end();
+	void home();
 
 	void hints_changed();
 	void show_hints();

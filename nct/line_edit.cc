@@ -21,6 +21,11 @@ void line_edit::set_text(const std::string& t)
 	request_redraw();
 }
 
+void line_edit::move_cursor_to_end()
+{
+	end();
+}
+
 void line_edit::on_text_changed()
 {
 	if(hints_widget_)
@@ -66,6 +71,10 @@ bool line_edit::on_special_key(int key_code, const char* key_name)
 			backspace(); return true;
 		case KEY_DC:
 			del(); return true;
+		case KEY_HOME:
+			home(); return true;
+		case KEY_END:
+			end(); return true;
 
 		// forwarded to line
 		case KEY_UP:
@@ -158,6 +167,30 @@ void line_edit::enter()
 			completion_hint hint{item->text, item->help_text};
 			hint_selected_signal(hint);
 		}
+	}
+}
+
+void line_edit::end()
+{
+	unsigned cp = text_.length();
+	if (cp != cursor_pos_)
+	{
+		cursor_pos_ = cp;
+		if (cursor_pos_ + first_column_ >= get_size().w)
+		{
+			first_column_ = cursor_pos_ - get_size().w;
+		}
+		request_redraw();
+	}
+}
+
+void line_edit::home()
+{
+	if (cursor_pos_ != 0)
+	{
+		cursor_pos_ = 0;
+		first_column_ = 0;
+		request_redraw();
 	}
 }
 

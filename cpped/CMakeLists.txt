@@ -11,6 +11,8 @@ add_executable(cpped
 	edited_file.cc edited_file.hh
 	open_files_widget.cc open_files_widget.hh
 	editor_state.hh
+	command_widget.cc command_widget.hh
+	commands.cc commands.hh
 )
 
 target_link_libraries(cpped

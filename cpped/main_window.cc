@@ -42,6 +42,13 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 			editor.open_file(p);
 			open_file_list_.file_opened(p);
 		});
+	navigator_.cancelled_signal.connect(
+		[this]()
+		{
+			auto& editor = get_current_editor();
+			editor.set_active();
+		});
+
 	open_file_list_.file_selected_signal.connect(
 		[this](const fs::path& p)
 		{
@@ -76,22 +83,41 @@ void main_window::on_activated()
 
 bool main_window::on_special_key(int key_code, const char* key_name)
 {
+	static const std::string command = "^P";
 	static const std::string navigation = "^K";
+	static const std::string find = "^F";
 	static const std::string next_file = "^]";
 	static const std::string prev_file = "^[";
 
 	if (key_name == navigation)
 	{
-		navigator_.set_active();
+		navigator_.activate("goto ");
+		return true;
+	}
+	else if (key_name == command)
+	{
+		navigator_.activate();
+		return true;
+	}
+	else if (key_name == find)
+	{
+		navigator_.activate("find ");
 		return true;
 	}
 	else if (key_name == next_file)
 	{
 		open_file_list_.select_next_file();
+		return true;
+	}
+	else if (key_name == next_file)
+	{
+		open_file_list_.select_next_file();
+		return true;
 	}
 	else if (key_name == prev_file)
 	{
 		open_file_list_.select_previous_file();
+		return true;
 	}
 
 	if (fbuttons_.try_special_key(key_code))
