@@ -35,6 +35,8 @@ bool command_widget::on_special_key(int key_code, const char* key_name)
 		cancelled_signal();
 		return true;
 	}
+
+	return false;
 }
 
 }

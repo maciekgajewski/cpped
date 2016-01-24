@@ -4,7 +4,6 @@ add_executable(cpped
 	styles.hh styles.cc
 	editor_window.cc editor_window.hh
 	project.hh project.cc
-	navigator_widget.cc navigator_widget.hh
 	main_window.cc main_window.hh
 	completer_widget.cc completer_widget.hh
 	clipboard.cc clipboard.hh
