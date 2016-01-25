@@ -39,18 +39,19 @@ void selector_command::on_text_changed(const std::string& text)
 	// do we know this guy?
 	auto it = boost::find_if(subcommands_,
 		[&](const auto& p) { return p.name == token; });
-	if (it == subcommands_.end())
+	if (it == subcommands_.end() || token_its.second == text.end()) // there must be some text following the token
 	{
 		display_hints(token);
 	}
 	else
 	{
 		// create subcommand
-		std::string prefix = prefix_ + std::string(text.begin(), token_its.second);
+		auto next_token_begin = std::find_if(token_its.second, text.end(), [](char c) { return c != ' ';});
+		std::string prefix = prefix_ + std::string(text.begin(), next_token_begin);
 		next_command_ = it->factory->create_command(ctx_, prefix);
 		if (token_its.second != text.end())
 		{
-			next_command_->on_text_changed(std::string(token_its.second, text.end()));
+			next_command_->on_text_changed(std::string(next_token_begin, text.end()));
 		}
 	}
 }
@@ -67,6 +68,7 @@ bool selector_command::on_enter_pressed()
 			if (item)
 			{
 				ctx_.command_editor->set_text(prefix_+ item->text + " ");
+				ctx_.command_editor->move_cursor_to_end();
 			}
 		}
 		return false;
