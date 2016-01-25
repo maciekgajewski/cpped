@@ -1,6 +1,7 @@
 #pragma once
 
 #include <nct/list_widget.hh>
+#include <nct/line_edit.hh>
 
 #include <string>
 #include <memory>
@@ -14,6 +15,7 @@ struct command_context
 	nct::position editor_pos;
 	unsigned editor_width;
 	nct::list_widget* hint_list;
+	nct::line_edit* command_editor;
 };
 
 // command and command factory interfaces
@@ -28,48 +30,18 @@ public:
 class icommand_factory
 {
 public:
-	virtual std::unique_ptr<icommand> create_command(const command_context& ctx, unsigned shift) const = 0;
+	virtual std::unique_ptr<icommand> create_command(const command_context& ctx, const std::string& prefix) const = 0;
 };
 
-using command_factory_list = std::vector<
-	std::pair<std::string, icommand_factory*>>;
-
-// command that has another command as a parameter
-class selector_command : public icommand
+struct command_entry
 {
-public:
-
-	selector_command(const command_context& ctx, unsigned shift, const command_factory_list& subcommands);
-
-	virtual void on_text_changed(const std::string& text);
-	virtual bool on_enter_pressed();
-
-private:
-
-	void display_hints(const std::string& filter);
-
-	const command_context& ctx_;
-	unsigned shift_ = 0; // how many characters from the beginning of the editor the command starts
-	std::string prefix_;
-	std::unique_ptr<icommand> next_command_;
-
-	const command_factory_list& subcommands_;
+	std::string name;
+	std::string help;
+	icommand_factory* factory;
 };
 
-class selector_command_factory : public icommand_factory
-{
-public:
-	selector_command_factory(const command_factory_list& subcommands)
-		: subcommands_(subcommands) {}
+using command_factory_list = std::vector<command_entry>;
 
-	std::unique_ptr<icommand> create_command(const command_context& ctx, unsigned shift) const override
-	{
-		return std::make_unique<selector_command>(ctx, shift, subcommands_);
-	}
-
-private:
-	const command_factory_list& subcommands_;
-};
 
 
 // root command

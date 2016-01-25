@@ -12,6 +12,7 @@ add_executable(cpped
 	editor_state.hh
 	command_widget.cc command_widget.hh
 	commands.cc commands.hh
+	selector_command.hh selector_command.cc
 )
 
 target_link_libraries(cpped

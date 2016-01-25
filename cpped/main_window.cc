@@ -131,7 +131,7 @@ bool main_window::on_special_key(int key_code, const char* key_name)
 void main_window::render(nct::ncurses_window& surface)
 {
 	// just draw a bar at the bottom
-	nct::style style{COLOR_CYAN, COLOR_BLACK};
+	nct::style style{COLOR_WHITE, COLOR_BLACK};
 	surface.horizontal_line(surface.get_height()-3, 0, style, ' ', surface.get_width());
 
 	// status - left aligned

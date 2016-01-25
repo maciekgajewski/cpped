@@ -46,6 +46,7 @@ bool command_widget::on_special_key(int key_code, const char* key_name)
 {
 	if (key_code == 27) // ESC
 	{
+		hints_.hide();
 		cancelled_signal();
 		return true;
 	}
@@ -61,7 +62,8 @@ void command_widget::on_text_changed(const std::string& text)
 
 void command_widget::on_enter_pressed()
 {
-	// TODO
+	assert(root_command_);
+	root_command_->on_enter_pressed();
 }
 
 }
