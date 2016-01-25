@@ -5,7 +5,7 @@
 namespace cpped {
 
 // Command that has another command as a parameter. Used to group commands
-class selector_command : public icommand
+class selector_command : public base_command
 {
 public:
 
@@ -18,10 +18,7 @@ private:
 
 	void display_hints(const std::string& filter);
 
-	const command_context& ctx_;
-	unsigned shift_ = 0; // how many characters from the beginning of the editor the command starts
-	std::string prefix_;
-	std::unique_ptr<icommand> next_command_;
+	std::unique_ptr<base_command> next_command_;
 
 	const command_factory_list& subcommands_;
 };
@@ -32,7 +29,7 @@ public:
 	selector_command_factory(const command_factory_list& subcommands)
 		: subcommands_(subcommands) {}
 
-	std::unique_ptr<icommand> create_command(const command_context& ctx, const std::string& prefix) const override
+	std::unique_ptr<base_command> create_command(const command_context& ctx, const std::string& prefix) const override
 	{
 		return std::make_unique<selector_command>(ctx, prefix, subcommands_);
 	}

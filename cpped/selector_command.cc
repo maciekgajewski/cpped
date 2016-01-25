@@ -5,28 +5,36 @@
 namespace cpped {
 
 selector_command::selector_command(const command_context& ctx, const std::string& prefix, const command_factory_list& subcommands)
-	: ctx_(ctx)
-	, prefix_(prefix)
+	: base_command(ctx, prefix)
 	, subcommands_(subcommands)
 {
+}
+
+static bool starts_with(const std::string& text, const std::string& prefix)
+{
+	return
+		prefix.length() <= text.length()
+		&& std::equal(prefix.begin(), prefix.end(), text.begin(), text.begin() + prefix.length());
 }
 
 void selector_command::on_text_changed(const std::string& text)
 {
 	if (next_command_)
 	{
-		// TODO verify prefix
+		if (starts_with(text, next_command_->get_prefix()))
+		{
+			std::string reminder = text.substr(next_command_->get_prefix().length());
+			next_command_->on_text_changed(reminder);
+			return;
+		}
+		else
+		{
+			next_command_.reset();
+		}
 	}
 
-	// parse
-	auto token_begin = text.find_first_not_of(' ');
-	auto token_end = text.find_first_of(' ', token_begin);
-
-	std::string token(
-		token_begin == std::string::npos ?
-			text.begin() : text.begin() + token_begin,
-		token_end == std::string::npos ?
-			text.end() : text.begin() + token_end);
+	auto token_its = get_first_token(text);
+	std::string token(token_its.first, token_its.second);
 
 	// do we know this guy?
 	auto it = boost::find_if(subcommands_,
@@ -38,8 +46,12 @@ void selector_command::on_text_changed(const std::string& text)
 	else
 	{
 		// create subcommand
-		std::string prefix = prefix_ + std::string(text.begin(), text.begin() + token_end);
+		std::string prefix = prefix_ + std::string(text.begin(), token_its.second);
 		next_command_ = it->factory->create_command(ctx_, prefix);
+		if (token_its.second != text.end())
+		{
+			next_command_->on_text_changed(std::string(token_its.second, text.end()));
+		}
 	}
 }
 
@@ -63,7 +75,7 @@ bool selector_command::on_enter_pressed()
 
 void selector_command::display_hints(const std::string& filter)
 {
-	// items
+	// build item list
 	std::vector<nct::list_widget::list_item> items;
 	items.reserve(subcommands_.size());
 	for(const auto& subcommand : subcommands_)
@@ -74,22 +86,7 @@ void selector_command::display_hints(const std::string& filter)
 				{subcommand.name, subcommand.help});
 		}
 	}
-
-	if (items.empty())
-	{
-		ctx_.hint_list->hide();
-	}
-	else
-	{
-		ctx_.hint_list->set_items(items);
-
-		nct::size sz = ctx_.hint_list->get_content_size();
-		nct::position pos;
-		pos.x = ctx_.editor_pos.x + prefix_.length();
-		pos.y = ctx_.editor_pos.y - sz.h;
-		ctx_.hint_list->move(pos, sz);
-		ctx_.hint_list->show();
-	}
+	show_hints(items);
 }
 
 }

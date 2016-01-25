@@ -24,6 +24,8 @@ public:
 	editor_window& get_current_editor() const { return *editor_; }
 	void open_file(const boost::filesystem::path& file);
 
+	const project& get_project() const { return project_; }
+
 private:
 
 	void on_resized() override;

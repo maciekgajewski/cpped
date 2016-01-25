@@ -14,7 +14,7 @@ class command_widget final : public nct::event_window
 {
 public:
 
-	command_widget(project& pr, nct::window_manager& wm, nct::event_window* parent);
+	command_widget(project& pr, nct::window_manager& wm, main_window* parent);
 
 	// Activates the widget, and sets initial text
 	void activate(const std::string& init = {});
@@ -25,6 +25,7 @@ public:
 private:
 
 	void on_activated() override;
+	void on_deactivated() override;
 	void on_resized() override;
 	bool on_special_key(int key_code, const char *key_name);
 
@@ -35,7 +36,7 @@ private:
 	project& project_;
 	nct::line_edit editor_;
 	nct::list_widget hints_;
-	std::unique_ptr<icommand> root_command_;
+	std::unique_ptr<base_command> root_command_;
 };
 
 }

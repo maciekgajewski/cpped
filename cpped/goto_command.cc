@@ -1,0 +1,56 @@
+#include "goto_command.hh"
+
+#include "main_window.hh"
+
+namespace cpped {
+
+namespace fs = boost::filesystem;
+
+goto_command::goto_command(const command_context& ctx, const std::string& prefix)
+	: base_command(ctx, prefix)
+{
+	const project& pr = ctx_.main_win->get_project();
+
+	pr.get_all_project_files(std::inserter(files_, files_.end()));
+	pr.get_all_open_files(std::inserter(files_, files_.end()));
+}
+
+void goto_command::on_text_changed(const std::string& text)
+{
+	// parse
+	auto token_its = get_first_token(text);
+	std::string token(token_its.first, token_its.second);
+
+	std::vector<nct::list_widget::list_item> items;
+	items.reserve(files_.size());
+	for(const fs::path& path : files_)
+	{
+		std::string fn = path.filename().string();
+		if (fn.find(token) != std::string::npos)
+		{
+			items.push_back(
+				nct::list_widget::list_item{fn, path.string(), path});
+		}
+	}
+
+	show_hints(items);
+}
+
+bool goto_command::on_enter_pressed()
+{
+	if (ctx_.hint_list->is_visible())
+	{
+		auto item = ctx_.hint_list->get_current_item();
+		if (item)
+		{
+			fs::path path = boost::any_cast<fs::path>(item->data);
+
+			ctx_.hint_list->hide(); // this needs to be prettier
+			ctx_.main_win->open_file(path);
+
+		}
+	}
+	return true;
+}
+
+}

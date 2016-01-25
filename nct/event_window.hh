@@ -88,6 +88,7 @@ public:
 	const size& get_size() const { return size_; }
 	const position& get_position() const { return position_; }
 	int get_z() const { return z_; }
+	position get_global_position() const { return to_global(position_); }
 
 	void move(const position& pos, const size& sz);
 	void set_size(const size& sz) { move(position_, sz); }
@@ -109,7 +110,7 @@ protected:
 	void redraw_now();
 
 	// converts local to global (screen) coordinates
-	position to_global(const position& pos);
+	position to_global(const position& pos) const;
 
 	window_manager& get_window_manager() const { return window_manager_; }
 

@@ -1,7 +1,10 @@
 #include "command_widget.hh"
+
+#include "main_window.hh"
+
 namespace cpped {
 
-command_widget::command_widget(project& pr, nct::window_manager& wm, nct::event_window* parent)
+command_widget::command_widget(project& pr, nct::window_manager& wm, main_window* parent)
 	: nct::event_window(wm, parent)
 	, command_context_{wm}
 	, project_(pr)
@@ -18,6 +21,8 @@ command_widget::command_widget(project& pr, nct::window_manager& wm, nct::event_
 	hints_.hide();
 
 	command_context_.hint_list = &hints_;
+	command_context_.command_editor = &editor_;
+	command_context_.main_win = parent;
 }
 
 void command_widget::activate(const std::string& init)
@@ -35,6 +40,11 @@ void command_widget::on_activated()
 	editor_.set_active();
 }
 
+void command_widget::on_deactivated()
+{
+	hints_.hide();
+}
+
 void command_widget::on_resized()
 {
 	editor_.move(nct::position{0, 0}, nct::size{1, get_size().w});
@@ -44,11 +54,24 @@ void command_widget::on_resized()
 
 bool command_widget::on_special_key(int key_code, const char* key_name)
 {
-	if (key_code == 27) // ESC
+	switch(key_code)
 	{
-		hints_.hide();
-		cancelled_signal();
-		return true;
+		case 27: // ESC
+			hints_.hide();
+			cancelled_signal();
+			return true;
+		case KEY_UP:
+			if (hints_.is_visible())
+			{
+				hints_.select_previous();
+			}
+			return true;
+		case KEY_DOWN:
+			if (hints_.is_visible())
+			{
+				hints_.select_next();
+			}
+			return true;
 	}
 
 	return false;

@@ -64,6 +64,7 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 void main_window::open_file(const boost::filesystem::path& file)
 {
 	editor_->open_file(file);
+	editor_->set_active();
 	open_file_list_.file_opened(file);
 }
 
