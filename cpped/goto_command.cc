@@ -6,10 +6,10 @@ namespace cpped {
 
 namespace fs = boost::filesystem;
 
-goto_command::goto_command(const command_context& ctx, const std::string& prefix)
+goto_command::goto_command(command_context& ctx, const std::string& prefix)
 	: base_command(ctx, prefix)
 {
-	const project& pr = ctx_.main_win->get_project();
+	const project& pr = ctx_.get_project();
 
 	pr.get_all_project_files(std::inserter(files_, files_.end()));
 	pr.get_all_open_files(std::inserter(files_, files_.end()));
@@ -33,22 +33,16 @@ void goto_command::on_text_changed(const std::string& text)
 		}
 	}
 
-	show_hints(items);
+	ctx_.show_hints(prefix_.length(), items);
 }
 
 bool goto_command::on_enter_pressed()
 {
-	if (ctx_.hint_list->is_visible())
+	auto item = ctx_.get_current_item();
+	if (item)
 	{
-		auto item = ctx_.hint_list->get_current_item();
-		if (item)
-		{
-			fs::path path = boost::any_cast<fs::path>(item->data);
-
-			ctx_.hint_list->hide(); // this needs to be prettier
-			ctx_.main_win->open_file(path);
-
-		}
+		fs::path path = boost::any_cast<fs::path>(item->data);
+		ctx_.open_file(path);
 	}
 	return true;
 }

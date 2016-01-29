@@ -19,7 +19,7 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 	open_file_list_(wm, &main_splitter_),
 	editor_(std::make_unique<editor_window>(pr, wm, sm, &main_splitter_)),
 	fbuttons_(wm, this),
-	navigator_(pr, wm, this)
+	command_widget_(pr, wm, this)
 {
 	project_.status_signal.connect(
 		[this](const std::string st)
@@ -34,15 +34,12 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 	main_splitter_.set_fixed(0, &open_file_list_, 30);
 	main_splitter_.set_stretching(1, editor_.get());
 
-	navigator_.file_selected_signal.connect(
+	command_widget_.file_selected_signal.connect(
 		[this](const fs::path& p)
 		{
-			auto& editor = get_current_editor();
-			editor.set_active();
-			editor.open_file(p);
-			open_file_list_.file_opened(p);
+			open_file(p);
 		});
-	navigator_.cancelled_signal.connect(
+	command_widget_.cancelled_signal.connect(
 		[this]()
 		{
 			auto& editor = get_current_editor();
@@ -73,7 +70,7 @@ void main_window::on_resized()
 	nct::size sz = get_size();
 	main_splitter_.move({0, 0}, {sz.h - 3, sz.w});
 	fbuttons_.move({sz.h - 1, 0}, {1, sz.w});
-	navigator_.move({sz.h - 2, 0}, {1, sz.w});
+	command_widget_.move({sz.h - 2, 0}, {1, sz.w});
 	request_redraw();
 }
 
@@ -92,17 +89,17 @@ bool main_window::on_special_key(int key_code, const char* key_name)
 
 	if (key_name == navigation)
 	{
-		navigator_.activate("goto ");
+		command_widget_.activate("goto ");
 		return true;
 	}
 	else if (key_name == command)
 	{
-		navigator_.activate();
+		command_widget_.activate();
 		return true;
 	}
 	else if (key_name == find)
 	{
-		navigator_.activate("find ");
+		command_widget_.activate("find ");
 		return true;
 	}
 	else if (key_name == next_file)

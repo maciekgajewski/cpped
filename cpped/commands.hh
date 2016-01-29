@@ -1,5 +1,7 @@
 #pragma once
 
+#include "command_context.hh"
+
 #include <nct/list_widget.hh>
 #include <nct/line_edit.hh>
 
@@ -11,21 +13,11 @@ namespace cpped {
 
 class main_window;
 
-struct command_context
-{
-	nct::window_manager& wm;
-	nct::position editor_pos;
-	unsigned editor_width;
-	nct::list_widget* hint_list;
-	nct::line_edit* command_editor;
-	main_window* main_win;
-};
-
 // command and command factory interfaces
 class base_command
 {
 public:
-	base_command(const command_context& ctx, const std::string& prefix)
+	base_command(command_context& ctx, const std::string& prefix)
 		: ctx_(ctx), prefix_(prefix)
 	{}
 
@@ -36,7 +28,6 @@ public:
 
 protected:
 
-	void show_hints(const std::vector<nct::list_widget::list_item>& items);
 
 	static std::pair<std::string::const_iterator, std::string::const_iterator> get_first_token(const std::string& text)
 	{
@@ -48,14 +39,14 @@ protected:
 	}
 
 
-	const command_context& ctx_;
+	command_context& ctx_;
 	std::string prefix_;
 };
 
 class icommand_factory
 {
 public:
-	virtual std::unique_ptr<base_command> create_command(const command_context& ctx, const std::string& prefix) const = 0;
+	virtual std::unique_ptr<base_command> create_command(command_context& ctx, const std::string& prefix) const = 0;
 };
 
 struct command_entry
@@ -68,6 +59,6 @@ struct command_entry
 using command_factory_list = std::vector<command_entry>;
 
 // root command
-std::unique_ptr<base_command> make_root_command(const command_context& ctx);
+std::unique_ptr<base_command> make_root_command(command_context& ctx);
 
 }

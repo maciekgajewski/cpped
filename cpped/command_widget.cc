@@ -4,9 +4,10 @@
 
 namespace cpped {
 
-command_widget::command_widget(project& pr, nct::window_manager& wm, main_window* parent)
+namespace fs = boost::filesystem;
+
+command_widget::command_widget(project& pr, nct::window_manager& wm, nct::event_window* parent)
 	: nct::event_window(wm, parent)
-	, command_context_{wm}
 	, project_(pr)
 	, editor_(wm, this)
 	, hints_(wm, this)
@@ -19,15 +20,11 @@ command_widget::command_widget(project& pr, nct::window_manager& wm, main_window
 		[this]() { on_enter_pressed(); });
 
 	hints_.hide();
-
-	command_context_.hint_list = &hints_;
-	command_context_.command_editor = &editor_;
-	command_context_.main_win = parent;
 }
 
 void command_widget::activate(const std::string& init)
 {
-	root_command_ = make_root_command(command_context_);
+	root_command_ = make_root_command(*this);
 
 	editor_.set_text(init);
 	editor_.move_cursor_to_end();
@@ -48,8 +45,6 @@ void command_widget::on_deactivated()
 void command_widget::on_resized()
 {
 	editor_.move(nct::position{0, 0}, nct::size{1, get_size().w});
-	command_context_.editor_pos = nct::position{0, 0};
-	command_context_.editor_width = get_size().w;
 }
 
 bool command_widget::on_special_key(int key_code, const char* key_name)
@@ -79,14 +74,65 @@ bool command_widget::on_special_key(int key_code, const char* key_name)
 
 void command_widget::on_text_changed(const std::string& text)
 {
-	assert(root_command_);
-	root_command_->on_text_changed(text);
+	if (!ignore_signals_)
+	{
+		assert(root_command_);
+		root_command_->on_text_changed(text);
+	}
 }
 
 void command_widget::on_enter_pressed()
 {
 	assert(root_command_);
 	root_command_->on_enter_pressed();
+}
+
+void command_widget::show_hints(unsigned position, const std::vector<nct::list_widget::list_item>& items)
+{
+	if (items.empty())
+	{
+		hints_.hide();
+	}
+	else
+	{
+		hints_.set_items(items);
+
+		nct::size content_size = hints_.get_content_size();
+		nct::size sz;
+		sz.h = std::min<int>(content_size.h, editor_.get_global_position().y);
+		sz.w = std::min<int>(content_size.w, editor_.get_size().w - position);
+
+		nct::position pos;
+		pos.x = editor_.get_position().x + position;
+		pos.y = editor_.get_position().y - sz.h;
+		hints_.move(pos, sz);
+		hints_.show();
+	}
+}
+
+void command_widget::open_file(const boost::filesystem::path& path)
+{
+	cancel();
+	file_selected_signal(path);
+}
+
+nct::list_widget::list_item*command_widget::get_current_item()
+{
+	return hints_.get_current_item();
+}
+
+void command_widget::set_text(const std::string& t)
+{
+	editor_.set_text(t);
+	editor_.move_cursor_to_end();
+}
+
+void command_widget::cancel()
+{
+	ignore_signals_ = true;
+	editor_.set_text({});
+	hints_.hide();
+	ignore_signals_ = false;
 }
 
 }

@@ -45,7 +45,7 @@ private:
 	open_files_widget open_file_list_;
 	std::unique_ptr<editor_window> editor_;
 	nct::fbuttons fbuttons_;
-	command_widget navigator_;
+	command_widget command_widget_;
 	nct::fbutton_action_provider fbutton_provider_;
 
 };

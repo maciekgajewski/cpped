@@ -13,7 +13,7 @@ class goto_command : public base_command
 {
 public:
 
-	goto_command(const command_context& ctx, const std::string& prefix);
+	goto_command(command_context& ctx, const std::string& prefix);
 
 	void on_text_changed(const std::string& text) override;
 	bool on_enter_pressed() override;
@@ -25,7 +25,7 @@ private:
 
 struct goto_command_factory final : public icommand_factory
 {
-	std::unique_ptr<base_command> create_command(const command_context& ctx, const std::string& prefix) const override
+	std::unique_ptr<base_command> create_command(command_context& ctx, const std::string& prefix) const override
 	{
 		return std::make_unique<goto_command>(ctx, prefix);
 	}

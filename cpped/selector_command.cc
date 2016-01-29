@@ -4,7 +4,7 @@
 
 namespace cpped {
 
-selector_command::selector_command(const command_context& ctx, const std::string& prefix, const command_factory_list& subcommands)
+selector_command::selector_command(command_context& ctx, const std::string& prefix, const command_factory_list& subcommands)
 	: base_command(ctx, prefix)
 	, subcommands_(subcommands)
 {
@@ -59,20 +59,19 @@ void selector_command::on_text_changed(const std::string& text)
 bool selector_command::on_enter_pressed()
 {
 	if (next_command_)
+	{
 		return next_command_->on_enter_pressed();
+	}
 	else
 	{
-		if (ctx_.hint_list->is_visible())
+		auto item = ctx_.get_current_item();
+		if (item)
 		{
-			auto item = ctx_.hint_list->get_current_item();
-			if (item)
-			{
-				ctx_.command_editor->set_text(prefix_+ item->text + " ");
-				ctx_.command_editor->move_cursor_to_end();
-			}
+			ctx_.set_text(prefix_+ item->text + " ");
+			return true;
 		}
-		return false;
 	}
+	return false;
 }
 
 void selector_command::display_hints(const std::string& filter)
@@ -88,7 +87,7 @@ void selector_command::display_hints(const std::string& filter)
 				{subcommand.name, subcommand.help});
 		}
 	}
-	show_hints(items);
+	ctx_.show_hints(prefix_.length(), items);
 }
 
 }

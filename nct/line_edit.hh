@@ -19,6 +19,7 @@ public:
 
 	void set_help_text(const std::string& t) { help_text_ = t; }
 	void set_text(const std::string& t);
+	std::string get_text() const { return text_; }
 	void move_cursor_to_end();
 
 	void set_style(const style& s) { style_ = s; }
