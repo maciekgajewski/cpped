@@ -121,7 +121,7 @@ void event_window::do_show_cursor()
 {
 	if (window_ && requested_cursor_position_)
 	{
-		LOG("do_show_cursordo_show_cursor, pos=" << *requested_cursor_position_ << "win pos=" << position_);
+		LOG("do_show_cursor, pos=" << *requested_cursor_position_ << "win pos=" << position_);
 
 		::curs_set(1);
 		window_->move_cursor(*requested_cursor_position_);
@@ -190,7 +190,7 @@ void event_window::set_fullscreen(bool fs)
 	}
 }
 
-void event_window::set_title(const std::__cxx11::string& title)
+void event_window::set_title(const std::string& title)
 {
 	if (title != title_)
 	{

@@ -54,7 +54,6 @@ void run_frontend(cpped::ipc::endpoint& endpoint, const boost::program_options::
 		file_to_open = files[0];
 	}
 
-
 	::setlocale(LC_ALL, "en_EN.utf-8");
 	nct::ncurses_env env;
 
@@ -74,7 +73,7 @@ void run_frontend(cpped::ipc::endpoint& endpoint, const boost::program_options::
 	main_window.show();
 
 	window_manager.render_windows();
-	cpped::utils::file_monitor observed_stdin(STDIN_FILENO, [&]() { window_manager.stdin_readable(); window_manager.render_windows(); });
+	cpped::utils::file_monitor observed_stdin(STDIN_FILENO, [&]() { window_manager.stdin_readable(); });
 	cpped::utils::file_monitor observed_pipe(endpoint.get_fd(), [&]() { endpoint.receive_message(); window_manager.render_windows(); });
 
 	event_loop.run();

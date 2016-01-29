@@ -5,6 +5,8 @@
 #include "event_window.hh"
 #include "ncurses_env.hh"
 
+#include "utils_lib/log.hh"
+
 #include <algorithm>
 #include <stdexcept>
 
@@ -17,32 +19,39 @@ void window_manager::stdin_readable()
 
 	std::string input_buffer;
 	MEVENT mouse_event;
-
-	for(int c = ::wgetch(active_window); c != ERR; c = ::wgetch(active_window))
+	int c = ::wgetch(active_window);
+	if (c != ERR)
 	{
-		if(::getmouse(&mouse_event) == OK)
+		for(;c != ERR; c = ::wgetch(active_window))
 		{
-			send_sequence(input_buffer);
-			send_mouse_event(mouse_event);
-		}
-		else
-		{
-			// distinguish between regular/special
-			if ((c > 31 && c < 256))
+			if(::getmouse(&mouse_event) == OK)
 			{
-				input_buffer.push_back(c);
+				send_sequence(input_buffer);
+				send_mouse_event(mouse_event);
 			}
 			else
 			{
-				send_sequence(input_buffer);
-				// special char
-				const char* key_name = ::keyname(c);
-				send_special_key(c, key_name);
+				// distinguish between regular/special
+				if ((c > 31 && c < 256))
+				{
+					LOG("printable char=" << char(c));
+					input_buffer.push_back(c);
+				}
+				else
+				{
+					send_sequence(input_buffer);
+					// special char
+					const char* key_name = ::keyname(c);
+					LOG("special key=" << key_name);
+					send_special_key(c, key_name);
+				}
 			}
 		}
+		LOG("loop end");
+		check_for_terminal_resize();
+		send_sequence(input_buffer);
+		render_windows();
 	}
-	check_for_terminal_resize();
-	send_sequence(input_buffer);
 }
 
 void window_manager::add_window(event_window* win)
@@ -81,7 +90,6 @@ void window_manager::send_special_key(int c, const char* key_name)
 	{
 		if (win->on_special_key(c, key_name))
 		{
-			render_windows();
 			break;
 		}
 		else
@@ -109,7 +117,6 @@ void window_manager::send_sequence(std::string& seq)
 			remaining_chars = seq.length();
 			win = win->get_parent();
 		}
-		render_windows();
 	}
 	seq.clear();
 }
@@ -118,13 +125,14 @@ void window_manager::render_windows()
 {
 	std::sort(windows_.begin(), windows_.end(),
 		[](const event_window* a, const event_window* b) { return a->get_z() < b->get_z(); });
-
 	for(event_window* w : windows_)
 	{
 		w->do_render();
 	}
 	if (active_window_)
 		active_window_->do_show_cursor();
+
+	LOG("doupdate");
 	::doupdate();
 }
 
@@ -134,7 +142,6 @@ void window_manager::check_for_terminal_resize()
 	if (sz != screen_size_)
 	{
 		screen_size_ = sz;
-		render_windows();
 	}
 }
 
