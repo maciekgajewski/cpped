@@ -13,7 +13,7 @@ std::pair<std::string, std::unique_ptr<icommand_factory>> make_command(
 
 static command_factory_list root_commands
 {
-	{"goto", "        - go to file, symbol, line etc", new goto_command_factory},
+	{"goto", "        - go to file, symbol, line etc (ctrl-k)", new goto_command_factory},
 	{"find", "<text>  - find text in file", nullptr},
 };
 
