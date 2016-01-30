@@ -2,175 +2,207 @@
 
 namespace nct {
 
-template<typename SplitterDirection>
-splitter<SplitterDirection>::splitter(window_manager& wm, event_window* parent)
+splitter::splitter(window_manager& wm, event_window* parent)
 	: nct::event_window(wm, parent)
 {
 }
 
-template<typename SplitterDirection>
-void splitter<SplitterDirection>::set_fixed(unsigned idx, event_window* win, unsigned requested_size)
+void splitter::set_main_section(splitter_section& section, splitter::direction dir)
 {
-	entries_[idx].window_ = win;
-	entries_[idx].type_ = entry_type::fixed;
-	entries_[idx].requested_size_ = requested_size;
-	entries_[idx].title_chaned_connection_ = win->title_changed_signal.connect(
-		[this](const std::string&) { request_redraw(); });
-
-	win->set_parent(this);
-	recalculate_sizes();
+	main_section_ = &section;
+	direction_ = dir;
 	request_redraw();
 }
 
-template<typename SplitterDirection>
-void splitter<SplitterDirection>::set_stretching(unsigned idx, event_window* win)
+void splitter::on_resized()
 {
-	entries_[idx].window_ = win;
-	entries_[idx].type_ = entry_type::stretching;
-
-	win->set_parent(this);
-	recalculate_sizes();
-	request_redraw();
-}
-
-static unsigned size_of_fixed(unsigned total, unsigned requested)
-{
-	if (total > 80)
-		return std::min(requested, total);
-	else
-		return std::min<unsigned>(total, requested*total/80.0);
-}
-
-template<typename SplitterDirection>
-void splitter<SplitterDirection>::on_resized()
-{
-	recalculate_sizes();
-}
-
-template<>
-void splitter<_splitter_directions::horizontal>::render(nct::ncurses_window& surface)
-{
-	if (entries_[0].type_ == entry_type::unset || entries_[0].type_ == entry_type::unset)
-		return; // invalid state
-
-	// titlebar
-	surface.horizontal_line(0, 0, ACS_HLINE, surface.get_width());
-
-	// split line
-	surface.vertical_line(0, entries_[0].size_, ACS_VLINE, surface.get_height());
-	surface.move_cursor(0, entries_[0].size_);
-
-	// T
-	surface.put_char(ACS_TTEE);
-
-	// title texts
-	unsigned begin = 0;
-	for(const entry& e : entries_)
+	if (main_section_)
 	{
-		unsigned end = begin + e.size_;
-
-		const std::string& title = e.window_->get_title();
-		if (title.length() <= (end - begin - 2))
-		{
-			surface.move_cursor({0, int(begin + ((end-begin)-title.length())/2)});
-			surface.print(title);
-		}
-
-		begin += e.size_;
+		if (direction_ == direction::horizontal)
+			main_section_->recalc_size<direction::horizontal>(get_size());
+		else
+			main_section_->recalc_size<direction::vertical>(get_size());
 	}
 }
 
-template<>
-void splitter<_splitter_directions::vertical>::render(ncurses_window& surface)
+void splitter::render(ncurses_window& surface)
 {
 	// TODO
 }
 
-template<typename SplitterDirection>
-void splitter<SplitterDirection>::recalculate_sizes()
+splitter_item::splitter_item(splitter& sp, event_window& window)
+	: splitter_(sp), geometry_(geometry::stretching), window_(&window)
 {
-	if (entries_[0].type_ == entry_type::unset && entries_[1].type_ == entry_type::unset)
-	{
-		return; // do nothing
-	}
+	window.set_parent(&sp);
+}
 
-	// split size
-	unsigned size = get_availabale_size();
+splitter_item::splitter_item(splitter& sp, event_window& window, unsigned preferred_size)
+	: splitter_(sp), geometry_(geometry::fixed), preferred_size_(preferred_size), window_(&window)
+{
+	window.set_parent(&sp);
+}
 
-	if (size == 0) // invalid state
-		return;
-
-	entries_[0].size_ = 0;
-	entries_[1].size_ = 0;
-	if(entries_[0].type_ == entry_type::unset)
+bool splitter_item::is_visible() const
+{
+	if (visible_)
 	{
-		entries_[0].size_ = 0;
-		entries_[1].size_ = size-1;
-	}
-	else if (entries_[1].type_ == entry_type::unset)
-	{
-		entries_[0].size_ = size-1;
-		entries_[1].size_ = 0;
+		if (window_)
+			return window_->is_visible();
+		else
+			return true;
 	}
 	else
 	{
-		if (entries_[0].type_ == entry_type::fixed && entries_[1].type_ == entry_type::stretching)
-		{
-			entries_[0].size_ = size_of_fixed(size, entries_[0].requested_size_);
-			entries_[1].size_ = size - entries_[0].size_ - 1;
-		}
-		else if (entries_[0].type_ == entry_type::fixed && entries_[1].type_ == entry_type::stretching)
-		{
-			entries_[1].size_ = size_of_fixed(size, entries_[0].requested_size_);
-			entries_[0].size_ = size - entries_[1].size_ - 1;
-		}
-		else
-		{
-			entries_[0].size_ = size/2 - 1;
-			entries_[1].size_ = size - entries_[0].size_;
-		}
+		return false;
 	}
+}
 
-	if(entries_[0].window_)
+void splitter_item::apply_size(const position& pos, const size& sz)
+{
+	assert(window_);
+	nct::position window_pos = pos;
+	nct::size window_sz = sz;
+
+	window_pos.y += 1; // leave space for titlebar
+	window_sz.h -= 1;
+
+	window_->move(window_pos, window_sz);
+}
+
+splitter_section::splitter_section(splitter& sp)
+	: splitter_item(sp)
+{
+}
+
+splitter_section::splitter_section(splitter& sp, unsigned preferred_size)
+	: splitter_item(sp, preferred_size)
+{
+}
+
+void splitter_section::add_item(splitter_item& item)
+{
+	items_.push_back(&item);
+}
+
+void splitter_section::apply_size(const position& pos, const size& sz)
+{
+	assert(false && "Implement!");
+}
+
+template<splitter::direction DIR> unsigned get_total(const nct::size& sz, unsigned item_count);
+template<> unsigned get_total<splitter::direction::horizontal>(const nct::size& sz, unsigned item_count)
+{
+	return sz.w - item_count>0 ? (item_count-1) : 0; // substract 1 for each separator between items
+}
+template<> unsigned get_total<splitter::direction::vertical>(const nct::size& sz, unsigned item_count)
+{
+	return sz.h - item_count; // substract 1 for each item's title bar
+}
+
+template<splitter::direction DIR> double get_mulitiplier(unsigned total);
+template<> double get_mulitiplier<splitter::direction::horizontal>(unsigned total)
+{
+	return total >= 80 ? 1.0 : total/80.0;
+}
+template<> double get_mulitiplier<splitter::direction::vertical>(unsigned total)
+{
+	return total >= 25 ? 1.0 : total/25.0;
+}
+
+template<splitter::direction DIR>
+void splitter_section::recalc_size(const nct::size& sz)
+{
+	// count visible items
+	unsigned total_fixed_size = 0;
+	unsigned stretching_items = 0;
+	unsigned all_visible_items = 0;
+	for(splitter_item* item : items_)
 	{
-		apply_size(entries_[0].window_, 0, entries_[0].size_);
+		assert(item);
+		if (item->is_visible())
+		{
+			all_visible_items++;
+
+			if (item->geometry_ == geometry::fixed)
+				total_fixed_size += item->preferred_size_;
+			else
+				stretching_items++;
+		}
 	}
-	if(entries_[1].window_)
+
+	unsigned total = get_total<DIR>(sz, all_visible_items);
+
+	// calculate sizes of fixed items
+	double multiplier = get_mulitiplier<DIR>(total); // 1.0 for large windows, <1.0 for small windows
+	if (total_fixed_size > total)
 	{
-		apply_size(entries_[1].window_, entries_[0].size_ + 1, entries_[1].size_);
+		multiplier *= double(total_fixed_size)/total;
+	}
+
+	unsigned space_left_for_stretching = total;
+	for(splitter_item* item : items_)
+	{
+		if (item->is_visible() && item->geometry_ == geometry::fixed)
+		{
+			item->size_ = std::floor(item->preferred_size_ * multiplier);
+			space_left_for_stretching -= item->size_;
+		}
+	}
+
+	// calculate sizes of stretching items
+	if (stretching_items > 0)
+	{
+		unsigned stretching_items_left = stretching_items;
+		unsigned stretching_size = space_left_for_stretching/stretching_items_left;
+		for(splitter_item* item : items_)
+		{
+			if (item->is_visible() && item->geometry_ == geometry::stretching)
+			{
+				if (stretching_items_left == 1)
+				{
+					item->size_ = space_left_for_stretching;
+				}
+				else
+				{
+					item->size_ = stretching_size;
+					space_left_for_stretching -= stretching_size;
+				}
+				stretching_items_left--;
+			}
+		}
+	}
+
+	apply_sizes<DIR>();
+}
+
+template<>
+void splitter_section::apply_sizes<splitter::direction::horizontal>()
+{
+	auto window_size = splitter_.get_size();
+	unsigned left = 0;
+
+	for(splitter_item* item : items_)
+	{
+		if (item->is_visible())
+		{
+			nct::position pos;
+			pos.y = 0;
+			pos.x = left;
+
+			nct::size sz;
+			sz.h = window_size.h;
+			sz.w = item->size_;
+
+			item->apply_size(pos, sz);
+
+			left += item->size_ + 1;
+		}
 	}
 }
 
 template<>
-void splitter<_splitter_directions::horizontal>::apply_size(nct::event_window* win, unsigned size_before, unsigned size)
+void splitter_section::apply_sizes<splitter::direction::vertical>()
 {
-	nct::position pos{1, int(size_before)};
-	nct::size sz { int(get_size().h-1), int(size)};
-	win->move(pos, sz);
 }
-
-template<>
-void splitter<_splitter_directions::vertical>::apply_size(nct::event_window* win, unsigned size_before, unsigned size)
-{
-	nct::position pos{int(size_before), 0};
-	nct::size sz { int(size), int(get_size().w)};
-	win->move(pos, sz);
-}
-
-
-template<>
-unsigned splitter<_splitter_directions::horizontal>::get_availabale_size() const
-{
-	return get_size().w;
-}
-
-template<>
-unsigned splitter<_splitter_directions::vertical>::get_availabale_size() const
-{
-	return get_size().h;
-}
-
-template class splitter<_splitter_directions::horizontal>;
-template class splitter<_splitter_directions::vertical>;
 
 }

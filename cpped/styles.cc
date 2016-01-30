@@ -18,7 +18,7 @@ style_manager::style_manager()
 
 	plain = nct::style{bg, COLOR_WHITE};
 	line_numbers = nct::style{COLOR_BLACK, COLOR_RED};
-	visual_tab = nct::style{bg, COLOR_CYAN};
+	visual_tab = nct::style{bg, COLOR_BLUE};
 	status = nct::style{bg, COLOR_WHITE};
 }
 

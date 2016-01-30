@@ -31,8 +31,16 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 			}
 		});
 
-	main_splitter_.set_fixed(0, &open_file_list_, 30);
-	main_splitter_.set_stretching(1, editor_.get());
+	auto left_panel = std::make_unique<nct::splitter_item>(main_splitter_, open_file_list_, 30);
+	auto right_panel = std::make_unique<nct::splitter_item>(main_splitter_, *editor_);
+	auto main_section = std::make_unique<nct::splitter_section>(main_splitter_);
+	main_section->add_item(*left_panel);
+	main_section->add_item(*right_panel);
+	main_splitter_.set_main_section(*main_section, nct::splitter::horizontal);
+
+	splitter_items_.push_back(std::move(left_panel));
+	splitter_items_.push_back(std::move(right_panel));
+	splitter_items_.push_back(std::move(main_section));
 
 	command_widget_.file_selected_signal.connect(
 		[this](const fs::path& p)

@@ -8,48 +8,92 @@
 
 namespace nct {
 
-// Splitter is a window split in two, containing two other windows, managing they positions
-template<typename SplitterDirection>
+class splitter_section;
+
+// Splitter is a window split verticall or horizontally into sections
 class splitter : public nct::event_window
 {
 public:
 
+	enum direction { horizontal, vertical };
+
 	splitter(window_manager& wm, event_window* parent);
 
-	void set_fixed(unsigned idx, nct::event_window* win, unsigned requested_size);
-	void set_stretching(unsigned idx, nct::event_window* win);
+	void set_main_section(splitter_section& section, direction dir);
 
 private:
 
 	void on_resized() override;
 	void render(nct::ncurses_window& surface) override;
 
-	void recalculate_sizes();
-	unsigned get_availabale_size() const;
-	void apply_size(nct::event_window* win, unsigned size_before, unsigned size);
+	splitter_section* main_section_ = nullptr;
+	direction direction_;
+};
 
-	enum class entry_type { fixed, stretching, unset };
+// Single splitter item
+class splitter_item
+{
+public:
+	enum class geometry { fixed, stretching };
 
-	struct entry
-	{
-		nct::event_window* window_ = nullptr;
-		entry_type type_ = entry_type::unset;
-		unsigned requested_size_ = 0;
-		unsigned size_;
-		boost::signals2::scoped_connection title_chaned_connection_;
-	};
+	// creates sretching item
+	splitter_item(splitter& sp, nct::event_window& window);
 
-	std::array<entry, 2> entries_;
+	// creates fixed-size item
+	splitter_item(splitter& sp, nct::event_window& window, unsigned preferred_size);
+
+	bool is_visible() const;
+
+protected:
+
+	splitter_item(splitter& sp) : splitter_(sp), geometry_(geometry::stretching) {}
+	splitter_item(splitter& sp, unsigned preferred_size)
+		: splitter_(sp)
+		, geometry_(geometry::stretching)
+		, preferred_size_(preferred_size)
+		{ }
+
+	bool is_section() const { return window_ == nullptr; }
+	virtual void apply_size(const nct::position& pos, const nct::size& sz);
+
+	friend class splitter_section;
+
+	splitter& splitter_;
+	geometry geometry_;
+	unsigned preferred_size_;
+	bool visible_ = true;
+	unsigned size_; // current size
+
+private:
+
+	nct::event_window* window_ = nullptr;
 
 };
 
-namespace _splitter_directions
+class splitter_section : public splitter_item
 {
-	struct horizontal {};
-	struct vertical {};
-}
+public:
 
-using horizontal_splitter = splitter<_splitter_directions::horizontal>;
-using vertical_splitter = splitter<_splitter_directions::vertical>;
+	// creates stretching section
+	splitter_section(splitter& sp);
+
+	// creates fixed-size sections
+	splitter_section(splitter& sp, unsigned preferred_size);
+
+	void add_item(splitter_item& item);
+
+	template<splitter::direction DIR>
+	void recalc_size(const nct::size& sz);
+
+private:
+
+	template<splitter::direction DIR>
+	void apply_sizes();
+
+	void apply_size(const nct::position& pos, const nct::size& sz) final override;
+
+	std::vector<splitter_item*> items_;
+	nct::position position_;
+};
 
 }

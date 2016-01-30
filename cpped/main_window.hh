@@ -41,13 +41,14 @@ private:
 	project& project_;
 	style_manager& style_;
 	nct::status_message_receiver status_message_receiver_;
-	nct::horizontal_splitter main_splitter_;
+	nct::splitter main_splitter_;
 	open_files_widget open_file_list_;
 	std::unique_ptr<editor_window> editor_;
 	nct::fbuttons fbuttons_;
 	command_widget command_widget_;
 	nct::fbutton_action_provider fbutton_provider_;
 
+	std::vector<std::unique_ptr<nct::splitter_item>> splitter_items_;
 };
 
 }
