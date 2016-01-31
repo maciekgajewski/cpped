@@ -92,7 +92,7 @@ void splitter_section::apply_size(const position& pos, const size& sz)
 template<splitter::direction DIR> unsigned get_total(const nct::size& sz, unsigned item_count);
 template<> unsigned get_total<splitter::direction::horizontal>(const nct::size& sz, unsigned item_count)
 {
-	return sz.w - item_count>0 ? (item_count-1) : 0; // substract 1 for each separator between items
+	return sz.w - (item_count > 0 ? (item_count-1) : 0); // substract 1 for each separator between items
 }
 template<> unsigned get_total<splitter::direction::vertical>(const nct::size& sz, unsigned item_count)
 {
