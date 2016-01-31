@@ -2,6 +2,7 @@
 
 #include "command_widget.hh"
 #include "open_files_widget.hh"
+#include "filesystem_widget.hh"
 
 #include <nct/event_window.hh>
 #include <nct/status_message.hh>
@@ -43,6 +44,7 @@ private:
 	nct::status_message_receiver status_message_receiver_;
 	nct::splitter main_splitter_;
 	open_files_widget open_file_list_;
+	filesystem_widget filesystem_widget_;
 	std::unique_ptr<editor_window> editor_;
 	nct::fbuttons fbuttons_;
 	command_widget command_widget_;

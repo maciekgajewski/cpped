@@ -54,7 +54,7 @@ protected:
 		{ }
 
 	bool is_section() const { return window_ == nullptr; }
-	virtual void apply_size(const nct::position& pos, const nct::size& sz);
+	virtual void apply_size(splitter::direction dir, const nct::position& pos, const nct::size& sz);
 	virtual void render(splitter::direction dir, nct::ncurses_window& surface);
 
 	friend class splitter_section;
@@ -85,15 +85,17 @@ public:
 
 	void add_item(splitter_item& item);
 
-	template<splitter::direction DIR>
-	void recalc_size(const nct::size& sz);
+	void recalc_size(splitter::direction dir, const nct::size& sz);
 
 private:
 
 	template<splitter::direction DIR>
+	void recalc_size(const nct::size& sz);
+
+	template<splitter::direction DIR>
 	void apply_sizes();
 
-	void apply_size(const nct::position& pos, const nct::size& sz) final override;
+	void apply_size(splitter::direction dir, const nct::position& pos, const nct::size& sz) final override;
 	void render_horizontal(nct::ncurses_window& surface);
 	void render_vertical(nct::ncurses_window& surface);
 	void draw_horizontal_partition(unsigned x, ncurses_window& surface, splitter_item& left, splitter_item& right);

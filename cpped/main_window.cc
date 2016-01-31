@@ -17,6 +17,7 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 	status_message_receiver_([this](const std::string& s) { set_status_message(s); }),
 	main_splitter_(wm, this),
 	open_file_list_(wm, &main_splitter_),
+	filesystem_widget_(wm, &main_splitter_),
 	editor_(std::make_unique<editor_window>(pr, wm, sm, &main_splitter_)),
 	fbuttons_(wm, this),
 	command_widget_(pr, wm, this)
@@ -31,13 +32,21 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 			}
 		});
 
-	auto left_panel = std::make_unique<nct::splitter_item>(main_splitter_, open_file_list_, 30);
+	auto open_files_item = std::make_unique<nct::splitter_item>(main_splitter_, open_file_list_);
+	auto filesystem_item = std::make_unique<nct::splitter_item>(main_splitter_, filesystem_widget_);
+	auto left_panel = std::make_unique<nct::splitter_section>(main_splitter_, 30);
+	left_panel->add_item(*open_files_item);
+	left_panel->add_item(*filesystem_item);
+
 	auto right_panel = std::make_unique<nct::splitter_item>(main_splitter_, *editor_);
+
 	auto main_section = std::make_unique<nct::splitter_section>(main_splitter_);
 	main_section->add_item(*left_panel);
 	main_section->add_item(*right_panel);
 	main_splitter_.set_main_section(*main_section, nct::splitter::horizontal);
 
+	splitter_items_.push_back(std::move(open_files_item));
+	splitter_items_.push_back(std::move(filesystem_item));
 	splitter_items_.push_back(std::move(left_panel));
 	splitter_items_.push_back(std::move(right_panel));
 	splitter_items_.push_back(std::move(main_section));

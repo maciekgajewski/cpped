@@ -18,10 +18,7 @@ void splitter::on_resized()
 {
 	if (main_section_)
 	{
-		if (direction_ == direction::horizontal)
-			main_section_->recalc_size<direction::horizontal>(get_size());
-		else
-			main_section_->recalc_size<direction::vertical>(get_size());
+		main_section_->recalc_size(direction_, get_size());
 	}
 }
 
@@ -58,7 +55,7 @@ bool splitter_item::is_visible() const
 	}
 }
 
-void splitter_item::apply_size(const position& pos, const size& sz)
+void splitter_item::apply_size(splitter::direction, const position& pos, const size& sz)
 {
 	assert(window_);
 	nct::position window_pos = pos;
@@ -98,13 +95,20 @@ void splitter_item::render(splitter::direction dir, ncurses_window& surface)
 	}
 }
 
+static splitter::direction opposite(splitter::direction d)
+{
+	return d == splitter::direction::horizontal ?
+		splitter::direction::vertical
+		: splitter::direction::horizontal;
+}
+
 void splitter_section::render(splitter::direction dir, ncurses_window& surface)
 {
 	for(splitter_item* item : items_)
 	{
 		if (item->is_visible())
 		{
-			item->render(dir, surface);
+			item->render(opposite(dir), surface);
 		}
 	}
 
@@ -123,9 +127,18 @@ void splitter_section::add_item(splitter_item& item)
 	items_.push_back(&item);
 }
 
-void splitter_section::apply_size(const position& pos, const size& sz)
+void splitter_section::recalc_size(splitter::direction dir, const size& sz)
 {
-	assert(false && "Implement!");
+	if (dir == splitter::direction::horizontal)
+		recalc_size<splitter::direction::horizontal>(sz);
+	else
+		recalc_size<splitter::direction::vertical>(sz);
+}
+
+void splitter_section::apply_size(splitter::direction dir, const position& pos, const size& sz)
+{
+	position_ = pos;
+	recalc_size(dir, sz);
 }
 
 void splitter_section::draw_horizontal_partition(unsigned x, ncurses_window& surface, splitter_item& left, splitter_item& right)
@@ -155,7 +168,8 @@ void splitter_section::render_horizontal(ncurses_window& surface)
 
 void splitter_section::render_vertical(ncurses_window& surface)
 {
-	// TODO
+	// nothing to do, window titles suffice
+	// One may try to draw Ts and + if one of the items is splitter...
 }
 
 template<splitter::direction DIR> unsigned get_total(const nct::size& sz, unsigned item_count);
@@ -249,22 +263,21 @@ void splitter_section::recalc_size(const nct::size& sz)
 template<>
 void splitter_section::apply_sizes<splitter::direction::horizontal>()
 {
-	auto window_size = splitter_.get_size();
-	unsigned left = 0;
+	unsigned left = position_.x;
 
 	for(splitter_item* item : items_)
 	{
 		if (item->is_visible())
 		{
 			nct::position pos;
-			pos.y = 0;
+			pos.y = position_.y;
 			pos.x = left;
 
 			nct::size sz;
-			sz.h = window_size.h;
+			sz.h = size_.h;
 			sz.w = item->size_;
 
-			item->apply_size(pos, sz);
+			item->apply_size(splitter::direction::vertical, pos, sz);
 
 			left += item->size_ + 1;
 		}
@@ -274,6 +287,25 @@ void splitter_section::apply_sizes<splitter::direction::horizontal>()
 template<>
 void splitter_section::apply_sizes<splitter::direction::vertical>()
 {
+	unsigned top = position_.y;
+
+	for(splitter_item* item : items_)
+	{
+		if (item->is_visible())
+		{
+			nct::position pos;
+			pos.y = top;
+			pos.x = position_.x;
+
+			nct::size sz;
+			sz.h = item->size_;
+			sz.w = size_.w;
+
+			item->apply_size(splitter::direction::horizontal, pos, sz);
+
+			top += item->size_;
+		}
+	}
 }
 
 }
