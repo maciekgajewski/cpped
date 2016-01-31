@@ -93,6 +93,19 @@ void event_window::show()
 	}
 }
 
+void event_window::parent_moved()
+{
+	if (window_)
+	{
+		position global_pos = to_global({0 ,0});
+		window_->move(global_pos.y, global_pos.x);
+	}
+	for(event_window* child : children_)
+	{
+		child->parent_moved();
+	}
+}
+
 void event_window::move(const position& pos, const size& sz)
 {
 	if (pos != position_ || sz != size_)
@@ -103,15 +116,10 @@ void event_window::move(const position& pos, const size& sz)
 			{
 				window_->resize(sz.h, sz.w);
 			}
-			if (pos != position_)
-			{
-				position_ = pos;
-				position global_pos = to_global({0 ,0});
-				window_->move(global_pos.y, global_pos.x);
-			}
 		}
 		size_ = sz;
 		position_ = pos;
+		parent_moved();
 		on_resized();
 		request_redraw();
 	}

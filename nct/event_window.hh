@@ -127,6 +127,7 @@ private:
 
 	void destroy_surface();
 	void create_surface();
+	void parent_moved();
 
 	window_manager& window_manager_;
 	boost::optional<ncurses_window> window_;

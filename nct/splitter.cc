@@ -179,7 +179,7 @@ template<> unsigned get_total<splitter::direction::horizontal>(const nct::size& 
 }
 template<> unsigned get_total<splitter::direction::vertical>(const nct::size& sz, unsigned item_count)
 {
-	return sz.h - item_count; // substract 1 for each item's title bar
+	return sz.h; // no partitions
 }
 
 template<splitter::direction DIR> double get_mulitiplier(unsigned total);
