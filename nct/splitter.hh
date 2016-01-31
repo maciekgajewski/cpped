@@ -46,12 +46,8 @@ public:
 
 protected:
 
-	splitter_item(splitter& sp) : splitter_(sp), geometry_(geometry::stretching) {}
-	splitter_item(splitter& sp, unsigned preferred_size)
-		: splitter_(sp)
-		, geometry_(geometry::stretching)
-		, preferred_size_(preferred_size)
-		{ }
+	splitter_item(splitter& sp);
+	splitter_item(splitter& sp, unsigned preferred_size);
 
 	bool is_section() const { return window_ == nullptr; }
 	virtual void apply_size(splitter::direction dir, const nct::position& pos, const nct::size& sz);

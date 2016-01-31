@@ -77,6 +77,19 @@ splitter_section::splitter_section(splitter& sp, unsigned preferred_size)
 {
 }
 
+splitter_item::splitter_item(splitter& sp)
+	: splitter_(sp), geometry_(geometry::stretching)
+{
+}
+
+splitter_item::splitter_item(splitter& sp, unsigned preferred_size)
+	: splitter_(sp)
+	, geometry_(geometry::fixed)
+	, preferred_size_(preferred_size)
+{
+}
+
+
 void splitter_item::render(splitter::direction dir, ncurses_window& surface)
 {
 	assert(window_);

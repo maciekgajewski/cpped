@@ -20,6 +20,7 @@ void filesystem_widget::set_directory(const fs::path& path)
 	assert(path.is_absolute());
 	if (path != path_)
 	{
+		path_ = path;
 		update_files();
 	}
 }

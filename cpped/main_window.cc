@@ -75,11 +75,12 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 				9 /* F10 */, "Quit", []() { utils::event_loop::get_current()->stop(); });
 }
 
-void main_window::open_file(const boost::filesystem::path& file)
+void main_window::open_file(const boost::filesystem::path& path)
 {
-	editor_->open_file(file);
+	editor_->open_file(path);
 	editor_->set_active();
-	open_file_list_.file_opened(file);
+	open_file_list_.file_opened(path);
+	filesystem_widget_.set_directory(path.parent_path());
 }
 
 void main_window::on_resized()
