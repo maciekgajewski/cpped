@@ -25,9 +25,10 @@ void splitter::on_resized()
 	}
 }
 
-void splitter::render(ncurses_window& surface)
+void splitter::render(nct::ncurses_window& surface)
 {
-	// TODO
+	if (main_section_)
+		main_section_->render(direction_, surface);
 }
 
 splitter_item::splitter_item(splitter& sp, event_window& window)
@@ -79,6 +80,44 @@ splitter_section::splitter_section(splitter& sp, unsigned preferred_size)
 {
 }
 
+void splitter_item::render(splitter::direction dir, ncurses_window& surface)
+{
+	assert(window_);
+
+	const nct::position& pos = window_->get_position();
+	const nct::size& sz = window_->get_size();
+
+	surface.horizontal_line(pos.y-1, pos.x, ACS_HLINE, sz.w);
+
+	const std::string& title = window_->get_title();
+
+	if (title.length() < sz.w)
+	{
+		surface.move_cursor(pos.y -1, pos.x + (sz.w-title.length())/2);
+		surface.print(title);
+	}
+}
+
+void splitter_section::render(splitter::direction dir, ncurses_window& surface)
+{
+	for(splitter_item* item : items_)
+	{
+		if (item->is_visible())
+		{
+			item->render(dir, surface);
+		}
+	}
+
+	if (dir == splitter::direction::horizontal)
+	{
+		render_horizontal(surface);
+	}
+	else
+	{
+		render_vertical(surface);
+	}
+}
+
 void splitter_section::add_item(splitter_item& item)
 {
 	items_.push_back(&item);
@@ -87,6 +126,36 @@ void splitter_section::add_item(splitter_item& item)
 void splitter_section::apply_size(const position& pos, const size& sz)
 {
 	assert(false && "Implement!");
+}
+
+void splitter_section::draw_horizontal_partition(unsigned x, ncurses_window& surface, splitter_item& left, splitter_item& right)
+{
+	surface.move_cursor(position_.y, position_.x + x);
+	surface.put_char(ACS_TTEE);
+	surface.vertical_line(position_.y + 1, position_.x + x, ACS_VLINE, size_.h-1);
+}
+
+void splitter_section::render_horizontal(ncurses_window& surface)
+{
+	splitter_item* left = nullptr;
+	unsigned x = 0;
+	for(splitter_item* item : items_)
+	{
+		if (item->is_visible())
+		{
+			if (left)
+			{
+				draw_horizontal_partition(x, surface, *left, *item);
+			}
+			x += item->size_;
+			left = item;
+		}
+	}
+}
+
+void splitter_section::render_vertical(ncurses_window& surface)
+{
+	// TODO
 }
 
 template<splitter::direction DIR> unsigned get_total(const nct::size& sz, unsigned item_count);
@@ -112,6 +181,8 @@ template<> double get_mulitiplier<splitter::direction::vertical>(unsigned total)
 template<splitter::direction DIR>
 void splitter_section::recalc_size(const nct::size& sz)
 {
+	size_ = sz;
+
 	// count visible items
 	unsigned total_fixed_size = 0;
 	unsigned stretching_items = 0;
