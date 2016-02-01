@@ -65,8 +65,14 @@ edited_file& project::open_file(const fs::path& path)
 		doc.load_from_raw_data(reply.data, absolute, reply.tokens, reply.new_file);
 
 		open_files_.push_front(
-			std::make_unique<edited_file>(endpoint_, std::move(doc), reply.parsed, reply.new_file)
+			std::make_unique<edited_file>(
+				endpoint_,
+				std::move(doc),
+				reply.parsed ? file_category::source : file_category::other,
+				reply.new_file)
 			);
+
+		file_opened_signal(*open_files_.front());
 
 		return *open_files_.front();
 	}
@@ -76,22 +82,16 @@ edited_file& project::open_file(const fs::path& path)
 	}
 }
 
-edited_file& project::get_open_file(const boost::filesystem::path& path)
+edited_file& project::new_file()
 {
-	fs::path absolute = fs::absolute(path);
+	static unsigned unsaved_index = 0;
+	open_files_.push_front(std::make_unique<edited_file>(endpoint_, document::document{}, file_category::other, true));
+	edited_file& file = *open_files_.front();
+	file.set_unsaved_name(std::string("unsaved file #") + std::to_string(unsaved_index++));
 
-	edited_file* file = find_file(absolute);
+	file_opened_signal(file);
 
-	if (!file)
-	{
-		throw std::runtime_error("No such file");
-	}
-	return *file;
-}
-
-std::unique_ptr<edited_file> project::make_unsaved_file()
-{
-	return std::make_unique<edited_file>(endpoint_, document::document{}, false, true);
+	return file;
 }
 
 void project::on_file_tokens(const backend::messages::file_tokens_feed& token_feed)

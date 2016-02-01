@@ -20,7 +20,7 @@ class editor_window;
 class main_window : public nct::event_window
 {
 public:
-	main_window(project& pr, nct::window_manager& ed, style_manager& sm);
+	main_window(project& pr, nct::window_manager& ed, style_manager& sm, edited_file& f);
 
 	editor_window& get_current_editor() const { return *editor_; }
 	void open_file(const boost::filesystem::path& file);
@@ -35,6 +35,8 @@ private:
 	void render(nct::ncurses_window& surface) override;
 
 	void set_status_message(const std::string& st);
+
+	void connect_project_to_open_files();
 
 	std::string project_status_;
 	std::string status_;

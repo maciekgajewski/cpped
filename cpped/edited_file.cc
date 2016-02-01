@@ -4,8 +4,8 @@
 
 namespace cpped {
 
-edited_file::edited_file(ipc::endpoint& endpoint, document::document&& doc, bool is_source, bool was_new)
-	: endpoint_(endpoint), document_(std::move(doc)), is_source_(is_source), was_new_(was_new)
+edited_file::edited_file(ipc::endpoint& endpoint, document::document&& doc, file_category category, bool was_new)
+	: endpoint_(endpoint), document_(std::move(doc)), category_(category), was_new_(was_new)
 {
 }
 
@@ -31,7 +31,7 @@ void edited_file::send_parse_request(
 
 void edited_file::request_parsing(const boost::optional<document::document_position>& cursor_pos)
 {
-	if (!is_source_)
+	if (category_ != file_category::source)
 	{
 		return; // ignore for non-source files
 	}
@@ -112,6 +112,18 @@ void edited_file::on_file_tokens(const backend::messages::file_tokens_feed& toke
 	while(last_version_send_ < document_.get_current_version())
 	{
 		send_parse_request(boost::none);
+	}
+}
+
+std::string edited_file::get_name() const
+{
+	if (document_.get_path().empty())
+	{
+		return unsaved_name_;
+	}
+	else
+	{
+		return document_.get_path().string();
 	}
 }
 

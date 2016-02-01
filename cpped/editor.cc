@@ -14,16 +14,6 @@ editor::editor(editor_window& win, edited_file& f)
 	set_document(f);
 }
 
-editor::editor(editor_window& win)
-	: window_(win)
-{
-	unsaved_file_ = win.get_project().make_unsaved_file();
-	file_ = unsaved_file_.get();
-
-	tokens_udated_connection_ = file_->get_document().tokens_updated_signal.connect([this]() { on_document_tokens_updated(); });
-	cursor_pos_ = {0, 0};
-}
-
 bool editor::on_special_key(int key_code, const char* key_name)
 {
 
@@ -112,7 +102,6 @@ void editor::set_document(edited_file& f)
 	}
 
 	file_ = &f;
-	unsaved_file_.reset();
 
 	tokens_udated_connection_.release().disconnect();
 	tokens_udated_connection_ = file_->get_document().tokens_updated_signal.connect([this]() { on_document_tokens_updated(); });
@@ -219,7 +208,7 @@ editor::status_info editor::get_status_info() const
 	info.docy = cursor_pos_.line;
 	info.column = column;
 	info.status_text = "";
-	info.file_name = get_document().get_path();
+	info.file_name = file_->get_name();
 	info.unsaved = get_document().has_unsaved_changes();
 	return info;
 }

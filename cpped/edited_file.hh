@@ -12,12 +12,14 @@ namespace cpped {
 
 namespace ipc { class endpoint; }
 
+enum class file_category { source, other };
+
 // File open in the editor
 class edited_file
 {
 public:
 
-	edited_file(ipc::endpoint& endpoint, document::document&& doc, bool is_source, bool was_new);
+	edited_file(ipc::endpoint& endpoint, document::document&& doc, file_category category, bool was_new);
 	~edited_file();
 
 	document::document& get_document() { return document_; }
@@ -39,6 +41,11 @@ public:
 	const boost::optional<editor_state>& get_editor_state() const { return editor_state_; }
 	void set_editor_state(const editor_state& es) { editor_state_ = es; }
 
+	// editedfile's unique name. Path for saved file, unique name for unsaved
+	std::string get_name() const;
+
+	void set_unsaved_name(const std::string& n) { unsaved_name_ = n; }
+
 private:
 
 	void send_parse_request(
@@ -51,7 +58,7 @@ private:
 	std::uint64_t last_version_send_ = 0;
 
 	// If this is source file (ie parsing/completion available)
-	bool is_source_;
+	file_category category_;
 
 	// If file was new at the time of creation
 	bool was_new_ = false;
@@ -60,6 +67,7 @@ private:
 	bool parsing_in_progress_ = false;
 
 	boost::optional<editor_state> editor_state_;
+	std::string unsaved_name_;
 };
 
 }

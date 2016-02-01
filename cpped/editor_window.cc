@@ -93,8 +93,8 @@ void text_renderer::put_char(const nct::style& style, char c)
 }
 
 
-editor_window::editor_window(project& pr, nct::window_manager& ed, style_manager& sm, event_window* parent)
-	: event_window(ed, parent), project_(pr), styles_(sm), editor_(*this)
+editor_window::editor_window(project& pr, nct::window_manager& ed, style_manager& sm, edited_file& f, event_window* parent)
+	: event_window(ed, parent), project_(pr), styles_(sm), editor_(*this, f)
 	, completer_(ed, this)
 {
 	completer_.completion_cancelled_signal.connect(
@@ -263,28 +263,33 @@ unsigned editor_window::get_workspace_height() const
 	return get_size().h - top_margin_ - bottom_margin_;
 }
 
-void editor_window::open_file(const boost::filesystem::path& file)
+void editor_window::open_file(const boost::filesystem::path& path)
 {
 	// TODO modal dialog to save unsaved changes in current document
 	try
 	{
 		set_status("Openig file...");
 		redraw_now();
-		auto& result = project_.open_file(file);
+		auto& result = project_.open_file(path);
 		editor_.set_document(result);
 		if (result.was_new())
 		{
-			set_status("New file: " + file.string());
+			set_status("New file: " + path.string());
 		}
 		else
 		{
-			set_status("File loaded: " + file.string());
+			set_status("File loaded: " + path.string());
 		}
 	}
 	catch(const std::exception& e)
 	{
 		set_status(std::string("Error opening file: ") + e.what());
 	}
+}
+
+void editor_window::open_file(edited_file& file)
+{
+	editor_.set_document(file);
 }
 
 }

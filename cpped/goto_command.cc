@@ -12,7 +12,19 @@ goto_command::goto_command(command_context& ctx, const std::string& prefix)
 	const project& pr = ctx_.get_project();
 
 	pr.get_all_project_files(std::inserter(files_, files_.end()));
-	pr.get_all_open_files(std::inserter(files_, files_.end()));
+
+	std::vector<edited_file*> open_files;
+	pr.get_all_open_files(std::back_inserter(open_files));
+
+	for(edited_file* ef : open_files)
+	{
+		// skip unsaved files
+		const fs::path p = ef->get_path();
+		if (!p.empty())
+		{
+			files_.insert(p);
+		}
+	}
 }
 
 void goto_command::on_text_changed(const std::string& text)

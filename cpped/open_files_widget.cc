@@ -1,5 +1,7 @@
 #include "open_files_widget.hh"
 
+#include "edited_file.hh"
+
 namespace cpped {
 
 namespace fs = boost::filesystem;
@@ -15,16 +17,16 @@ open_files_widget::open_files_widget(nct::window_manager& wm, nct::event_window*
 	set_title("Open files");
 }
 
-void open_files_widget::file_opened(const fs::path& path)
+void open_files_widget::file_opened(edited_file& file)
 {
-	auto it = files_.find(path);
+	auto it = files_.find(&file);
 	if (it == files_.end())
 	{
-		add_file(path);
+		add_file(file);
 	}
 	else
 	{
-		select_file(path);
+		select_file(file);
 	}
 }
 
@@ -38,20 +40,22 @@ void open_files_widget::select_previous_file()
 	select_previous();
 }
 
-void open_files_widget::add_file(const fs::path& path)
+void open_files_widget::add_file(edited_file& file)
 {
-	files_.insert(path);
+	files_.insert(&file);
 	std::vector<nct::list_widget::list_item> items;
 	items.reserve(files_.size());
 
 	unsigned current_item_index = 0;
-	for(const auto& p : files_)
+	for(edited_file* ef : files_)
 	{
-		if (p == path)
+		if (ef == &file)
 		{
 			current_item_index = items.size();
 		}
-		items.push_back({p.filename().string(), {}, p});
+		const fs::path& p = ef->get_path();
+
+		items.push_back({p.empty() ? ef->get_name() : p.filename().string(), {}, ef});
 	}
 
 	set_items(items);
@@ -60,7 +64,7 @@ void open_files_widget::add_file(const fs::path& path)
 	signal_blocked_ = false;
 }
 
-void open_files_widget::select_file(const fs::path& path)
+void open_files_widget::select_file(edited_file& file)
 {
 	// TODO
 }
@@ -69,8 +73,8 @@ void open_files_widget::on_selection_changed(const nct::list_widget::list_item& 
 {
 	if (!signal_blocked_)
 	{
-		fs::path path = boost::any_cast<fs::path>(item.data);
-		file_selected_signal(path);
+		edited_file* file  = boost::any_cast<edited_file*>(item.data);
+		file_selected_signal(*file);
 	}
 }
 

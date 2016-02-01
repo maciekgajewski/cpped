@@ -11,14 +11,14 @@ namespace cpped {
 
 namespace fs = boost::filesystem;
 
-main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm)
+main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm, edited_file& f)
 	: nct::event_window(wm, nullptr),
 	project_(pr), style_(sm),
 	status_message_receiver_([this](const std::string& s) { set_status_message(s); }),
 	main_splitter_(wm, this),
 	open_file_list_(wm, &main_splitter_),
 	filesystem_widget_(wm, &main_splitter_),
-	editor_(std::make_unique<editor_window>(pr, wm, sm, &main_splitter_)),
+	editor_(std::make_unique<editor_window>(pr, wm, sm, f, &main_splitter_)),
 	fbuttons_(wm, this),
 	command_widget_(pr, wm, this)
 {
@@ -64,22 +64,36 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 		});
 
 	open_file_list_.file_selected_signal.connect(
-		[this](const fs::path& p)
+		[this](edited_file& ef)
 		{
 			auto& editor = get_current_editor();
 			editor.set_active();
-			editor.open_file(p);
+			editor.open_file(ef);
 		});
+
+	connect_project_to_open_files();
 
 	fbutton_provider_.set_action(
 				9 /* F10 */, "Quit", []() { utils::event_loop::get_current()->stop(); });
+}
+
+void main_window::connect_project_to_open_files()
+{
+	project_.file_opened_signal.connect(
+		[this](edited_file& ef) { open_file_list_.file_opened(ef); });
+
+	std::vector<edited_file*> open_files;
+	project_.get_all_open_files(std::back_inserter(open_files));
+	for(edited_file* f : open_files)
+	{
+		open_file_list_.file_opened(*f);
+	}
 }
 
 void main_window::open_file(const boost::filesystem::path& path)
 {
 	editor_->open_file(path);
 	editor_->set_active();
-	open_file_list_.file_opened(path);
 	filesystem_widget_.set_directory(path.parent_path());
 }
 

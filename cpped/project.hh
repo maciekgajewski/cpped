@@ -23,19 +23,19 @@ class project
 public:
 
 	boost::signals2::signal<void(const std::string&)> status_signal;
+	boost::signals2::signal<void(edited_file&)> file_opened_signal;
 
 	project(ipc::endpoint& ep);
 
 	void open_cmake_project(const boost::filesystem::path& build_dir);
 	edited_file& open_file(const boost::filesystem::path& path);
-	edited_file& get_open_file(const boost::filesystem::path& path);
-	std::unique_ptr<edited_file> make_unsaved_file();
+	edited_file& new_file();
 
-
-
-	// Returns (via output iterator) all open files (paths)
+	// Retruns (via output iterator) all project files (fs::path)
 	template<typename OutIt>
 	void get_all_project_files(OutIt out) const;
+
+	// Returns (via output iterator) all open files (edited_file*)
 	template<typename OutIt>
 	void get_all_open_files(OutIt out) const;
 
@@ -73,7 +73,7 @@ template<typename OutIt>
 void project::get_all_open_files(OutIt out) const
 {
 	std::transform(open_files_.begin(), open_files_.end(), out,
-		[](const auto& ef_ptr) { return ef_ptr->get_path(); });
+		[](const auto& ef_ptr) { return ef_ptr.get(); });
 }
 
 }

@@ -17,6 +17,7 @@ class ncurses_window;
 namespace cpped {
 
 class style_manager;
+class edited_file;
 
 namespace document{
 	class document;
@@ -26,7 +27,7 @@ class editor_window final : public nct::event_window
 {
 public:
 
-	editor_window(project& pr, nct::window_manager& ed, style_manager& sm, nct::event_window* parent = nullptr);
+	editor_window(project& pr, nct::window_manager& ed, style_manager& sm, edited_file& f, nct::event_window* parent = nullptr);
 
 	unsigned on_sequence(const std::string& s) override;
 	bool on_special_key(int key_code, const char* key_name) override;
@@ -34,7 +35,8 @@ public:
 	void on_shown() override;
 	void on_resized() override;
 
-	void open_file(const boost::filesystem::path& file);
+	void open_file(const boost::filesystem::path& path);
+	void open_file(edited_file& file);
 
 	// inward-facing API, used by editor
 

@@ -31,7 +31,6 @@ public:
 	};
 
 	editor(editor_window& win, edited_file& f);
-	editor(editor_window& win);
 
 	bool on_special_key(int key_code, const char* key_name);
 	unsigned on_sequence(const std::string& sequence);
@@ -128,8 +127,7 @@ private:
 	// settings
 	editor_settings settings_;
 
-	edited_file* file_;
-	std::unique_ptr<edited_file> unsaved_file_;
+	edited_file* file_ = nullptr;
 	editor_window& window_;
 	bool parsing_disabled_ = false;
 	boost::optional<document::document_range> selection_;

@@ -57,16 +57,21 @@ void run_frontend(cpped::ipc::endpoint& endpoint, const boost::program_options::
 	::setlocale(LC_ALL, "en_EN.utf-8");
 	nct::ncurses_env env;
 
+	cpped::edited_file* file = nullptr;
+	if (file_to_open)
+	{
+		file = &project.open_file(*file_to_open);
+	}
+	else
+	{
+		file = &project.new_file();
+	}
+
 	cpped::utils::event_loop event_loop;
 	nct::window_manager window_manager;
 	cpped::style_manager styles;
 	cpped::clipboard clipboard;
-	cpped::main_window main_window(project, window_manager, styles);
-
-	if (file_to_open)
-	{
-		main_window.open_file(*file_to_open);
-	}
+	cpped::main_window main_window(project, window_manager, styles, *file);
 
 	main_window.set_fullscreen(true);
 	main_window.set_active(); // so it recevies input
