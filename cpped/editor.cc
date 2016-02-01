@@ -56,7 +56,13 @@ bool editor::on_special_key(int key_code, const char* key_name)
 		case KEY_HOME:
 			home(); return true;
 		case KEY_END:
-			end(); return true;		
+			end(); return true;
+
+		// enter/tab
+		case '\n':
+			insert_at_cursor("\n"); return true;
+		case '\t':
+			insert_at_cursor("\t"); return true;
 	}
 
 	static const std::string copy_key = "^C";

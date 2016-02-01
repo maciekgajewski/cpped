@@ -176,14 +176,15 @@ void event_window::do_render()
 
 ncurses_window& event_window::get_ncurses_window()
 {
-	if (window_)
-	{
-		return *window_;
-	}
-	else
+	if (!visible_)
 	{
 		throw std::logic_error("Trying to get surface of hidden window");
 	}
+	if (!window_)
+	{
+		create_surface();
+	}
+	return *window_;
 }
 
 void event_window::set_fullscreen(bool fs)

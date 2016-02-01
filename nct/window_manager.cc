@@ -14,15 +14,12 @@ namespace nct {
 
 void window_manager::stdin_readable()
 {
-	WINDOW* active_window = get_active_ncurses_window();
-	::wtimeout(active_window, 0); // enter non-blocking mode
-
 	std::string input_buffer;
 	MEVENT mouse_event;
-	int c = ::wgetch(active_window);
+	int c = ::wgetch(get_active_ncurses_window());
 	if (c != ERR)
 	{
-		for(;c != ERR; c = ::wgetch(active_window))
+		for(;c != ERR; c = ::wgetch(get_active_ncurses_window()))
 		{
 			if(::getmouse(&mouse_event) == OK)
 			{

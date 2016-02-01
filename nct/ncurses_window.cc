@@ -11,6 +11,7 @@ ncurses_window::ncurses_window(int height, int width, int starty, int startx)
 	win_ = ::newwin(height, width, starty, startx);
 	::keypad(win_, TRUE);
 	::leaveok(win_, FALSE);
+	::wtimeout(win_, 0); // enter non-blocking mode
 }
 
 ncurses_window::ncurses_window(WINDOW* w)

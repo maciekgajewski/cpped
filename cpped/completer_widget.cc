@@ -86,22 +86,6 @@ unsigned completer_widget::on_sequence(const std::string& s)
 	for(unsigned i = 0; i < s.size(); i++)
 	{
 		char c = s[i];
-		if (c == '\n')
-		{
-			// if there is something to select from - use it
-			if (list_->get_filtered_count() > 0)
-			{
-				complete();
-				return i+1;
-				// TODO there is a bug here, filter may be modified, but this is not reflected in the editor
-			}
-			// oterwise - cancel and pass trough
-			else
-			{
-				cancel();
-				return 0;
-			}
-		}
 		if ((filter_.empty() && !is_valid_first(c)) || !is_valid(c))
 		{
 			// filter no longer represents a valid identifier, deactivate
@@ -128,6 +112,18 @@ bool completer_widget::on_special_key(int key_code, const char* /*key_name*/)
 	if(key_code == 27) // ESC
 	{
 		cancel();
+		return true;
+	}
+	if (key_code == '\n')
+	{
+		if (list_->get_filtered_count() > 0)
+		{
+			complete();
+		}
+		else
+		{
+			cancel();
+		}
 		return true;
 	}
 
