@@ -74,7 +74,7 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 	connect_project_to_open_files();
 
 	fbutton_provider_.set_action(
-				9 /* F10 */, "Quit", []() { utils::event_loop::get_current()->stop(); });
+				9 /* F10 */, "Quit", [this]() { quit(); });
 }
 
 void main_window::connect_project_to_open_files()
@@ -171,6 +171,62 @@ void main_window::render(nct::ncurses_window& surface)
 	// project status - right aligned
 	surface.move_cursor(surface.get_height()-3, surface.get_width()-project_status_.size());
 	surface.style_print(style, project_status_);
+}
+
+template<typename Lambda>
+struct OutputIt
+{
+	Lambda lambda_;
+
+	OutputIt& operator *() { return *this; }
+	void operator++() {}
+	template<typename Val>
+	void operator=(const Val& v) { lambda_(v); }
+};
+
+template<typename Lambda>
+OutputIt<Lambda> iterator(Lambda l)
+{
+	return OutputIt<Lambda>{l};
+}
+
+void main_window::quit()
+{
+	bool has_unsaved_changes = false;
+	project_.get_all_open_files(iterator([&](const edited_file* f)
+	{
+		if (f->get_document().has_unsaved_changes())
+			has_unsaved_changes = true;
+	}));
+
+	if (has_unsaved_changes)
+	{
+		std::string answer = ask("There are unsaved files, quit? [y/N]");
+		if (answer.length() < 0 || (answer[0] != 'y' && answer[0] != 'Y'))
+		{
+			return;
+		}
+	}
+
+	utils::event_loop::get_current()->stop();
+}
+
+std::string main_window::ask(const std::string& question)
+{
+	nct::ncurses_window dialog(command_widget_.get_position(), command_widget_.get_size());
+
+	nct::style question_style(COLOR_YELLOW, COLOR_BLACK);
+	nct::style answer_style(COLOR_BLACK, COLOR_WHITE);
+
+	dialog.print({0, 0}, question_style, question);
+	dialog.horizontal_line(0, question.length(), answer_style, ' ', dialog.get_width() - question.length());
+	dialog.move_cursor({0, int(question.length())});
+	dialog.set_timeout(-1);
+	::echo();
+	char buf[100];
+	::wscanw(dialog.get_window(), "%s", buf);
+	::noecho();
+	return buf;
 }
 
 void main_window::set_status_message(const std::string& st)

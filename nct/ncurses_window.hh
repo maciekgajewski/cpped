@@ -13,6 +13,7 @@ class ncurses_window
 public:
 
 	ncurses_window(int height, int width, int starty, int startx);
+	ncurses_window(position pos, size sz);
 	ncurses_window(WINDOW* w);
 	~ncurses_window();
 
@@ -81,6 +82,9 @@ public:
 	void horizontal_line(int y, int x, const cchar_t* c, int len) { mvwhline_set(win_, y, x, c, len); }
 
 	void vertical_line(int y, int x, chtype c, int len) { mvwvline(win_, y, x, c, len); }
+
+	// other
+	void set_timeout(int to) { ::wtimeout(win_, to); }
 
 private:
 

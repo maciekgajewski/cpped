@@ -14,6 +14,11 @@ ncurses_window::ncurses_window(int height, int width, int starty, int startx)
 	::wtimeout(win_, 0); // enter non-blocking mode
 }
 
+ncurses_window::ncurses_window(position pos, size sz)
+	: ncurses_window(sz.h, sz.w, pos.y, pos.x)
+{
+}
+
 ncurses_window::ncurses_window(WINDOW* w)
 	:	win_(w)
 {

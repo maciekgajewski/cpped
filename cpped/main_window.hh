@@ -34,6 +34,9 @@ private:
 	bool on_special_key(int key_code, const char *key_name) override;
 	void render(nct::ncurses_window& surface) override;
 
+	void quit();
+	std::string ask(const std::__cxx11::string& question);
+
 	void set_status_message(const std::string& st);
 
 	void connect_project_to_open_files();
