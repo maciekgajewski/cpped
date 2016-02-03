@@ -2,6 +2,8 @@
 
 #include <boost/range/algorithm.hpp>
 
+#include <cstdlib>
+
 namespace cpped {
 
 namespace fs = boost::filesystem;
@@ -19,6 +21,18 @@ void file_command::on_text_changed(const std::string& text)
 	path_ = token;
 	std::string filename;
 	fs::path dir;
+
+	// ~ replacement
+	if (path_.filename() == "." && path_.parent_path() == "~")
+	{
+		const char* home = std::getenv("HOME");
+		if (home)
+		{
+			ctx_.set_text(prefix_ + std::string(home) + "/");
+			return;
+		}
+	}
+
 	if (path_.filename() == "/" || path_.filename() == ".")
 	{
 		dir = path_;
@@ -26,15 +40,13 @@ void file_command::on_text_changed(const std::string& text)
 	else
 	{
 		dir = path_.parent_path();
-		if (dir.empty())
-			dir = fs::current_path();
 		filename = path_.filename().string();
 	}
 
 	try
 	{
 		std::vector<nct::list_widget::list_item> items;
-		fs::directory_iterator it(dir);
+		fs::directory_iterator it(dir.empty() ? fs::current_path() : dir);
 
 		boost::optional<std::string> common_prefix;
 		for(const fs::directory_entry& entry : it)
@@ -75,7 +87,7 @@ void file_command::on_text_changed(const std::string& text)
 		});
 
 		unsigned junk_len = (token_its.first - text.begin());
-		ctx_.show_hints(prefix_.size() + junk_len, items);
+		ctx_.show_hints(prefix_.size() + junk_len + dir.string().length(), items);
 	}
 	catch(...)
 	{
