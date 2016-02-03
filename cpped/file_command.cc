@@ -76,12 +76,6 @@ void file_command::on_text_changed(const std::string& text)
 	ctx_.show_hints(prefix_.size() + junk_len, items);
 }
 
-bool file_command::on_enter_pressed()
-{
-	// TODO
-	return false;
-}
-
 bool file_command::on_tab_pressed()
 {
 	if (!tab_completion_.empty())
@@ -100,5 +94,17 @@ bool file_command::on_tab_pressed()
 	}
 	return false;
 }
+
+bool open_file_command::on_enter_pressed()
+{
+	if (fs::is_regular_file(path_))
+	{
+		ctx_.open_file(fs::canonical(path_));
+		return true;
+	}
+	return false;
+}
+
+
 
 }
