@@ -2,6 +2,8 @@
 
 #include "edited_file.hh"
 
+#include <boost/range/algorithm.hpp>
+
 namespace cpped {
 
 namespace fs = boost::filesystem;
@@ -46,11 +48,14 @@ void open_files_widget::add_file(edited_file& file)
 	file.status_changed_signal.connect(
 		[this]() { update_files(); });
 	update_files();
+	select_file(file);
 }
 
 void open_files_widget::select_file(edited_file& file)
 {
-	// TODO
+	auto it = boost::find(files_, &file);
+	assert(it != files_.end());
+	select_item(files_.index_of(it));
 }
 
 void open_files_widget::update_files()
