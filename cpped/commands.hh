@@ -23,6 +23,7 @@ public:
 
 	virtual void on_text_changed(const std::string& text) = 0;
 	virtual bool on_enter_pressed() = 0;
+	virtual bool on_tab_pressed() { return false; }
 
 	const std::string& get_prefix() const { return prefix_; }
 

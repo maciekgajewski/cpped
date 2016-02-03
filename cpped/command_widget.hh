@@ -32,6 +32,7 @@ private:
 
 	void on_text_changed(const std::string& text);
 	void on_enter_pressed();
+	void on_tab_pressed();
 
 	// actions
 	void cancel();

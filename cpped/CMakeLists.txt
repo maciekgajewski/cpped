@@ -16,6 +16,7 @@ add_executable(cpped
 	goto_command.cc goto_command.hh
 	command_context.cc command_context.hh
 	filesystem_widget.cc filesystem_widget.hh
+	file_command.cc file_command.hh
 )
 
 target_link_libraries(cpped

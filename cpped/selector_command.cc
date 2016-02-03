@@ -74,6 +74,15 @@ bool selector_command::on_enter_pressed()
 	return false;
 }
 
+bool selector_command::on_tab_pressed()
+{
+	if (next_command_)
+	{
+		return next_command_->on_tab_pressed();
+	}
+	return false;
+}
+
 void selector_command::display_hints(const std::string& filter)
 {
 	// build item list

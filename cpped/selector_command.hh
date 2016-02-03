@@ -11,8 +11,9 @@ public:
 
 	selector_command(command_context& ctx, const std::string& prefix, const command_factory_list& subcommands);
 
-	virtual void on_text_changed(const std::string& text);
-	virtual bool on_enter_pressed();
+	void on_text_changed(const std::string& text) override;
+	bool on_enter_pressed() override;
+	bool on_tab_pressed() override;
 
 private:
 

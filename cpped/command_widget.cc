@@ -67,6 +67,9 @@ bool command_widget::on_special_key(int key_code, const char* key_name)
 				hints_.select_next();
 			}
 			return true;
+		case '\t':
+			on_tab_pressed();
+			return true;
 	}
 
 	return false;
@@ -85,6 +88,12 @@ void command_widget::on_enter_pressed()
 {
 	assert(root_command_);
 	root_command_->on_enter_pressed();
+}
+
+void command_widget::on_tab_pressed()
+{
+	assert(root_command_);
+	root_command_->on_tab_pressed();
 }
 
 void command_widget::show_hints(unsigned position, const std::vector<nct::list_widget::list_item>& items)

@@ -2,6 +2,7 @@
 
 #include "selector_command.hh"
 #include "goto_command.hh"
+#include "file_command.hh"
 
 namespace cpped {
 
@@ -14,7 +15,8 @@ std::pair<std::string, std::unique_ptr<icommand_factory>> make_command(
 static command_factory_list root_commands
 {
 	{"goto", "        - go to file, symbol, line etc (ctrl-k)", new goto_command_factory},
-	{"find", "<text>  - find text in file", nullptr},
+	{"open", "<file>  - open file", new file_command_factory},
+//	{"find", "<text>  - find text in file", nullptr},
 };
 
 
