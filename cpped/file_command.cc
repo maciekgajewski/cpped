@@ -31,49 +31,58 @@ void file_command::on_text_changed(const std::string& text)
 		filename = path_.filename().string();
 	}
 
-	std::vector<nct::list_widget::list_item> items;
-	fs::directory_iterator it(dir);
-
-	boost::optional<std::string> common_prefix;
-	for(const fs::directory_entry& entry : it)
+	try
 	{
-		std::string name = entry.path().filename().string();
-		if (name.find(filename) == 0)
-		{
-			if (entry.status().type() == fs::directory_file)
-			{
-				name += "/";
-			}
-			items.push_back(nct::list_widget::list_item{name});
+		std::vector<nct::list_widget::list_item> items;
+		fs::directory_iterator it(dir);
 
-			if (!common_prefix)
+		boost::optional<std::string> common_prefix;
+		for(const fs::directory_entry& entry : it)
+		{
+			std::string name = entry.path().filename().string();
+			if (name.find(filename) == 0)
 			{
-				common_prefix = name;
-			}
-			else
-			{
-				auto pair = boost::mismatch(*common_prefix, name);
-				common_prefix.emplace(name.begin(), pair.second);
+				if (entry.status().type() == fs::directory_file)
+				{
+					name += "/";
+				}
+				items.push_back(nct::list_widget::list_item{name});
+
+				if (!common_prefix)
+				{
+					common_prefix = name;
+				}
+				else
+				{
+					auto pair = boost::mismatch(*common_prefix, name);
+					common_prefix.emplace(name.begin(), pair.second);
+				}
 			}
 		}
-	}
 
-	if (common_prefix)
-	{
-		tab_completion_ = *common_prefix;
+		if (common_prefix)
+		{
+			tab_completion_ = *common_prefix;
+		}
+		else
+		{
+			tab_completion_.clear();
+		}
+
+		boost::sort(items, [](const auto& it1, const auto& it2)
+		{
+			return it1.text < it2.text;
+		});
+
+		unsigned junk_len = (token_its.first - text.begin());
+		ctx_.show_hints(prefix_.size() + junk_len, items);
 	}
-	else
+	catch(...)
 	{
+		// just ignore
+		ctx_.show_hints(0, {});
 		tab_completion_.clear();
 	}
-
-	boost::sort(items, [](const auto& it1, const auto& it2)
-	{
-		return it1.text < it2.text;
-	});
-
-	unsigned junk_len = (token_its.first - text.begin());
-	ctx_.show_hints(prefix_.size() + junk_len, items);
 }
 
 bool file_command::on_tab_pressed()
