@@ -28,6 +28,7 @@ private:
 
 	void add_file(edited_file& file);
 	void select_file(edited_file& file);
+	void update_files();
 
 	void on_selection_changed(const nct::list_widget::list_item& item);
 

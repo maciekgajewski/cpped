@@ -7,6 +7,14 @@ namespace cpped {
 edited_file::edited_file(ipc::endpoint& endpoint, document::document&& doc, file_category category, bool was_new)
 	: endpoint_(endpoint), document_(std::move(doc)), category_(category), was_new_(was_new)
 {
+	document_.document_changed_signal.connect(
+		[this]() {
+			if (last_have_unsaved_changes_ != document_.has_unsaved_changes())
+			{
+				status_changed_signal();
+				last_have_unsaved_changes_ = document_.has_unsaved_changes();
+			}
+		});
 }
 
 edited_file::~edited_file()
@@ -74,31 +82,37 @@ std::vector<backend::messages::completion_record> edited_file::get_completion(co
 
 void edited_file::save()
 {
-	if (last_version_send_ < document_.get_current_version())
+	if (document_.has_unsaved_changes())
 	{
-		backend::messages::document_changed_feed change_feed;
-		change_feed.path = document_.get_path();
-		change_feed.version = document_.get_current_version();
-		change_feed.data.assign(document_.get_raw_data().begin(), document_.get_raw_data().end());
 
-		endpoint_.send_message(change_feed);
-		last_version_send_ = document_.get_current_version();
-		parsing_in_progress_ = true;
-	}
+		if (last_version_send_ < document_.get_current_version())
+		{
+			backend::messages::document_changed_feed change_feed;
+			change_feed.path = document_.get_path();
+			change_feed.version = document_.get_current_version();
+			change_feed.data.assign(document_.get_raw_data().begin(), document_.get_raw_data().end());
 
-	backend::messages::save_reply reply;
-	backend::messages::save_request request;
-	request.path = document_.get_path();
+			endpoint_.send_message(change_feed);
+			last_version_send_ = document_.get_current_version();
+			parsing_in_progress_ = true;
+		}
 
-	endpoint_.send_sync_request(request, reply);
+		backend::messages::save_reply reply;
+		backend::messages::save_request request;
+		request.path = document_.get_path();
 
-	if (!reply.error.empty())
-	{
-		throw std::runtime_error(reply.error);
-	}
-	else
-	{
-		document_.set_saved(reply.version);
+		endpoint_.send_sync_request(request, reply);
+
+		if (!reply.error.empty())
+		{
+			throw std::runtime_error(reply.error);
+		}
+		else
+		{
+			document_.set_saved(reply.version);
+		}
+		last_have_unsaved_changes_ = false;
+		status_changed_signal();
 	}
 }
 

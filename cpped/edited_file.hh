@@ -46,6 +46,10 @@ public:
 
 	void set_unsaved_name(const std::string& n) { unsaved_name_ = n; }
 
+	// signals
+
+	boost::signals2::signal<void()> status_changed_signal;
+
 private:
 
 	void send_parse_request(
@@ -68,6 +72,7 @@ private:
 
 	boost::optional<editor_state> editor_state_;
 	std::string unsaved_name_;
+	bool last_have_unsaved_changes_ = false;
 };
 
 }

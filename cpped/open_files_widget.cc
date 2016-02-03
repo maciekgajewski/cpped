@@ -43,30 +43,49 @@ void open_files_widget::select_previous_file()
 void open_files_widget::add_file(edited_file& file)
 {
 	files_.insert(&file);
-	std::vector<nct::list_widget::list_item> items;
-	items.reserve(files_.size());
-
-	unsigned current_item_index = 0;
-	for(edited_file* ef : files_)
-	{
-		if (ef == &file)
-		{
-			current_item_index = items.size();
-		}
-		const fs::path& p = ef->get_path();
-
-		items.push_back({p.empty() ? ef->get_name() : p.filename().string(), {}, ef});
-	}
-
-	set_items(items);
-	signal_blocked_ = true;
-	select_item(current_item_index);
-	signal_blocked_ = false;
+	file.status_changed_signal.connect(
+		[this]() { update_files(); });
+	update_files();
 }
 
 void open_files_widget::select_file(edited_file& file)
 {
 	// TODO
+}
+
+void open_files_widget::update_files()
+{
+	nct::list_widget::list_item* current = get_current_item();
+
+	std::vector<nct::list_widget::list_item> items;
+	items.reserve(files_.size());
+
+	int current_item_index = -1;
+	for(edited_file* ef : files_)
+	{
+		if (current && ef == boost::any_cast<edited_file*>(current->data))
+		{
+			current_item_index = items.size();
+		}
+		const fs::path& p = ef->get_path();
+
+		std::string text = p.empty() ? ef->get_name() : p.filename().string();
+		if (ef->get_document().has_unsaved_changes())
+		{
+			text += "*";
+		}
+
+		items.push_back({text, {}, ef});
+	}
+
+	set_items(items);
+
+	if(current_item_index >= 0)
+	{
+		signal_blocked_ = true;
+		select_item(current_item_index);
+		signal_blocked_ = false;
+	}
 }
 
 void open_files_widget::on_selection_changed(const nct::list_widget::list_item& item)
