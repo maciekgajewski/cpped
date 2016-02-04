@@ -35,7 +35,7 @@ private:
 	void render(nct::ncurses_window& surface) override;
 
 	void quit();
-	std::string ask(const std::__cxx11::string& question);
+	std::string ask(const std::string& question);
 
 	void set_status_message(const std::string& st);
 
