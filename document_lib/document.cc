@@ -105,9 +105,9 @@ void document_edit::commit(const document_position& cursor_pos)
 	}
 }
 
-void document::parse_language()
+void document::set_path(const boost::filesystem::path& path)
 {
-	// TODO
+	path_ = path; // TODO I'm not sure document should even have a path.
 }
 
 std::string document::to_string() const

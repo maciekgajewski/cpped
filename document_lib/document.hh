@@ -106,11 +106,9 @@ public:
 			});
 	}
 
-	// Requests parsing
-	void parse_language();
-
 	const std::vector<char>& get_raw_data() const { return current_data_->data->get_raw_data(); }
 	const boost::filesystem::path& get_path() const { return path_; }
+	void set_path(const boost::filesystem::path& path);
 
 	std::string to_string() const; // mostly for testing
 

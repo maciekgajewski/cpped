@@ -80,22 +80,26 @@ std::vector<backend::messages::completion_record> edited_file::get_completion(co
 	return reply.results;
 }
 
+void edited_file::ensure_latest_data_send()
+{
+	if (last_version_send_ < document_.get_current_version())
+	{
+		backend::messages::document_changed_feed change_feed;
+		change_feed.path = document_.get_path();
+		change_feed.version = document_.get_current_version();
+		change_feed.data.assign(document_.get_raw_data().begin(), document_.get_raw_data().end());
+
+		endpoint_.send_message(change_feed);
+		last_version_send_ = document_.get_current_version();
+		parsing_in_progress_ = true;
+	}
+}
+
 void edited_file::save()
 {
 	if (document_.has_unsaved_changes())
 	{
-
-		if (last_version_send_ < document_.get_current_version())
-		{
-			backend::messages::document_changed_feed change_feed;
-			change_feed.path = document_.get_path();
-			change_feed.version = document_.get_current_version();
-			change_feed.data.assign(document_.get_raw_data().begin(), document_.get_raw_data().end());
-
-			endpoint_.send_message(change_feed);
-			last_version_send_ = document_.get_current_version();
-			parsing_in_progress_ = true;
-		}
+		ensure_latest_data_send();
 
 		backend::messages::save_reply reply;
 		backend::messages::save_request request;
@@ -107,13 +111,33 @@ void edited_file::save()
 		{
 			throw std::runtime_error(reply.error);
 		}
-		else
-		{
-			document_.set_saved(reply.version);
-		}
+
+		document_.set_saved(reply.version);
 		last_have_unsaved_changes_ = false;
 		status_changed_signal();
 	}
+}
+
+void edited_file::save_as(const boost::filesystem::path& path)
+{
+	backend::messages::save_as_request request;
+	request.old_path = get_path();
+	request.new_path = path;
+	request.version = document_.get_current_version();
+	request.data.assign(document_.get_raw_data().begin(), document_.get_raw_data().end());
+
+	backend::messages::save_reply reply;
+	endpoint_.send_sync_request(request, reply);
+
+	if (!reply.error.empty())
+	{
+		throw std::runtime_error(reply.error);
+	}
+
+	document_.set_path(path);
+	document_.set_saved(reply.version);
+	last_have_unsaved_changes_ = false;
+	status_changed_signal();
 }
 
 void edited_file::on_file_tokens(const backend::messages::file_tokens_feed& token_feed)

@@ -125,6 +125,12 @@ void command_widget::open_file(const boost::filesystem::path& path)
 	file_selected_signal(path);
 }
 
+void command_widget::save_as(const boost::filesystem::path& path)
+{
+	cancel();
+	save_as_signal(path);
+}
+
 nct::list_widget::list_item*command_widget::get_current_item()
 {
 	return hints_.get_current_item();

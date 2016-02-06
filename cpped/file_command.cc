@@ -126,6 +126,16 @@ bool open_file_command::on_enter_pressed()
 	return false;
 }
 
+bool save_as_command::on_enter_pressed()
+{
+	if (!fs::exists(path_) || !fs::is_directory(path_))
+	{
+		ctx_.save_as(fs::absolute(path_));
+		return true;
+	}
+	return false;
+}
+
 
 
 }

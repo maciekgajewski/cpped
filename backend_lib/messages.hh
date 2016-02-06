@@ -227,7 +227,7 @@ template<typename Reader> void deserialize(Reader& reader, save_request& m)
 	deserialize(reader, m.path);
 }
 
-// F->B
+// B->F
 struct save_reply
 {
 	static const std::uint64_t ID = 11;
@@ -246,6 +246,30 @@ template<typename Reader> void deserialize(Reader& reader, save_reply& m)
 	deserialize(reader, m.path);
 	deserialize(reader, m.version);
 	deserialize(reader, m.error);
+}
+
+// F->B
+struct save_as_request
+{
+	static const std::uint64_t ID = 12;
+	fs::path old_path;
+	fs::path new_path;
+	std::uint64_t version;
+	std::string data;
+};
+template<typename Writer> void serialize(Writer& writer, const save_as_request& m)
+{
+	serialize(writer, m.old_path);
+	serialize(writer, m.new_path);
+	serialize(writer, m.version);
+	serialize(writer, m.data);
+}
+template<typename Reader> void deserialize(Reader& reader, save_as_request& m)
+{
+	deserialize(reader, m.old_path);
+	deserialize(reader, m.new_path);
+	deserialize(reader, m.version);
+	deserialize(reader, m.data);
 }
 
 }}}

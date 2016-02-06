@@ -72,6 +72,9 @@ private:
 	// touich all CUs containing the file
 	void touch_units(const boost::filesystem::path& changed_file);
 
+	void on_save(const messages::save_request& request);
+	void on_save_as(const messages::save_as_request& request);
+
 	// Database of all information about a file that we know
 	std::map<boost::filesystem::path, std::unique_ptr<file_data>> file_data_;
 

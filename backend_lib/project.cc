@@ -130,29 +130,67 @@ project::project(event_dispatcher& ed, background_worker_manager& bwm)
 	event_dispatcher_.register_message_handler<messages::save_request>(
 		[this](const messages::save_request& request)
 		{
-			messages::save_reply reply;
-			reply.path = request.path;
+			on_save(request);
+		});
 
-			auto it = open_files_.find(request.path);
-			if (it != open_files_.end())
-			{
-				open_file& file = *it->second;
-				try
-				{
-					file.save();
-					reply.version = file.get_version();
-				}
-				catch(const std::exception& e)
-				{
-					reply.error = e.what();
-				}
-			}
-
-			event_dispatcher_.send_message(reply);
+	event_dispatcher_.register_message_handler<messages::save_as_request>(
+		[this](const messages::save_as_request& request)
+		{
+			on_save_as(request);
 		});
 
 	worker_manager_.signal_file_parsed.connect(
 		[this](const auto& msg) { this->on_scheduled_file_parsed(msg); });
+}
+
+void project::on_save(const messages::save_request& request)
+{
+	messages::save_reply reply;
+	reply.path = request.path;
+
+	auto it = open_files_.find(request.path);
+	if (it != open_files_.end())
+	{
+		open_file& file = *it->second;
+		try
+		{
+			file.save();
+			reply.version = file.get_version();
+		}
+		catch(const std::exception& e)
+		{
+			reply.error = e.what();
+		}
+	}
+
+	event_dispatcher_.send_message(reply);
+}
+
+void project::on_save_as(const messages::save_as_request& request)
+{
+	messages::save_reply reply;
+	reply.path = request.new_path;
+
+	open_file& file = open(request.new_path);
+
+	file.set_data(request.data, request.version);
+	try
+	{
+		file.save();
+		reply.version = file.get_version();
+
+		if (!request.old_path.empty())
+		{
+			open_files_.erase(request.old_path);
+			units_.erase(request.old_path);
+		}
+	}
+	catch(const std::exception& e)
+	{
+		reply.error = e.what();
+	}
+
+	event_dispatcher_.send_message(reply);
 }
 
 void project::touch_units(const fs::path& changed_file)

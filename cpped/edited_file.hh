@@ -33,6 +33,7 @@ public:
 		const document::document_position& cursor_pos);
 
 	void save();
+	void save_as(const boost::filesystem::path& path);
 
 	boost::filesystem::path get_path() const { return document_.get_path(); }
 
@@ -54,6 +55,8 @@ private:
 
 	void send_parse_request(
 		const boost::optional<document::document_position>& cursor_pos);
+
+	void ensure_latest_data_send();
 
 	ipc::endpoint& endpoint_;
 	document::document document_;

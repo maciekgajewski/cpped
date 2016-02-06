@@ -35,13 +35,18 @@ public:
 	bool on_enter_pressed() override;
 };
 
-struct open_file_command_factory final : public icommand_factory
+using open_file_command_factory = generic_factory<open_file_command>;
+
+class save_as_command : public file_command
 {
-	std::unique_ptr<base_command> create_command(command_context& ctx, const std::string& prefix) const override
-	{
-		return std::make_unique<open_file_command>(ctx, prefix);
-	}
+public:
+	save_as_command(command_context& ctx, const std::string& prefix)
+		: file_command(ctx, prefix) {}
+
+	bool on_enter_pressed() override;
 };
+
+using save_as_command_factory = generic_factory<save_as_command>;
 
 }
 

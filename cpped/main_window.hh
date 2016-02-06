@@ -23,7 +23,8 @@ public:
 	main_window(project& pr, nct::window_manager& ed, style_manager& sm, edited_file& f);
 
 	editor_window& get_current_editor() const { return *editor_; }
-	void open_file(const boost::filesystem::path& file);
+	void open_file(const boost::filesystem::path& path);
+	void save_as(const boost::filesystem::path& path);
 
 	const project& get_project() const { return project_; }
 

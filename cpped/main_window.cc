@@ -11,6 +11,12 @@ namespace cpped {
 
 namespace fs = boost::filesystem;
 
+static bool is_yes(const std::string& answer)
+{
+	return answer.length() > 0 && (answer[0] == 'y' && answer[0] == 'Y');
+}
+
+
 main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm, edited_file& f)
 	: nct::event_window(wm, nullptr),
 	project_(pr), style_(sm),
@@ -62,6 +68,11 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 			auto& editor = get_current_editor();
 			editor.set_active();
 		});
+	command_widget_.save_as_signal.connect(
+		[this](const fs::path& p)
+		{
+			save_as(p);
+		});
 
 	open_file_list_.file_selected_signal.connect(
 		[this](edited_file& ef)
@@ -95,6 +106,20 @@ void main_window::open_file(const boost::filesystem::path& path)
 	editor_->open_file(path);
 	editor_->set_active();
 	filesystem_widget_.set_directory(path.parent_path());
+}
+
+void main_window::save_as(const boost::filesystem::path& path)
+{
+	if (fs::exists(path))
+	{
+		auto answer = ask("File " + path.string() + " exists, overwrite? [y/N]");
+		if (!is_yes(answer))
+		{
+			return;
+		}
+	}
+
+	editor_->save_as(path);
 }
 
 void main_window::on_resized()
@@ -202,7 +227,7 @@ void main_window::quit()
 	if (has_unsaved_changes)
 	{
 		std::string answer = ask("There are unsaved files, quit? [y/N]");
-		if (answer.length() < 0 || (answer[0] != 'y' && answer[0] != 'Y'))
+		if (!is_yes(answer))
 		{
 			return;
 		}

@@ -14,8 +14,9 @@ std::pair<std::string, std::unique_ptr<icommand_factory>> make_command(
 
 static command_factory_list root_commands
 {
-	{"goto", "        - go to file, symbol, line etc (ctrl-k)", new goto_command_factory},
-	{"open", "<file>  - open file", new open_file_command_factory},
+	{"goto",    "        - go to file, symbol, line etc (ctrl-k)", new goto_command_factory},
+	{"open",    "<file>  - open file", new open_file_command_factory},
+	{"save-as", "<file>  - save current file as", new save_as_command_factory},
 //	{"find", "<text>  - find text in file", nullptr},
 };
 

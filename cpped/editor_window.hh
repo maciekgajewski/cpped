@@ -48,6 +48,9 @@ public:
 	project& get_project() const { return project_; }
 	void set_status(const std::string& s) { status_provider_.set_status(s); }
 
+	void save_as(const boost::filesystem::path& path);
+	void save();
+
 private:
 
 	void render(nct::ncurses_window& surface) override;

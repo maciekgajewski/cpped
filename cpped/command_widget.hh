@@ -21,6 +21,7 @@ public:
 	void activate(const std::string& init = {});
 
 	boost::signals2::signal<void(const boost::filesystem::path&)> file_selected_signal;
+	boost::signals2::signal<void(const boost::filesystem::path&)> save_as_signal;
 	boost::signals2::signal<void()> cancelled_signal;
 
 private:
@@ -40,6 +41,7 @@ private:
 	// command context
 
 	void open_file(const boost::filesystem::path& path) override;
+	void save_as(const boost::filesystem::path& path) override;
 	void show_hints(unsigned position, const hint_list& items) override;
 	nct::list_widget::list_item* get_current_item() override;
 	void set_text(const std::string& t) override;

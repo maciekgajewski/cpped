@@ -29,7 +29,6 @@ void translation_unit::parse(
 {
 	dispose();
 
-
 	CXErrorCode ec = clang_parseTranslationUnit2(
 			idx.clang_idx,
 			filename,

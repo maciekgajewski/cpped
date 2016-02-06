@@ -128,21 +128,42 @@ bool editor_window::on_special_key(int key_code, const char* key_name)
 	}
 	else if (key_name == save_key)
 	{
-		status_provider_.set_status("Saving...");
-		try
-		{
-			editor_.get_file().save();
-			status_provider_.set_status("Saved");
-		}
-		catch(const std::exception& e)
-		{
-			status_provider_.set_status(std::string("Error saving file: ") + e.what());
-		}
-		editor_.update();
+		save();
 	}
 
 	return editor_.on_special_key(key_code, key_name);
 }
+
+void editor_window::save_as(const fs::path& path)
+{
+	status_provider_.set_status("Saving...");
+	try
+	{
+		editor_.get_file().save_as(path);
+		status_provider_.set_status("Saved");
+	}
+	catch(const std::exception& e)
+	{
+		status_provider_.set_status(std::string("Error saving file: ") + e.what());
+	}
+	editor_.update();
+}
+
+void editor_window::save()
+{
+	status_provider_.set_status("Saving...");
+	try
+	{
+		editor_.get_file().save();
+		status_provider_.set_status("Saved");
+	}
+	catch(const std::exception& e)
+	{
+		status_provider_.set_status(std::string("Error saving file: ") + e.what());
+	}
+	editor_.update();
+}
+
 
 void editor_window::on_mouse(const MEVENT& event)
 {

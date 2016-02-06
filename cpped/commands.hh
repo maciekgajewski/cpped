@@ -50,6 +50,15 @@ public:
 	virtual std::unique_ptr<base_command> create_command(command_context& ctx, const std::string& prefix) const = 0;
 };
 
+template<typename Command>
+struct generic_factory final : public icommand_factory
+{
+	std::unique_ptr<base_command> create_command(command_context& ctx, const std::string& prefix) const override
+	{
+		return std::make_unique<Command>(ctx, prefix);
+	}
+};
+
 struct command_entry
 {
 	std::string name;

@@ -19,6 +19,9 @@ public:
 	// Open file in current editor, finish command entry
 	virtual void open_file(const boost::filesystem::path& path) = 0;
 
+	// Saves current file as
+	virtual void save_as(const boost::filesystem::path& path) = 0;
+
 	/// Displays hint widget, shifter 'position' characters to the left from the beginnig
 	/// of the line edit
 	virtual void show_hints(unsigned position, const hint_list& items) = 0;
