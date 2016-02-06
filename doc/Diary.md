@@ -43,3 +43,6 @@ I just had an ides: spawn on, or even few more processes. The only goal for the 
 and the result can be transferred back.
 Disk caching or buildign of PCH (if this makes sense) still may be requiired, to not go trough the same chores whenver the project is opened.
 
+# 06-02-2016 
+
+Having goodcode structure is paying off. At some point I was thinking: "dude, you spent way too much time refactoring; push for features", but now, with a solid code structure, adding new features is a breeze!
