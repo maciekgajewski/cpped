@@ -8,7 +8,7 @@ The goal of the project is to create a fast, efficient, productive C++ editor.
 The first release is nothing more than a preview. 
 The features are but a few, the interface is rough and minimalistic, the performance is not what I plan it to be.
 
-### Knonwn limitations
+### Known limitations
 * Doesn't work with PuTTY, PuTTY doesn't send correct sequences for some fancy keyboard shotcurs. Use another SSH client. mobaXterm works pretty well, just diasable 'Backspace sends ^H'. 
 * Works only with ASCII files with UNIX line endings
 
