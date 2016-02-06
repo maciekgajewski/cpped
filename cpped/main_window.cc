@@ -13,7 +13,7 @@ namespace fs = boost::filesystem;
 
 static bool is_yes(const std::string& answer)
 {
-	return answer.length() > 0 && (answer[0] == 'y' && answer[0] == 'Y');
+	return answer.length() > 0 && (answer[0] == 'y' || answer[0] == 'Y');
 }
 
 

@@ -238,18 +238,14 @@ void editor::request_parsing()
 
 void editor::update_window_title()
 {
-	const auto& path = file_->get_path();
-	if (path.empty())
+	std::string name = file_->get_name();
+	if (file_->get_document().has_unsaved_changes())
 	{
-		window_.set_title("<unsaved>");
-	}
-	else if (file_->get_document().has_unsaved_changes())
-	{
-		window_.set_title(path.string() + "*");
+		window_.set_title(name + "*");
 	}
 	else
 	{
-		window_.set_title(path.string());
+		window_.set_title(name);
 	}
 }
 
