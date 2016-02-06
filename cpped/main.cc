@@ -48,7 +48,7 @@ void run_frontend(cpped::ipc::endpoint& endpoint, const boost::program_options::
 	{
 		project.open_cmake_project(options["cmake"].as<std::string>());
 	}
-	else
+	else if (options.count("file"))
 	{
 		auto files = options["file"].as<std::vector<std::string>>();
 		file_to_open = files[0];
