@@ -9,7 +9,7 @@ The first release is nothing more than a preview.
 The features are but a few, the interface is rough and minimalistic, the performance is not what I plan it to be.
 
 ### Knonwn limitations
-* Doesn't work with PuTTY, PuTTY doesn't send correct sequences for some fancy keyboard shotcurs used. Use another SSH client. mobaXterm works pretty well, just diasable 'Backspace sends ^H'.
+* Doesn't work with PuTTY, PuTTY doesn't send correct sequences for some fancy keyboard shotcurs. Use another SSH client. mobaXterm works pretty well, just diasable 'Backspace sends ^H'. 
 * Works only with ASCII files with UNIX line endings
 
 ### Requirements
@@ -37,4 +37,4 @@ The features are but a few, the interface is rough and minimalistic, the perform
 * VCS integration
 * Integrated web broser, mail client and chess program
 * Qt/Gtk/Web UI
-* Port to exoctic OSes
+* Port to exotic OSes
