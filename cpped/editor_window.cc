@@ -151,6 +151,12 @@ void editor_window::save_as(const fs::path& path)
 
 void editor_window::save()
 {
+	if (editor_.get_file().get_document().get_path().empty())
+	{
+		save_as_request_signal();
+		return;
+	}
+
 	status_provider_.set_status("Saving...");
 	try
 	{

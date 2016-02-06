@@ -82,6 +82,9 @@ main_window::main_window(project& pr, nct::window_manager& wm, style_manager& sm
 			editor.open_file(ef);
 		});
 
+	editor_->save_as_request_signal.connect(
+		[this]() { command_widget_.activate("save-as "); });
+
 	connect_project_to_open_files();
 
 	fbutton_provider_.set_action(
@@ -120,6 +123,7 @@ void main_window::save_as(const boost::filesystem::path& path)
 	}
 
 	editor_->save_as(path);
+	editor_->set_active();
 }
 
 void main_window::on_resized()

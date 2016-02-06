@@ -29,6 +29,8 @@ public:
 
 	editor_window(project& pr, nct::window_manager& ed, style_manager& sm, edited_file& f, nct::event_window* parent = nullptr);
 
+	boost::signals2::signal<void()> save_as_request_signal;
+
 	unsigned on_sequence(const std::string& s) override;
 	bool on_special_key(int key_code, const char* key_name) override;
 	void on_mouse(const MEVENT& event) override;
@@ -37,6 +39,9 @@ public:
 
 	void open_file(const boost::filesystem::path& path);
 	void open_file(edited_file& file);
+
+	void save_as(const boost::filesystem::path& path);
+	void save();
 
 	// inward-facing API, used by editor
 
@@ -47,9 +52,6 @@ public:
 
 	project& get_project() const { return project_; }
 	void set_status(const std::string& s) { status_provider_.set_status(s); }
-
-	void save_as(const boost::filesystem::path& path);
-	void save();
 
 private:
 
